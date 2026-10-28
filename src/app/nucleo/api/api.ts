@@ -77,7 +77,11 @@ function traducir(error: unknown): Observable<never> {
   // red. Decirlo asi evita media hora buscando un error de sesion que no hay.
   if (error.status === 0) {
     return throwError(
-      () => new FalloDeApi(0, 'No se pudo contactar al servidor. Comprueba que el backend este arriba.'),
+      () =>
+        new FalloDeApi(
+          0,
+          'No se pudo contactar al servidor. Comprueba que el backend este arriba.',
+        ),
     );
   }
 

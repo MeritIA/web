@@ -51,8 +51,8 @@
 
     @if (tarjetas().length === 0) {
       <p class="tarjeta vacio">
-        No hay vacantes publicadas. Las que estén en borrador no aparecen aquí: todavía no tienen
-        a nadie invitado ni avance que mostrar.
+        No hay vacantes publicadas. Las que estén en borrador no aparecen aquí: todavía no tienen a
+        nadie invitado ni avance que mostrar.
       </p>
     } @else {
       <ul class="vacantes">
@@ -62,7 +62,11 @@
               <h3 class="vacante__titulo">{{ v.titulo }}</h3>
 
               @if (v.cierreEstimado) {
-                <span class="etiqueta" [class.etiqueta--ambar]="v.vencida" [class.etiqueta--neutra]="!v.vencida">
+                <span
+                  class="etiqueta"
+                  [class.etiqueta--ambar]="v.vencida"
+                  [class.etiqueta--neutra]="!v.vencida"
+                >
                   {{ v.vencida ? 'Se pasó del cierre estimado' : 'Cierre estimado' }}
                   · {{ v.cierreEstimado | date: 'd MMM y' }}
                 </span>
@@ -78,7 +82,11 @@
                 Todavía no has invitado a nadie. El avance aparece cuando haya candidatos.
               </p>
             } @else {
-              <div class="barraAvance" role="img" [attr.aria-label]="v.avance + ' por ciento evaluado'">
+              <div
+                class="barraAvance"
+                role="img"
+                [attr.aria-label]="v.avance + ' por ciento evaluado'"
+              >
                 <div class="barraAvance__relleno" [style.width.%]="v.avance"></div>
               </div>
               <p class="vacante__avance">

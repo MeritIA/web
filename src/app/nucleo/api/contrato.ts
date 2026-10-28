@@ -87,7 +87,11 @@ export interface ProgresoDeVacante {
 
 /** Las cifras de la empresa en una sola llamada (`GET /reportes/panel`). */
 export interface PanelDeEmpresa {
-  readonly vacantes: { readonly borradores: number; readonly publicadas: number; readonly cerradas: number };
+  readonly vacantes: {
+    readonly borradores: number;
+    readonly publicadas: number;
+    readonly cerradas: number;
+  };
   readonly abiertas: readonly ProgresoDeVacante[];
   /** PERSONAS con alguna entrega por evaluar, no entregas. */
   readonly finalistasEnEvaluacion: number;

@@ -31,6 +31,8 @@ Y aquí:
 ```bash
 npm install
 npm start                               # http://localhost:4200
+npm run lint                            # mismo listón que el backend
+npm run format:check
 ```
 
 El backend ya trae `http://localhost:4200` en su lista blanca de orígenes de
@@ -85,12 +87,9 @@ Tres casos que la pantalla distingue a propósito, y que es fácil romper:
 
 ## Lo que falta, y no es poco
 
-- **ESLint.** El encuadre del proyecto lo exige y el backend lo tiene en CI.
-  Aquí todavía no está configurado.
 - **Pruebas.** El andamiaje trae Vitest —el mismo que el backend— y no hay ni
-  una prueba escrita.
-- **Integración continua.** El backend tiene cinco verificaciones por PR; este
-  repositorio no tiene ninguna.
+  una prueba escrita. Es el hueco más grande: por eso la CI de aquí tiene tres
+  verificaciones y la del backend cinco.
 - **Capacitor.** Los paquetes 3.1 y 3.2 incluyen la APK, y todavía no está.
 - **Las otras ocho pantallas del MVP.**
 - **Configuración por entorno.** `API` está fija en `nucleo/api/api.ts`; para

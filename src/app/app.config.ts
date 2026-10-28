@@ -1,7 +1,11 @@
 import { registerLocaleData } from '@angular/common';
 import localeEsCo from '@angular/common/locales/es-CO';
 import { provideHttpClient, withFetch } from '@angular/common/http';
-import { LOCALE_ID, type ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  LOCALE_ID,
+  type ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 

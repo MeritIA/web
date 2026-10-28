@@ -1,0 +1,84 @@
+# Integracion continua del frontend.
+#
+# Es deliberadamente la MISMA forma que la del backend —mismas acciones
+# fijadas por hash, mismo .nvmrc, mismos nombres de trabajo— para que las dos
+# se lean igual y nadie tenga que aprender dos sistemas. Lo que cambia es lo
+# que falta aqui y esta dicho en el README: todavia no hay pruebas, asi que no
+# hay trabajo de cobertura. Cuando las haya, se anade un trabajo "Pruebas" con
+# el mismo nombre que el del backend.
+#
+# Gitleaks escanea el HISTORIAL COMPLETO, no el ultimo commit: un secreto
+# borrado despues sigue filtrado para quien clone el repositorio.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  GITLEAKS_VERSION: v8.30.1
+
+jobs:
+  secretos:
+    name: Secretos (Gitleaks)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Escanear todo el historial
+        run: |
+          docker run --rm \
+            -v "$PWD:/repo" \
+            -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/repo \
+            "zricethezav/gitleaks:${GITLEAKS_VERSION}" \
+            git /repo --redact --no-banner --verbose --exit-code 1
+
+  dependencias:
+    name: Dependencias (npm audit)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      # Falla solo con vulnerabilidades criticas. Las altas y menores quedan en
+      # el registro y las propone Dependabot, igual que en el backend.
+      - name: Auditar dependencias
+        run: npm audit --audit-level=critical
+
+  calidad:
+    name: Lint, build y formato
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      # Build de produccion: es la que acaba empaquetada en la APK, y la que
+      # aplica los presupuestos de tamano de angular.json.
+      - run: npm run build

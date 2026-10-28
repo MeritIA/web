@@ -52,9 +52,7 @@ export class Entrar {
       const volverA = this.ruta.snapshot.queryParamMap.get('volverA');
       await this.router.navigateByUrl(volverA ?? inicioDe(quien.rol));
     } catch (fallo) {
-      this.error.set(
-        fallo instanceof FalloDeApi ? fallo.message : 'No se pudo iniciar sesion.',
-      );
+      this.error.set(fallo instanceof FalloDeApi ? fallo.message : 'No se pudo iniciar sesion.');
     } finally {
       this.enviando.set(false);
     }
