@@ -1,0 +1,71 @@
+<header class="barra">
+  <div class="barra__dentro">
+    <p class="marca">Merit<span>IA</span></p>
+    <p class="barra__seccion">Mis retos</p>
+    <button class="barra__salir" type="button" (click)="salir()">Salir</button>
+  </div>
+</header>
+
+<main class="pantalla">
+  @if (error(); as mensaje) {
+    <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+  } @else if (cargando()) {
+    <p class="cargando" role="status">Cargando tus retos…</p>
+  } @else {
+    <h1 class="titulo">Tus retos</h1>
+    <p class="subtitulo">
+      @if (pendientes() > 0) {
+        Tienes {{ pendientes() }} {{ pendientes() === 1 ? 'reto' : 'retos' }} sin entregar.
+      } @else {
+        No tienes retos pendientes.
+      }
+    </p>
+
+    @if (retos().length === 0) {
+      <p class="tarjeta vacio">
+        Todavía no te han invitado a ningún reto. En MeritIA es la empresa quien invita: cuando
+        alguien te invite, el reto aparecerá aquí.
+      </p>
+    } @else {
+      <ul class="retos">
+        @for (r of retos(); track r.vacante.id) {
+          <li class="tarjeta reto">
+            <div class="reto__centro">
+              <h2 class="reto__titulo">{{ r.vacante.titulo }}</h2>
+
+              @if (r.vacante.estado === 'cerrada') {
+                <p class="etiqueta etiqueta--neutra">Proceso cerrado</p>
+              } @else if (r.yaEntrego) {
+                <p class="etiqueta etiqueta--azul">Entregado · en evaluación</p>
+              } @else {
+                <p class="etiqueta etiqueta--ambar">Sin entregar</p>
+              }
+
+              @if (r.entregas.length > 0) {
+                <p class="reto__entregas">
+                  {{ r.entregas.length }}
+                  {{ r.entregas.length === 1 ? 'entrega' : 'entregas' }} · última el
+                  {{ r.entregas[r.entregas.length - 1].creadaEn | date: 'd MMM y' }}
+                </p>
+              }
+            </div>
+
+            <div class="reto__derecha">
+              @if (r.evaluada) {
+                <a
+                  class="boton boton--principal reto__accion"
+                  [href]="'/retos/' + r.vacante.id + '/resultado'"
+                >
+                  Ver mi resultado
+                </a>
+              }
+              <a class="boton boton--secundario reto__accion" [href]="'/retos/' + r.vacante.id">
+                {{ r.yaEntrego ? 'Ver el reto' : 'Abrir el reto' }}
+              </a>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  }
+</main>

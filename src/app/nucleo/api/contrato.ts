@@ -178,3 +178,151 @@ export interface IdentidadRevelada {
   readonly correo: string;
   readonly reveladaEn: string;
 }
+
+/** Un criterio de la rubrica, con la evidencia que justifica el puntaje. */
+export interface CriterioDelIntento {
+  readonly criterio: string;
+  readonly puntaje: number;
+  readonly escalaMaxima: number;
+  /** Cuanto pesa en la nota final. Los pesos de una rubrica suman 100. */
+  readonly peso: number;
+  /**
+   * La cita del entregable que sostiene el puntaje.
+   *
+   * Es lo que separa una nota de un juicio: sin evidencia, el candidato no
+   * puede discutir nada y el reclutador no puede defender la decision.
+   */
+  readonly evidencia: string;
+}
+
+/** Un intento evaluado de un candidato. */
+export interface IntentoEvaluado {
+  readonly idEvaluacion: string;
+  readonly idEntrega: string;
+  readonly idEjercicio: string;
+  readonly notaFinal: number;
+  readonly creadaEn: string;
+  readonly riesgoInyeccion: string;
+  readonly criterios: readonly CriterioDelIntento[];
+}
+
+/** Lo que muestra la pantalla A07, ver entrega. */
+export interface ReporteDeCandidato {
+  readonly vacante: { readonly id: string; readonly titulo: string; readonly estado: string };
+  /** Sigue siendo el alias: entrar al detalle NO revela a nadie. */
+  readonly alias: string;
+  readonly idCandidato: string;
+  readonly posicionEnLaVacante: number | null;
+  /** Todos sus intentos, no solo el mejor. */
+  readonly intentos: readonly IntentoEvaluado[];
+  readonly generadoEn: string;
+}
+
+/** Estado de un aviso por correo a un candidato (modulo de notificaciones). */
+export interface AvisoDeCierre {
+  readonly idCandidato: string;
+  readonly tipo: string;
+  /**
+   * `pendiente` registrado y sin enviar · `enviando` reservado por una ronda
+   * en curso · `enviada` entregado al servidor de correo · `sin_canal` no hay
+   * SMTP configurado · `fallida` el servidor rechazo el envio.
+   *
+   * `sin_canal` NO es un fallo: es un entorno sin correo configurado, y
+   * mezclarlo con `fallida` haria imposible saber si reintentar tiene sentido.
+   */
+  readonly estado: string;
+  readonly intentos: number;
+  readonly enviadoEn: string | null;
+  readonly ultimoError: string | null;
+}
+
+/** Lo que deja una ronda de avisos. */
+export interface ResumenDeAvisos {
+  readonly idVacante: string;
+  /** Candidatos con al menos una entrega evaluada: los que pueden recibir aviso. */
+  readonly considerados: number;
+  readonly nuevos: number;
+  readonly enviados: number;
+  readonly sinCanal: number;
+  readonly fallidos: number;
+  /** Ya los tenian enviados y no se volvieron a tocar. */
+  readonly yaAvisados: number;
+  /** Por que no se envio nada: `vacante_no_cerrada`, `canal_apagado`... */
+  readonly omitido?: string;
+}
+
+/** Una vacante tal como la devuelve el modulo de vacantes. */
+export interface Vacante {
+  readonly id: string;
+  readonly titulo: string;
+  readonly estado: 'borrador' | 'publicada' | 'cerrada';
+  readonly cerradaEn: string | null;
+  readonly candidatos?: readonly {
+    readonly idCandidato: string;
+    readonly contratadoEn: string | null;
+  }[];
+}
+
+/** Un criterio de la rubrica, tal como lo ve el candidato ANTES de entregar. */
+export interface CriterioDeLaRubrica {
+  readonly nombre: string;
+  readonly descripcion: string;
+  /** Cuanto pesa en la nota. Los pesos de una rubrica suman 100. */
+  readonly peso: number;
+  readonly escalaMaxima: number;
+}
+
+/**
+ * El reto que el candidato tiene que resolver.
+ *
+ * Trae la rubrica COMPLETA, con los pesos. El candidato sabe de antemano con
+ * que se le va a medir: es la diferencia entre una prueba y un examen sorpresa.
+ */
+export interface RetoDeLaVacante {
+  readonly idEjercicio: string;
+  readonly idVersion: string;
+  readonly numero: number;
+  readonly titulo: string;
+  readonly enunciado: string;
+  readonly criterios: readonly CriterioDeLaRubrica[];
+}
+
+/** Una entrega del candidato. */
+export interface EntregaPropia {
+  readonly id: string;
+  readonly idVacante: string;
+  readonly idEjercicio: string;
+  readonly numeroIntento: number;
+  readonly estado: 'recibida' | 'en_evaluacion' | 'evaluada' | 'fallida';
+  readonly archivoNombre: string;
+  readonly archivoBytes: number;
+  readonly creadaEn: string;
+}
+
+/** La evaluacion de una entrega, con su desglose. */
+export interface EvaluacionPropia {
+  readonly id: string;
+  readonly idEntrega: string;
+  readonly idVacante: string;
+  readonly idEjercicio: string;
+  readonly notaFinal: number;
+  readonly criterios: readonly CriterioDelIntento[];
+  readonly creadaEn: string;
+}
+
+/**
+ * El puesto del candidato en una vacante.
+ *
+ * `disponible` es `false` mientras la vacante siga abierta, y `motivo` dice por
+ * que: saber que vas tercero con el proceso en marcha cambiaria como te
+ * comportas, y los demas todavia pueden entregar.
+ */
+export interface MiPuesto {
+  readonly idVacante: string;
+  readonly estadoVacante: string;
+  readonly disponible: boolean;
+  readonly motivo: string;
+  readonly puesto: number | null;
+  readonly total: number | null;
+  readonly notaFinal: number | null;
+}

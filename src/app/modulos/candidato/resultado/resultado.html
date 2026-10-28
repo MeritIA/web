@@ -1,0 +1,91 @@
+<header class="barra">
+  <div class="barra__dentro">
+    <p class="marca">Merit<span>IA</span></p>
+    <a class="barra__volver" [href]="volverAMisRetos">← Mis retos</a>
+  </div>
+</header>
+
+<main class="pantalla">
+  @if (error(); as mensaje) {
+    <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="cargando" role="status">Cargando tu resultado…</p>
+  } @else if (vacante(); as v) {
+    <h1 class="titulo">{{ v.titulo }}</h1>
+
+    @if (puesto(); as p) {
+      @if (p.disponible && p.puesto !== null) {
+        <section class="tarjeta puesto">
+          <p class="puesto__valor">
+            {{ p.puesto }}<span class="puesto__de">de {{ p.total }}</span>
+          </p>
+          <p class="puesto__texto">
+            Tu posición en el proceso, con tu mejor intento
+            @if (p.notaFinal !== null) {
+              ({{ p.notaFinal }} puntos)
+            }
+          </p>
+        </section>
+      } @else {
+        <!-- El motivo en vez de un hueco: así el candidato no cree que se
+             rompió algo, y entiende que es una decisión. -->
+        <p class="tarjeta puesto puesto--sin">{{ porQueNoHayPuesto(p.motivo) }}</p>
+      }
+    }
+
+    @if (intentos().length === 0) {
+      <p class="tarjeta vacio">
+        Todavía no hay ninguna evaluación de tus entregas en este reto. La evaluación tarda unos
+        minutos desde que entregas.
+      </p>
+    } @else {
+      <h2 class="titulo titulo--seccion">Cómo se calificó tu entrega</h2>
+      <p class="explicacion">
+        Cada criterio trae la parte de tu entregable en la que se basó la nota. Es la misma que ve
+        la empresa.
+      </p>
+
+      @for (intento of intentos(); track intento.id) {
+        <section class="tarjeta intento">
+          <header class="intento__cabeza">
+            <div>
+              <h3 class="intento__titulo">
+                Entrega del {{ intento.creadaEn | date: 'd MMM y, HH:mm' }}
+                @if (intento.esElMejor && intentos().length > 1) {
+                  <span class="etiqueta etiqueta--azul">Tu mejor intento</span>
+                }
+              </h3>
+            </div>
+            <p class="intento__nota">{{ intento.notaFinal }}</p>
+          </header>
+
+          <ul class="criterios">
+            @for (c of intento.criterios; track c.criterio) {
+              <li class="criterio">
+                <div class="criterio__cabeza">
+                  <h4 class="criterio__nombre">{{ c.criterio }}</h4>
+                  <p class="criterio__puntaje">
+                    {{ c.puntaje }} / {{ c.escalaMaxima }}
+                    <span class="criterio__peso">· pesa {{ c.peso }}%</span>
+                  </p>
+                </div>
+
+                <div
+                  class="criterio__barra"
+                  role="img"
+                  [attr.aria-label]="c.logrado + ' por ciento del criterio'"
+                >
+                  <div class="criterio__relleno" [style.width.%]="c.logrado"></div>
+                </div>
+
+                <blockquote class="criterio__evidencia">{{ c.evidencia }}</blockquote>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    }
+  }
+</main>

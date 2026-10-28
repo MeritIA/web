@@ -1,0 +1,57 @@
+<main class="pantalla">
+  <section class="tarjeta caja">
+    <header class="caja__cabecera">
+      <p class="marca">Merit<span>IA</span></p>
+      <h1>Crea tu cuenta</h1>
+      <p class="caja__sub">Te evalúan por lo que resuelves, no por tu hoja de vida.</p>
+    </header>
+
+    @if (error(); as mensaje) {
+      <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+    }
+
+    <form (submit)="enviar($event)" novalidate>
+      <label class="campo">
+        <span class="campo__nombre">Nombre completo</span>
+        <input
+          type="text"
+          name="nombreCompleto"
+          autocomplete="name"
+          required
+          [value]="nombreCompleto()"
+          (input)="nombreCompleto.set($any($event.target).value)"
+        />
+      </label>
+
+      <label class="campo">
+        <span class="campo__nombre">Correo</span>
+        <input
+          type="email"
+          name="correo"
+          autocomplete="email"
+          required
+          [value]="correo()"
+          (input)="correo.set($any($event.target).value)"
+        />
+      </label>
+
+      <label class="campo">
+        <span class="campo__nombre">Contraseña</span>
+        <input
+          type="password"
+          name="contrasena"
+          autocomplete="new-password"
+          required
+          [value]="contrasena()"
+          (input)="contrasena.set($any($event.target).value)"
+        />
+      </label>
+
+      <button class="boton boton--principal caja__enviar" type="submit" [disabled]="!puedeEnviar()">
+        {{ enviando() ? 'Creando…' : 'Crear cuenta' }}
+      </button>
+    </form>
+
+    <p class="caja__pie">¿Ya tienes cuenta? <a href="/entrar">Entra aquí</a>.</p>
+  </section>
+</main>

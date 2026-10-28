@@ -1,0 +1,220 @@
+.barra {
+  background: var(--tinta);
+  color: #fff;
+}
+
+.barra__dentro {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.marca {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.marca span {
+  color: #7da2ff;
+}
+
+.barra__volver {
+  margin-left: auto;
+  font-size: 14px;
+  color: #c7d2e8;
+  text-decoration: none;
+  padding: 10px 4px;
+}
+
+.barra__volver:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.pantalla {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+
+.titulo {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.cargando {
+  color: var(--texto-medio);
+  padding: 24px;
+  font-size: 15px;
+}
+
+.aviso--exito {
+  background: var(--verde-tenue);
+  color: var(--verde);
+  border: 1px solid #b7e4c7;
+  margin-bottom: 20px;
+}
+
+.aviso--atencion {
+  margin-top: 20px;
+  background: var(--ambar-tenue);
+  color: var(--ambar);
+  border: 1px solid #f3dcb5;
+}
+
+.reto {
+  margin-top: 24px;
+  padding: 28px;
+}
+
+.reto__titulo {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* El enunciado llega como texto con saltos de línea: se respetan en vez de
+   convertirlo en un párrafo corrido que pierde las listas. */
+.reto__enunciado {
+  margin-top: 14px;
+  white-space: pre-wrap;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--texto);
+}
+
+.reto__subtitulo {
+  margin-top: 32px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.reto__nota {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--texto-medio);
+}
+
+.criterios {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.criterio {
+  padding: 14px 16px;
+  background: var(--fondo);
+  border-radius: var(--radio-chico);
+}
+
+.criterio__cabeza {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.criterio__nombre {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.criterio__peso {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--azul-oscuro);
+}
+
+.criterio__descripcion {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--texto-medio);
+  line-height: 1.6;
+}
+
+.entregas {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.entrega {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  font-size: 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-chico);
+}
+
+.entrega__intento {
+  font-weight: 600;
+}
+
+.entrega__archivo {
+  color: var(--texto-medio);
+  overflow-wrap: anywhere;
+}
+
+.entrega__estado {
+  margin-left: auto;
+  color: var(--azul-oscuro);
+  font-weight: 600;
+}
+
+.entrega__fecha {
+  color: var(--texto-tenue);
+  font-size: 13px;
+}
+
+.subir {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--borde);
+}
+
+.subir__campo {
+  display: block;
+  margin-top: 14px;
+}
+
+.subir__nombre {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.subir__campo input {
+  font: inherit;
+  font-size: 14px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.subir__ayuda {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--texto-tenue);
+}
+
+.subir__elegido {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.subir__boton {
+  margin-top: 20px;
+}

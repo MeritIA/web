@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { Api, FalloDeApi } from '../../../nucleo/api/api';
 import type { PanelDeEmpresa, ProgresoDeVacante } from '../../../nucleo/api/contrato';
@@ -45,6 +46,7 @@ export interface TarjetaDeVacante extends ProgresoDeVacante {
 export class Panel {
   private readonly api = inject(Api);
   private readonly sesion = inject(Sesion);
+  private readonly router = inject(Router);
 
   protected readonly datos = signal<PanelDeEmpresa | null>(null);
   protected readonly cargando = signal(true);
@@ -87,6 +89,9 @@ export class Panel {
 
   protected async salir(): Promise<void> {
     await this.sesion.salir();
-    location.assign('/entrar');
+    // Por el router y no con `location.assign`: una recarga entera tira el
+    // paquete de la aplicacion para volver a bajarlo, y de paso se pierde el
+    // titulo de la pagina hasta que el router lo repone.
+    await this.router.navigateByUrl('/entrar');
   }
 }

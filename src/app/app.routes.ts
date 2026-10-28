@@ -35,6 +35,45 @@ export const routes: Routes = [
     canActivate: [exigeRol('reclutador', 'administrador')],
     loadComponent: () => import('./modulos/empresa/ranking/ranking').then((m) => m.Ranking),
   },
+  {
+    // Cuelga del ranking porque es donde se entra: la URL cuenta el camino, y
+    // un enlace suelto a una entrega sin su vacante no significa nada.
+    path: 'vacantes/:idVacante/candidatos/:idCandidato',
+    title: 'Ver entrega · MeritIA',
+    canActivate: [exigeRol('reclutador', 'administrador')],
+    loadComponent: () => import('./modulos/empresa/entrega/entrega').then((m) => m.Entrega),
+  },
+  {
+    path: 'vacantes/:idVacante/cierre',
+    title: 'Contratar y cerrar · MeritIA',
+    canActivate: [exigeRol('reclutador', 'administrador')],
+    loadComponent: () => import('./modulos/empresa/cierre/cierre').then((m) => m.Cierre),
+  },
+  {
+    path: 'crear-cuenta',
+    title: 'Crear cuenta · MeritIA',
+    loadComponent: () =>
+      import('./modulos/autenticacion/crear-cuenta/crear-cuenta').then((m) => m.CrearCuenta),
+  },
+  {
+    // La casa del candidato. `inicioDe` ya apuntaba aqui desde el principio.
+    path: 'mis-retos',
+    title: 'Mis retos · MeritIA',
+    canActivate: [exigeRol('candidato')],
+    loadComponent: () => import('./modulos/candidato/mis-retos/mis-retos').then((m) => m.MisRetos),
+  },
+  {
+    path: 'retos/:idVacante',
+    title: 'Reto · MeritIA',
+    canActivate: [exigeRol('candidato')],
+    loadComponent: () => import('./modulos/candidato/reto/reto').then((m) => m.Reto),
+  },
+  {
+    path: 'retos/:idVacante/resultado',
+    title: 'Mi resultado · MeritIA',
+    canActivate: [exigeRol('candidato')],
+    loadComponent: () => import('./modulos/candidato/resultado/resultado').then((m) => m.Resultado),
+  },
   // Sin sesion, el guardia de `/panel` redirige a `/entrar` recordando a donde
   // iba. Con sesion de candidato, a su inicio. Es el unico sitio donde se
   // decide a donde va alguien que entra por la raiz.

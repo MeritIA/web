@@ -1,0 +1,185 @@
+<header class="barra">
+  <div class="barra__dentro">
+    <p class="marca">Merit<span>IA</span></p>
+    <a class="barra__volver" [href]="volverAlRanking()">← Volver al ranking</a>
+  </div>
+</header>
+
+<main class="pantalla">
+  @if (error(); as mensaje) {
+    <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="cargando" role="status">Cargando…</p>
+  } @else if (vacante(); as v) {
+    <div class="cabecera">
+      <div>
+        <h1 class="titulo">{{ v.titulo }}</h1>
+        <p class="subtitulo">
+          @if (cerrada()) {
+            Proceso cerrado
+            @if (v.cerradaEn) {
+              el {{ v.cerradaEn | date: 'd MMM y, HH:mm' }}
+            }
+          } @else {
+            Proceso abierto · {{ finalistas().length }} finalistas evaluados
+          }
+        </p>
+      </div>
+
+      @if (!cerrada()) {
+        <button
+          class="boton boton--principal"
+          type="button"
+          [disabled]="finalistas().length === 0"
+          (click)="confirmandoCierre.set(true)"
+        >
+          Cerrar el proceso
+        </button>
+      }
+    </div>
+
+    @if (!cerrada() && !hayContratados() && finalistas().length > 0) {
+      <p class="aviso aviso--atencion">
+        Todavía no has marcado a nadie como contratado. Puedes cerrar el proceso igual —cerrar no es
+        contratar—, pero entonces no quedará registro de en qué terminó.
+      </p>
+    }
+
+    <h2 class="titulo titulo--seccion">Finalistas</h2>
+    <p class="explicacion">
+      Marcar a alguien como contratado <strong>no revela su identidad</strong>: queda registrado
+      sobre su alias, con tu usuario y la fecha. Para saber quién es, revela su identidad en el
+      ranking.
+    </p>
+
+    @if (finalistas().length === 0) {
+      <p class="tarjeta vacio">
+        No hay finalistas evaluados en esta vacante, así que no hay a quién contratar ni a quién
+        avisar.
+      </p>
+    } @else {
+      <ul class="finalistas">
+        @for (f of finalistas(); track f.idCandidato) {
+          <li class="tarjeta finalista">
+            <p class="finalista__posicion">{{ f.posicion }}</p>
+
+            <div class="finalista__centro">
+              <p class="finalista__alias">{{ f.alias }}</p>
+              @if (f.contratadoEn) {
+                <p class="finalista__contratado">
+                  Contratado el {{ f.contratadoEn | date: 'd MMM y, HH:mm' }}
+                </p>
+              }
+              @if (cerrada()) {
+                <p class="etiqueta finalista__aviso" [class]="claseDelAviso(f.aviso)">
+                  {{ textoDelAviso(f.aviso) }}
+                </p>
+              }
+            </div>
+
+            <div class="finalista__derecha">
+              <p class="finalista__nota">{{ f.notaFinal }}</p>
+              @if (!cerrada() && !f.contratadoEn) {
+                <button
+                  class="boton boton--secundario finalista__contratar"
+                  type="button"
+                  [disabled]="contratando() !== null"
+                  (click)="contratar(f)"
+                >
+                  {{ contratando() === f.idCandidato ? 'Registrando…' : 'Marcar contratado' }}
+                </button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (cerrada()) {
+      <section class="tarjeta avisos">
+        <h2 class="avisos__titulo">Avisos por correo</h2>
+        <p class="avisos__texto">
+          Al cerrar se le avisó a cada persona con una entrega evaluada. El correo dice que el
+          proceso terminó y que el resultado está en la plataforma:
+          <strong>no lleva la nota, ni el puesto, ni si fue seleccionada</strong>.
+        </p>
+
+        @if (fallidos() > 0) {
+          <p class="aviso aviso--error">
+            {{ fallidos() }}
+            {{ fallidos() === 1 ? 'aviso no salió' : 'avisos no salieron' }}: el servidor de correo
+            los rechazó. Reintentar es seguro: a quien ya recibió el suyo no se le vuelve a
+            escribir.
+          </p>
+        } @else if (pendientes() > 0 || sinCanal() > 0) {
+          <!-- Pendiente no es un fallo: está registrado y esperando. -->
+          <p class="avisos__espera">
+            {{ pendientes() + sinCanal() }}
+            {{ pendientes() + sinCanal() === 1 ? 'aviso registrado' : 'avisos registrados' }} y
+            todavía sin enviar.
+          </p>
+        }
+
+        @if (ultimoResumen(); as r) {
+          <p class="avisos__resumen">
+            Última ronda: {{ r.enviados }} enviados, {{ r.yaAvisados }} ya los tenían,
+            {{ r.fallidos }} fallaron, {{ r.sinCanal }} sin canal.
+            @if (r.omitido) {
+              <br /><strong>No se envió nada porque {{ porQueNoSeEnvio(r.omitido) }}</strong>
+            }
+          </p>
+        }
+
+        <button
+          class="boton boton--secundario"
+          type="button"
+          [disabled]="reenviando()"
+          (click)="reenviar()"
+        >
+          {{ reenviando() ? 'Reintentando…' : 'Reintentar los que faltan' }}
+        </button>
+      </section>
+    }
+  }
+
+  @if (confirmandoCierre()) {
+    <div class="confirmacion" role="alertdialog" aria-labelledby="tituloCerrar">
+      <div class="tarjeta confirmacion__caja">
+        <h2 id="tituloCerrar" class="confirmacion__titulo">¿Cerrar el proceso?</h2>
+        <p class="confirmacion__texto">
+          Se le enviará un correo a cada persona con una entrega evaluada ({{
+            finalistas().length
+          }}).
+        </p>
+        <p class="confirmacion__texto confirmacion__texto--detalle">
+          El correo dice que el proceso terminó y que el resultado está en la plataforma.
+          <strong>No lleva la nota, ni el puesto, ni si fue seleccionada</strong> — eso se mira
+          entrando con su cuenta.
+        </p>
+        <p class="confirmacion__texto confirmacion__texto--detalle">
+          Cerrar <strong>no revela ninguna identidad</strong> y no se puede deshacer.
+        </p>
+        <div class="confirmacion__botones">
+          <button
+            class="boton boton--secundario"
+            type="button"
+            [disabled]="cerrando()"
+            (click)="confirmandoCierre.set(false)"
+          >
+            Cancelar
+          </button>
+          <button
+            class="boton boton--principal"
+            type="button"
+            [disabled]="cerrando()"
+            (click)="cerrar()"
+          >
+            {{ cerrando() ? 'Cerrando…' : 'Sí, cerrar y avisar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</main>

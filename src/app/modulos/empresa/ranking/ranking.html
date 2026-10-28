@@ -26,7 +26,10 @@
       </div>
       <!-- Enlace normal, no fetch: la cookie de sesión viaja sola y el
            navegador se encarga de guardar el archivo. -->
-      <a class="boton boton--secundario" [href]="urlDelCsv()" download>Descargar CSV</a>
+      <div class="cabecera__acciones">
+        <a class="boton boton--secundario" [href]="urlDelCsv()" download>Descargar CSV</a>
+        <a class="boton boton--principal" [href]="enlaceAlCierre()">Contratar y cerrar</a>
+      </div>
     </div>
 
     @if (r.resumen.entregasEnProceso > 0) {
@@ -112,6 +115,7 @@
             <div class="candidato__derecha">
               <p class="candidato__nota">{{ fila.notaFinal }}</p>
               <p class="candidato__fecha">{{ fila.evaluadaEn | date: 'd MMM y' }}</p>
+              <a class="candidato__ver" [href]="enlaceAlDetalle(fila)">Ver entrega</a>
               @if (!identidadDe(fila)) {
                 <button
                   class="boton boton--secundario candidato__revelar"

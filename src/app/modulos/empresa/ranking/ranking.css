@@ -203,8 +203,15 @@
   color: var(--texto-tenue);
 }
 
-.candidato__revelar {
+.candidato__ver {
+  display: block;
   margin-top: 12px;
+  font-size: 14px;
+  color: var(--azul-oscuro);
+}
+
+.candidato__revelar {
+  margin-top: 8px;
   font-size: 14px;
   padding: 9px 14px;
 }
@@ -247,4 +254,17 @@
   gap: 12px;
   justify-content: flex-end;
   flex-wrap: wrap;
+}
+
+.cabecera__acciones {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cabecera__acciones .boton {
+  text-decoration: none;
+  /* Como son enlaces con pinta de boton, el texto se centra a mano. */
+  display: inline-flex;
+  align-items: center;
 }

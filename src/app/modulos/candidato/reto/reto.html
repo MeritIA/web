@@ -1,0 +1,98 @@
+<header class="barra">
+  <div class="barra__dentro">
+    <p class="marca">Merit<span>IA</span></p>
+    <a class="barra__volver" [href]="volverAMisRetos">← Mis retos</a>
+  </div>
+</header>
+
+<main class="pantalla">
+  @if (error(); as mensaje) {
+    <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+  }
+
+  @if (entregado()) {
+    <p class="aviso aviso--exito" role="status">
+      Entrega recibida. La evaluación tarda unos minutos; cuando esté lista podrás ver tu nota y el
+      desglose por criterio.
+    </p>
+  }
+
+  @if (cargando()) {
+    <p class="cargando" role="status">Cargando el reto…</p>
+  } @else if (vacante(); as v) {
+    <h1 class="titulo">{{ v.titulo }}</h1>
+    @if (cerrada()) {
+      <p class="aviso aviso--atencion">
+        Este proceso ya se cerró, así que no se admiten más entregas. Tu resultado está en «Ver mi
+        resultado».
+      </p>
+    }
+
+    @for (reto of retos(); track reto.idEjercicio) {
+      <section class="tarjeta reto">
+        <h2 class="reto__titulo">{{ reto.titulo }}</h2>
+
+        <div class="reto__enunciado">{{ reto.enunciado }}</div>
+
+        <h3 class="reto__subtitulo">Con qué se te va a calificar</h3>
+        <p class="reto__nota">
+          Esta es la rúbrica completa, con lo que pesa cada criterio. La ves <strong>antes</strong>
+          de entregar, a propósito.
+        </p>
+
+        <ul class="criterios">
+          @for (c of reto.criterios; track c.nombre) {
+            <li class="criterio">
+              <div class="criterio__cabeza">
+                <h4 class="criterio__nombre">{{ c.nombre }}</h4>
+                <p class="criterio__peso">{{ c.peso }}% de la nota</p>
+              </div>
+              <p class="criterio__descripcion">{{ c.descripcion }}</p>
+            </li>
+          }
+        </ul>
+
+        @if (entregasDe(reto.idEjercicio).length > 0) {
+          <h3 class="reto__subtitulo">Lo que has entregado</h3>
+          <ul class="entregas">
+            @for (e of entregasDe(reto.idEjercicio); track e.id) {
+              <li class="entrega">
+                <span class="entrega__intento">Intento {{ e.numeroIntento }}</span>
+                <span class="entrega__archivo">{{ e.archivoNombre }}</span>
+                <span class="entrega__estado">{{ textoDelEstado(e.estado) }}</span>
+                <span class="entrega__fecha">{{ e.creadaEn | date: 'd MMM y, HH:mm' }}</span>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (!cerrada()) {
+          <div class="subir">
+            <h3 class="reto__subtitulo">Entregar</h3>
+            <label class="subir__campo">
+              <span class="subir__nombre">Tu archivo</span>
+              <input type="file" [attr.accept]="aceptadas" (change)="elegirArchivo($event)" />
+            </label>
+            <p class="subir__ayuda">Se aceptan {{ extensiones }}. Máximo 25 MB.</p>
+
+            @if (archivo(); as f) {
+              <p class="subir__elegido">{{ f.name }} · {{ enMegas(f.size) }}</p>
+            }
+            @if (problemaDelArchivo(); as problema) {
+              <p class="aviso aviso--error">{{ problema }}</p>
+            }
+
+            <button
+              class="boton boton--principal subir__boton"
+              type="button"
+              [disabled]="!puedeEntregar()"
+              (click)="entregar()"
+            >
+              {{ subiendo() ? 'Subiendo…' : 'Entregar' }}
+            </button>
+          </div>
+        }
+      </section>
+    }
+  }
+</main>
