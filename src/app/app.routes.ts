@@ -26,6 +26,15 @@ export const routes: Routes = [
     canActivate: [exigeRol('reclutador', 'administrador')],
     loadComponent: () => import('./modulos/empresa/panel/panel').then((m) => m.Panel),
   },
+  {
+    // El identificador va en la ruta y llega al componente como `input` gracias
+    // a `withComponentInputBinding`. Que sea compartible importa: un reclutador
+    // le pasa este enlace a otro de su empresa y funciona.
+    path: 'vacantes/:idVacante/ranking',
+    title: 'Ranking de finalistas · MeritIA',
+    canActivate: [exigeRol('reclutador', 'administrador')],
+    loadComponent: () => import('./modulos/empresa/ranking/ranking').then((m) => m.Ranking),
+  },
   // Sin sesion, el guardia de `/panel` redirige a `/entrar` recordando a donde
   // iba. Con sesion de candidato, a su inicio. Es el unico sitio donde se
   // decide a donde va alguien que entra por la raiz.

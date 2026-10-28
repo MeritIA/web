@@ -200,3 +200,13 @@
   font-size: 13px;
   color: var(--texto-tenue);
 }
+
+.vacante__enlace {
+  color: inherit;
+  text-decoration: none;
+}
+
+.vacante__enlace:hover {
+  color: var(--azul-oscuro);
+  text-decoration: underline;
+}

@@ -59,7 +59,14 @@
         @for (v of tarjetas(); track v.id) {
           <li class="tarjeta vacante">
             <div class="vacante__cabeza">
-              <h3 class="vacante__titulo">{{ v.titulo }}</h3>
+              <!-- El titulo es el enlace al ranking: es el sitio donde el
+                   reclutador quiere entrar desde el panel, y un enlace de verdad
+                   se puede abrir en otra pestana o compartir. -->
+              <h3 class="vacante__titulo">
+                <a class="vacante__enlace" [href]="'/vacantes/' + v.id + '/ranking'">
+                  {{ v.titulo }}
+                </a>
+              </h3>
 
               @if (v.cierreEstimado) {
                 <span

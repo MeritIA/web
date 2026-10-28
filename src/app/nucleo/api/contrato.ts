@@ -108,3 +108,73 @@ export interface ErrorDeApi {
   readonly mensaje?: string;
   readonly codigo?: string;
 }
+
+/** El criterio en el que mejor le fue a un candidato, del mismo intento que da la nota. */
+export interface HabilidadDestacada {
+  readonly criterio: string;
+  readonly porcentajeLogrado: number;
+  readonly peso: number;
+}
+
+/**
+ * Una fila del ranking de A06.
+ *
+ * **No trae nombre ni correo, y eso es el producto, no un descuido.** El
+ * objetivo de MeritIA es reducir el sesgo en la evaluacion, y A06 lo
+ * instrumenta: "identidad oculta hasta que selecciones a quien contactar". Un
+ * nombre en la tabla permite exactamente el sesgo que el producto dice evitar
+ * —por genero, por origen, por la universidad que se adivina en un apellido—
+ * justo mientras se compara a las personas entre si.
+ *
+ * `idCandidato` si viene, porque las otras llamadas lo necesitan; no dice
+ * quien es nadie.
+ */
+export interface FilaDeRanking {
+  readonly posicion: number;
+  /** Lo que se muestra en lugar del nombre. */
+  readonly alias: string;
+  readonly idCandidato: string;
+  readonly notaFinal: number;
+  /** Cuantos intentos se le evaluaron. La nota es la de su mejor intento. */
+  readonly intentosEvaluados: number;
+  readonly idEntrega: string;
+  readonly idEvaluacion: string;
+  readonly evaluadaEn: string;
+  /** Riesgo de inyeccion de instrucciones detectado al evaluar. */
+  readonly riesgoInyeccion: string;
+  /** Nulo si esa evaluacion no trae desglose. */
+  readonly habilidadDestacada: HabilidadDestacada | null;
+}
+
+export interface ResumenDelReporte {
+  readonly candidatosEvaluados: number;
+  readonly entregasEvaluadas: number;
+  readonly entregasEnProceso: number;
+  readonly entregasFallidas: number;
+  readonly notaPromedio: number | null;
+  readonly notaMediana: number | null;
+  readonly notaMaxima: number | null;
+  readonly notaMinima: number | null;
+  readonly entregasConRiesgoAlto: number;
+}
+
+export interface ReporteDeVacante {
+  readonly vacante: { readonly id: string; readonly titulo: string; readonly estado: string };
+  readonly resumen: ResumenDelReporte;
+  readonly ranking: readonly FilaDeRanking[];
+  readonly generadoEn: string;
+}
+
+/**
+ * Lo que devuelve revelar una identidad.
+ *
+ * Pedir esto **queda auditado** en el backend: quien lo hizo, cuando y de
+ * quien. No es una consulta mas.
+ */
+export interface IdentidadRevelada {
+  readonly alias: string;
+  readonly idCandidato: string;
+  readonly nombre: string;
+  readonly correo: string;
+  readonly reveladaEn: string;
+}
