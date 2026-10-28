@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input, type OnInit, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { API, Api, FalloDeApi } from '../../../nucleo/api/api';
 import type {
@@ -38,7 +38,7 @@ import type {
   templateUrl: './ranking.html',
   styleUrl: './ranking.css',
 })
-export class Ranking {
+export class Ranking implements OnInit {
   /** Llega de la ruta `/vacantes/:idVacante/ranking`. */
   readonly idVacante = input.required<string>();
 
@@ -65,7 +65,15 @@ export class Ranking {
     () => `${API}/reportes/vacantes/${this.idVacante()}/exportar`,
   );
 
-  constructor() {
+  /**
+   * Se carga en `ngOnInit` y NO en el constructor.
+   *
+   * No es estilo: un `input.required()` todavia no esta enlazado cuando corre
+   * el constructor, asi que leerlo ahi lanza y la pantalla se queda en un
+   * error generico sin llegar a pedir nada. Pasa exactamente eso, y la unica
+   * pista es que no hay ni peticion en la red.
+   */
+  ngOnInit(): void {
     void this.cargar();
   }
 
