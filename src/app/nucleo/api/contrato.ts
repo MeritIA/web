@@ -262,3 +262,67 @@ export interface Vacante {
     readonly contratadoEn: string | null;
   }[];
 }
+
+/** Un criterio de la rubrica, tal como lo ve el candidato ANTES de entregar. */
+export interface CriterioDeLaRubrica {
+  readonly nombre: string;
+  readonly descripcion: string;
+  /** Cuanto pesa en la nota. Los pesos de una rubrica suman 100. */
+  readonly peso: number;
+  readonly escalaMaxima: number;
+}
+
+/**
+ * El reto que el candidato tiene que resolver.
+ *
+ * Trae la rubrica COMPLETA, con los pesos. El candidato sabe de antemano con
+ * que se le va a medir: es la diferencia entre una prueba y un examen sorpresa.
+ */
+export interface RetoDeLaVacante {
+  readonly idEjercicio: string;
+  readonly idVersion: string;
+  readonly numero: number;
+  readonly titulo: string;
+  readonly enunciado: string;
+  readonly criterios: readonly CriterioDeLaRubrica[];
+}
+
+/** Una entrega del candidato. */
+export interface EntregaPropia {
+  readonly id: string;
+  readonly idVacante: string;
+  readonly idEjercicio: string;
+  readonly numeroIntento: number;
+  readonly estado: 'recibida' | 'en_evaluacion' | 'evaluada' | 'fallida';
+  readonly archivoNombre: string;
+  readonly archivoBytes: number;
+  readonly creadaEn: string;
+}
+
+/** La evaluacion de una entrega, con su desglose. */
+export interface EvaluacionPropia {
+  readonly id: string;
+  readonly idEntrega: string;
+  readonly idVacante: string;
+  readonly idEjercicio: string;
+  readonly notaFinal: number;
+  readonly criterios: readonly CriterioDelIntento[];
+  readonly creadaEn: string;
+}
+
+/**
+ * El puesto del candidato en una vacante.
+ *
+ * `disponible` es `false` mientras la vacante siga abierta, y `motivo` dice por
+ * que: saber que vas tercero con el proceso en marcha cambiaria como te
+ * comportas, y los demas todavia pueden entregar.
+ */
+export interface MiPuesto {
+  readonly idVacante: string;
+  readonly estadoVacante: string;
+  readonly disponible: boolean;
+  readonly motivo: string;
+  readonly puesto: number | null;
+  readonly total: number | null;
+  readonly notaFinal: number | null;
+}

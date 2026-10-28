@@ -65,3 +65,10 @@
 .aviso--error {
   margin-bottom: 20px;
 }
+
+.caja__pie {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--texto-tenue);
+  text-align: center;
+}
