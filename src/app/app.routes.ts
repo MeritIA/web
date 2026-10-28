@@ -35,6 +35,14 @@ export const routes: Routes = [
     canActivate: [exigeRol('reclutador', 'administrador')],
     loadComponent: () => import('./modulos/empresa/ranking/ranking').then((m) => m.Ranking),
   },
+  {
+    // Cuelga del ranking porque es donde se entra: la URL cuenta el camino, y
+    // un enlace suelto a una entrega sin su vacante no significa nada.
+    path: 'vacantes/:idVacante/candidatos/:idCandidato',
+    title: 'Ver entrega · MeritIA',
+    canActivate: [exigeRol('reclutador', 'administrador')],
+    loadComponent: () => import('./modulos/empresa/entrega/entrega').then((m) => m.Entrega),
+  },
   // Sin sesion, el guardia de `/panel` redirige a `/entrar` recordando a donde
   // iba. Con sesion de candidato, a su inicio. Es el unico sitio donde se
   // decide a donde va alguien que entra por la raiz.

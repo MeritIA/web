@@ -1,0 +1,114 @@
+<header class="barra">
+  <div class="barra__dentro">
+    <p class="marca">Merit<span>IA</span></p>
+    <a class="barra__volver" [href]="volverAlRanking()">← Volver al ranking</a>
+  </div>
+</header>
+
+<main class="pantalla">
+  @if (error(); as mensaje) {
+    <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+  }
+
+  @if (enlaceDeRespaldo(); as url) {
+    <p class="aviso aviso--atencion">
+      El navegador bloqueó la ventana.
+      <a [href]="url" target="_blank" rel="noopener">Abre el archivo aquí</a>.
+    </p>
+  }
+
+  @if (cargando()) {
+    <p class="cargando" role="status">Cargando la entrega…</p>
+  } @else if (reporte(); as r) {
+    <div class="cabecera">
+      <div>
+        <!-- Sigue siendo el alias: entrar al detalle no revela a nadie. -->
+        <h1 class="titulo">{{ r.alias }}</h1>
+        <p class="subtitulo">
+          {{ r.vacante.titulo }}
+          @if (r.posicionEnLaVacante !== null) {
+            · puesto {{ r.posicionEnLaVacante }}
+          }
+          · {{ r.intentos.length }}
+          {{ r.intentos.length === 1 ? 'intento evaluado' : 'intentos evaluados' }}
+        </p>
+      </div>
+    </div>
+
+    @if (r.intentos.length === 0) {
+      <p class="tarjeta vacio">Esta persona todavía no tiene ningún intento evaluado.</p>
+    } @else {
+      @for (intento of intentos(); track intento.idEvaluacion) {
+        <section class="tarjeta intento">
+          <header class="intento__cabeza">
+            <div>
+              <h2 class="intento__titulo">
+                Intento {{ intento.numero }}
+                @if (intento.esElMejor && r.intentos.length > 1) {
+                  <span class="etiqueta etiqueta--azul">El que cuenta</span>
+                }
+              </h2>
+              <p class="intento__fecha">
+                Evaluado el {{ intento.creadaEn | date: 'd MMM y, HH:mm' }}
+              </p>
+            </div>
+            <div class="intento__derecha">
+              <p class="intento__nota">{{ intento.notaFinal }}</p>
+              <!-- Botón y no enlace: la ruta devuelve un JSON con una URL
+                   firmada, no el archivo. -->
+              <button
+                class="boton boton--secundario intento__archivo"
+                type="button"
+                [disabled]="pidiendoArchivo() !== null"
+                (click)="descargar(intento.idEntrega)"
+              >
+                {{ pidiendoArchivo() === intento.idEntrega ? 'Pidiendo…' : 'Descargar entregable' }}
+              </button>
+            </div>
+          </header>
+
+          @if (riesgoVisible(intento.riesgoInyeccion)) {
+            <p class="intento__riesgo">
+              Riesgo de inyección de instrucciones: <strong>{{ intento.riesgoInyeccion }}</strong
+              >. El entregable contenía texto que intentaba dirigir a la IA evaluadora.
+            </p>
+          }
+
+          @if (intento.criterios.length === 0) {
+            <p class="intento__sinDesglose">
+              Esta evaluación no trae desglose por criterio, así que la nota no se puede explicar
+              desde aquí.
+            </p>
+          } @else {
+            <ul class="criterios">
+              @for (c of intento.criterios; track c.criterio) {
+                <li class="criterio">
+                  <div class="criterio__cabeza">
+                    <h3 class="criterio__nombre">{{ c.criterio }}</h3>
+                    <p class="criterio__puntaje">
+                      {{ c.puntaje }} / {{ c.escalaMaxima }}
+                      <span class="criterio__peso">· pesa {{ c.peso }}%</span>
+                    </p>
+                  </div>
+
+                  <div
+                    class="criterio__barra"
+                    role="img"
+                    [attr.aria-label]="c.logrado + ' por ciento del criterio'"
+                  >
+                    <div class="criterio__relleno" [style.width.%]="c.logrado"></div>
+                  </div>
+
+                  <!-- Entera, sin recortar: es lo que permite discutir la nota. -->
+                  <blockquote class="criterio__evidencia">{{ c.evidencia }}</blockquote>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+    }
+
+    <p class="generado">Datos de {{ r.generadoEn | date: 'd MMM y, HH:mm' }}</p>
+  }
+</main>

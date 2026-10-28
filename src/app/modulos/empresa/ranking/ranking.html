@@ -112,6 +112,7 @@
             <div class="candidato__derecha">
               <p class="candidato__nota">{{ fila.notaFinal }}</p>
               <p class="candidato__fecha">{{ fila.evaluadaEn | date: 'd MMM y' }}</p>
+              <a class="candidato__ver" [href]="enlaceAlDetalle(fila)">Ver entrega</a>
               @if (!identidadDe(fila)) {
                 <button
                   class="boton boton--secundario candidato__revelar"

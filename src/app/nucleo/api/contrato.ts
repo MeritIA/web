@@ -178,3 +178,42 @@ export interface IdentidadRevelada {
   readonly correo: string;
   readonly reveladaEn: string;
 }
+
+/** Un criterio de la rubrica, con la evidencia que justifica el puntaje. */
+export interface CriterioDelIntento {
+  readonly criterio: string;
+  readonly puntaje: number;
+  readonly escalaMaxima: number;
+  /** Cuanto pesa en la nota final. Los pesos de una rubrica suman 100. */
+  readonly peso: number;
+  /**
+   * La cita del entregable que sostiene el puntaje.
+   *
+   * Es lo que separa una nota de un juicio: sin evidencia, el candidato no
+   * puede discutir nada y el reclutador no puede defender la decision.
+   */
+  readonly evidencia: string;
+}
+
+/** Un intento evaluado de un candidato. */
+export interface IntentoEvaluado {
+  readonly idEvaluacion: string;
+  readonly idEntrega: string;
+  readonly idEjercicio: string;
+  readonly notaFinal: number;
+  readonly creadaEn: string;
+  readonly riesgoInyeccion: string;
+  readonly criterios: readonly CriterioDelIntento[];
+}
+
+/** Lo que muestra la pantalla A07, ver entrega. */
+export interface ReporteDeCandidato {
+  readonly vacante: { readonly id: string; readonly titulo: string; readonly estado: string };
+  /** Sigue siendo el alias: entrar al detalle NO revela a nadie. */
+  readonly alias: string;
+  readonly idCandidato: string;
+  readonly posicionEnLaVacante: number | null;
+  /** Todos sus intentos, no solo el mejor. */
+  readonly intentos: readonly IntentoEvaluado[];
+  readonly generadoEn: string;
+}

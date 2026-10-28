@@ -130,6 +130,11 @@ export class Ranking implements OnInit {
     return this.reveladas()[fila.idCandidato];
   }
 
+  /** A07: el desglose por criterio de esa persona, todavia por alias. */
+  protected enlaceAlDetalle(fila: FilaDeRanking): string {
+    return `/vacantes/${this.idVacante()}/candidatos/${fila.idCandidato}`;
+  }
+
   /** `ninguno` no se pinta: solo se avisa de lo que merece una mirada. */
   protected riesgoVisible(fila: FilaDeRanking): boolean {
     return fila.riesgoInyeccion !== 'ninguno';
