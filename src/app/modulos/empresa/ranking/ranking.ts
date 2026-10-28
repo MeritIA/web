@@ -130,6 +130,9 @@ export class Ranking implements OnInit {
     return this.reveladas()[fila.idCandidato];
   }
 
+  /** A08: contratar y cerrar, el final del flujo de la empresa. */
+  protected readonly enlaceAlCierre = computed(() => `/vacantes/${this.idVacante()}/cierre`);
+
   /** A07: el desglose por criterio de esa persona, todavia por alias. */
   protected enlaceAlDetalle(fila: FilaDeRanking): string {
     return `/vacantes/${this.idVacante()}/candidatos/${fila.idCandidato}`;

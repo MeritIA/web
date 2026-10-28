@@ -255,3 +255,16 @@
   justify-content: flex-end;
   flex-wrap: wrap;
 }
+
+.cabecera__acciones {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cabecera__acciones .boton {
+  text-decoration: none;
+  /* Como son enlaces con pinta de boton, el texto se centra a mano. */
+  display: inline-flex;
+  align-items: center;
+}

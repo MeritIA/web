@@ -1,0 +1,238 @@
+.barra {
+  background: var(--tinta);
+  color: #fff;
+}
+
+.barra__dentro {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.marca {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.marca span {
+  color: #7da2ff;
+}
+
+.barra__volver {
+  margin-left: auto;
+  font-size: 14px;
+  color: #c7d2e8;
+  text-decoration: none;
+  padding: 10px 4px;
+}
+
+.barra__volver:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.pantalla {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+
+.cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.titulo {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.titulo--seccion {
+  font-size: 20px;
+  margin-top: 40px;
+}
+
+.subtitulo {
+  margin-top: 6px;
+  color: var(--texto-tenue);
+  font-size: 15px;
+}
+
+.explicacion {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--texto-medio);
+  max-width: 70ch;
+}
+
+.cargando,
+.vacio {
+  color: var(--texto-medio);
+  padding: 24px;
+  font-size: 15px;
+}
+
+.aviso--atencion {
+  margin-top: 20px;
+  background: var(--ambar-tenue);
+  color: var(--ambar);
+  border: 1px solid #f3dcb5;
+}
+
+.finalistas {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.finalista {
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.finalista__posicion {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--texto-tenue);
+  min-width: 28px;
+  padding-top: 2px;
+}
+
+.finalista__centro {
+  flex: 999 1 260px;
+  min-width: 0;
+}
+
+/* Monoespaciada, igual que en el ranking y en ver entrega: es el mismo dato y
+   tiene que reconocerse de una pantalla a otra. */
+.finalista__alias {
+  font-size: 17px;
+  font-weight: 600;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  letter-spacing: -0.01em;
+}
+
+.finalista__contratado {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--verde);
+}
+
+.finalista__aviso {
+  margin-top: 8px;
+}
+
+.etiqueta--verde {
+  background: var(--verde-tenue);
+  color: var(--verde);
+}
+
+.etiqueta--rojo {
+  background: var(--rojo-tenue);
+  color: var(--rojo);
+}
+
+.finalista__derecha {
+  margin-left: auto;
+  text-align: right;
+}
+
+.finalista__nota {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.finalista__contratar {
+  margin-top: 12px;
+  font-size: 14px;
+  padding: 9px 14px;
+}
+
+.avisos {
+  margin-top: 40px;
+  padding: 24px;
+}
+
+.avisos__titulo {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.avisos__texto {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--texto-medio);
+  max-width: 70ch;
+}
+
+.avisos__resumen {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--texto-medio);
+  background: var(--fondo);
+  padding: 12px 14px;
+  border-radius: var(--radio-chico);
+}
+
+.avisos .boton {
+  margin-top: 20px;
+}
+
+.confirmacion {
+  position: fixed;
+  inset: 0;
+  background: rgb(15 26 58 / 45%);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.confirmacion__caja {
+  max-width: 480px;
+  padding: 24px;
+  box-shadow: var(--sombra-alta);
+}
+
+.confirmacion__titulo {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.confirmacion__texto {
+  margin-top: 12px;
+  font-size: 15px;
+  color: var(--texto-medio);
+}
+
+.confirmacion__texto--detalle {
+  font-size: 14px;
+}
+
+.confirmacion__botones {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.avisos__espera {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--texto-medio);
+}

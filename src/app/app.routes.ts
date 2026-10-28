@@ -43,6 +43,12 @@ export const routes: Routes = [
     canActivate: [exigeRol('reclutador', 'administrador')],
     loadComponent: () => import('./modulos/empresa/entrega/entrega').then((m) => m.Entrega),
   },
+  {
+    path: 'vacantes/:idVacante/cierre',
+    title: 'Contratar y cerrar · MeritIA',
+    canActivate: [exigeRol('reclutador', 'administrador')],
+    loadComponent: () => import('./modulos/empresa/cierre/cierre').then((m) => m.Cierre),
+  },
   // Sin sesion, el guardia de `/panel` redirige a `/entrar` recordando a donde
   // iba. Con sesion de candidato, a su inicio. Es el unico sitio donde se
   // decide a donde va alguien que entra por la raiz.

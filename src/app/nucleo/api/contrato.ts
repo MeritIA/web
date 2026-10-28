@@ -217,3 +217,48 @@ export interface ReporteDeCandidato {
   readonly intentos: readonly IntentoEvaluado[];
   readonly generadoEn: string;
 }
+
+/** Estado de un aviso por correo a un candidato (modulo de notificaciones). */
+export interface AvisoDeCierre {
+  readonly idCandidato: string;
+  readonly tipo: string;
+  /**
+   * `pendiente` registrado y sin enviar · `enviando` reservado por una ronda
+   * en curso · `enviada` entregado al servidor de correo · `sin_canal` no hay
+   * SMTP configurado · `fallida` el servidor rechazo el envio.
+   *
+   * `sin_canal` NO es un fallo: es un entorno sin correo configurado, y
+   * mezclarlo con `fallida` haria imposible saber si reintentar tiene sentido.
+   */
+  readonly estado: string;
+  readonly intentos: number;
+  readonly enviadoEn: string | null;
+  readonly ultimoError: string | null;
+}
+
+/** Lo que deja una ronda de avisos. */
+export interface ResumenDeAvisos {
+  readonly idVacante: string;
+  /** Candidatos con al menos una entrega evaluada: los que pueden recibir aviso. */
+  readonly considerados: number;
+  readonly nuevos: number;
+  readonly enviados: number;
+  readonly sinCanal: number;
+  readonly fallidos: number;
+  /** Ya los tenian enviados y no se volvieron a tocar. */
+  readonly yaAvisados: number;
+  /** Por que no se envio nada: `vacante_no_cerrada`, `canal_apagado`... */
+  readonly omitido?: string;
+}
+
+/** Una vacante tal como la devuelve el modulo de vacantes. */
+export interface Vacante {
+  readonly id: string;
+  readonly titulo: string;
+  readonly estado: 'borrador' | 'publicada' | 'cerrada';
+  readonly cerradaEn: string | null;
+  readonly candidatos?: readonly {
+    readonly idCandidato: string;
+    readonly contratadoEn: string | null;
+  }[];
+}
