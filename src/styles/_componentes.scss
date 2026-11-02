@@ -1,0 +1,456 @@
+// ---------------------------------------------------------------------------
+// Vocabulario visual compartido.
+//
+// Vive en global y no dentro de cada componente Angular a proposito: un boton
+// se ve igual en las siete pantallas porque hay UNA definicion de boton. Los
+// componentes aportan comportamiento; el aspecto se hereda de aqui.
+// ---------------------------------------------------------------------------
+
+// Un elemento personalizado es `inline` por omision, y un hijo de rejilla
+// inline ignora `min-width: 0`: basta una tabla ancha dentro para desbordar la
+// pagina entera. Se declaran en bloque de una vez, aqui.
+ui-panel,
+ui-recurso,
+ui-vacio,
+ui-carga,
+ui-desglose,
+ui-campo,
+ui-nota,
+app-panel-ejercicio {
+  display: block;
+}
+
+// --- Etiqueta micro: mono, versales, muy espaciada. Es la firma tipografica
+// que ordena la jerarquia sin recurrir a mas tamanos de titular.
+.micro {
+  font-family: var(--fuente-mono);
+  font-size: var(--t-micro);
+  letter-spacing: var(--tracking-micro);
+  text-transform: uppercase;
+  color: var(--c-texto-tenue);
+}
+
+.micro--acento {
+  color: var(--c-acento);
+}
+.micro--aviso {
+  color: var(--c-aviso);
+}
+
+// --- Superficies ---------------------------------------------------------
+.panel {
+  background: var(--c-superficie);
+  border: 1px solid var(--c-borde);
+  border-radius: var(--r-lg);
+  padding: var(--e-5);
+}
+
+.panel--plano {
+  padding: 0;
+  overflow: hidden;
+}
+
+.panel__cab {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--e-4);
+}
+
+// --- Botones -------------------------------------------------------------
+.btn {
+  display: inline-flex;
+  gap: var(--e-2);
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 var(--e-4);
+  border: 1px solid var(--c-borde-fuerte);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--c-texto);
+  font-family: var(--fuente-mono);
+  font-size: var(--t-micro);
+  letter-spacing: var(--tracking-micro);
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background var(--mov) var(--curva),
+    border-color var(--mov) var(--curva),
+    color var(--mov) var(--curva),
+    opacity var(--mov) var(--curva);
+
+  &:hover:not(:disabled) {
+    background: var(--c-neutro-tenue);
+    border-color: var(--c-texto-suave);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.btn--primario {
+  background: var(--c-acento);
+  border-color: var(--c-acento);
+  color: var(--c-acento-contraste);
+  font-weight: var(--peso-medio);
+
+  &:hover:not(:disabled) {
+    background: var(--c-acento);
+    border-color: var(--c-acento);
+    filter: brightness(1.1);
+  }
+}
+
+.btn--peligro {
+  border-color: var(--c-peligro);
+  color: var(--c-peligro);
+
+  &:hover:not(:disabled) {
+    background: var(--c-peligro-tenue);
+    border-color: var(--c-peligro);
+  }
+}
+
+.btn--fantasma {
+  border-color: transparent;
+  color: var(--c-texto-suave);
+}
+
+.btn--sm {
+  min-height: 32px;
+  padding: 0 var(--e-3);
+}
+
+.btn--bloque {
+  width: 100%;
+}
+
+// --- Chips de estado -----------------------------------------------------
+.chip {
+  display: inline-flex;
+  gap: var(--e-2);
+  align-items: center;
+  padding: 3px var(--e-3);
+  border: 1px solid var(--c-borde);
+  border-radius: var(--r-pill);
+  background: var(--c-neutro-tenue);
+  color: var(--c-texto-suave);
+  font-family: var(--fuente-mono);
+  font-size: var(--t-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.chip::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentcolor;
+  flex: none;
+}
+
+.chip--limpio::before {
+  display: none;
+}
+
+.chip--exito {
+  background: var(--c-acento-tenue);
+  border-color: color-mix(in srgb, var(--c-acento) 35%, transparent);
+  color: var(--c-acento);
+}
+.chip--aviso {
+  background: var(--c-aviso-tenue);
+  border-color: color-mix(in srgb, var(--c-aviso) 35%, transparent);
+  color: var(--c-aviso);
+}
+.chip--peligro {
+  background: var(--c-peligro-tenue);
+  border-color: color-mix(in srgb, var(--c-peligro) 35%, transparent);
+  color: var(--c-peligro);
+}
+.chip--info {
+  background: var(--c-info-tenue);
+  border-color: color-mix(in srgb, var(--c-info) 35%, transparent);
+  color: var(--c-info);
+}
+
+// Latido para "en proceso": el estado del sistema se ve sin leer.
+.chip--vivo::before {
+  animation: latido 1.8s ease-in-out infinite;
+}
+
+@keyframes latido {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+// --- Formularios ---------------------------------------------------------
+.campo {
+  display: grid;
+  gap: var(--e-2);
+}
+
+.campo__etiqueta {
+  font-family: var(--fuente-mono);
+  font-size: var(--t-micro);
+  letter-spacing: var(--tracking-micro);
+  text-transform: uppercase;
+  color: var(--c-texto-suave);
+}
+
+.control {
+  width: 100%;
+  min-height: 42px;
+  padding: var(--e-2) var(--e-3);
+  border: 1px solid var(--c-borde);
+  border-radius: var(--r-md);
+  background: var(--c-superficie-alta);
+  color: var(--c-texto);
+  transition:
+    border-color var(--mov) var(--curva),
+    background var(--mov) var(--curva);
+
+  &::placeholder {
+    color: var(--c-texto-tenue);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--c-borde-fuerte);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--c-peligro);
+  }
+}
+
+textarea.control {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.campo__ayuda {
+  font-size: var(--t-menor);
+  color: var(--c-texto-tenue);
+}
+
+.campo__error {
+  display: flex;
+  gap: var(--e-2);
+  align-items: center;
+  font-size: var(--t-menor);
+  color: var(--c-peligro);
+}
+
+// --- Tablas --------------------------------------------------------------
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-menor);
+  font-variant-numeric: tabular-nums;
+
+  th,
+  td {
+    padding: var(--e-3) var(--e-4);
+    text-align: left;
+    border-bottom: 1px solid var(--c-borde);
+  }
+
+  th {
+    font-family: var(--fuente-mono);
+    font-size: var(--t-micro);
+    font-weight: var(--peso-normal);
+    letter-spacing: var(--tracking-micro);
+    text-transform: uppercase;
+    color: var(--c-texto-tenue);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    transition: background var(--mov-rapido) var(--curva);
+  }
+
+  tbody tr:hover {
+    background: var(--c-superficie-viva);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.tabla__num {
+  text-align: right;
+}
+
+.tabla-scroll {
+  position: relative; // ancla lo posicionado de dentro (el `caption` oculto),
+  overflow-x: auto; // que si no se escapa del recorte y ensancha la pagina
+}
+
+// --- Medidor de nota -----------------------------------------------------
+.barra {
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--c-neutro-tenue);
+  overflow: hidden;
+}
+
+.barra__relleno {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--c-acento);
+  transition: width var(--mov-lento) var(--curva);
+}
+
+// --- Maquetacion ---------------------------------------------------------
+.pila {
+  display: grid;
+  gap: var(--e-4);
+  align-content: start;
+}
+.pila--sm {
+  gap: var(--e-2);
+}
+.pila--lg {
+  gap: var(--e-6);
+}
+
+.fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+  align-items: center;
+}
+.fila--entre {
+  justify-content: space-between;
+}
+
+// Rejilla que se adapta sola: sin media queries por pantalla.
+.rejilla {
+  display: grid;
+  gap: var(--e-4);
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+}
+
+.rejilla--ancha {
+  grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr));
+}
+
+// Dos zonas que se apilan solas en pantallas estrechas.
+.columnas {
+  display: grid;
+  gap: var(--e-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+}
+
+// Un hijo de rejilla mide por omision lo que mida su contenido, y una tabla
+// ancha empuja la pagina entera hasta desbordarla. Esta linea es lo que
+// mantiene el desplazamiento horizontal DENTRO de la tabla, donde se espera.
+.rejilla > *,
+.columnas > *,
+.cifras > * {
+  min-width: 0;
+}
+
+// Migas de pan: misma forma en todas las pantallas de detalle.
+.migas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+  margin-bottom: var(--e-4);
+  font-family: var(--fuente-mono);
+  font-size: var(--t-micro);
+  letter-spacing: var(--tracking-micro);
+  text-transform: uppercase;
+  color: var(--c-texto-tenue);
+}
+
+.separador {
+  height: 1px;
+  background: var(--c-borde);
+  border: 0;
+}
+
+.lectura {
+  max-width: var(--ancho-lectura);
+}
+
+// --- Estados de carga y vacio -------------------------------------------
+.esqueleto {
+  border-radius: var(--r-md);
+  background: linear-gradient(
+    90deg,
+    var(--c-neutro-tenue) 25%,
+    var(--c-superficie-viva) 37%,
+    var(--c-neutro-tenue) 63%
+  );
+  background-size: 400% 100%;
+  animation: brillo 1.4s ease infinite;
+}
+
+@keyframes brillo {
+  to {
+    background-position: -135% 0;
+  }
+}
+
+// --- Accesibilidad -------------------------------------------------------
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.saltar {
+  position: absolute;
+  top: var(--e-2);
+  left: var(--e-2);
+  z-index: var(--z-aviso);
+  padding: var(--e-2) var(--e-4);
+  border-radius: var(--r-pill);
+  background: var(--c-acento);
+  color: var(--c-acento-contraste);
+  transform: translateY(-200%);
+  transition: transform var(--mov) var(--curva);
+
+  &:focus {
+    transform: none;
+  }
+}
+
+// --- Fondo de malla: la reticula fina de la identidad --------------------
+.malla {
+  position: relative;
+  isolation: isolate;
+}
+
+.malla::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(var(--c-malla) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-malla) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%);
+  pointer-events: none;
+}

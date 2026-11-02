@@ -1,105 +1,126 @@
-# MeritIA · web
+# MeritIA · Frontend web
 
-Frontend de MeritIA. **Angular 22 + Capacitor**, sin renderizado en servidor.
+Interfaz web de MeritIA: evaluación de candidatos mediante ejercicios prácticos
+calificados contra una rúbrica, con puntaje, desglose por criterio y evidencia.
 
-## Por qué Angular y no Next.js
+Consume el backend NestJS de `../backend` (contrato en `backend/docs/openapi.json`)
+y cubre los tres roles del producto: candidato, reclutador y administrador.
 
-El *Project Charter* (v1.0) dice Next.js. El *Plan de Seguridad* (v1.0) dedica
-su §7 entero a Angular y a la APK generada con Capacitor, y la EDT le asigna
-los paquetes **3.1 y 3.2**. Se trabaja sobre Angular porque es lo único que
-conserva la APK dentro del alcance: el Charter no menciona aplicación móvil en
-ningún punto. **El Charter queda desactualizado en ese punto y el equipo
-debería corregirlo formalmente.** La contradicción está escrita en
-`backend/docs/arquitectura.md` §10.
+---
 
-**Sin SSR, y es una decisión:** Capacitor empaqueta una build estática. Con
-renderizado en servidor habría dos builds distintas y la sesión viviría en dos
-sitios, que es justo donde se cuelan los fallos de autenticación.
-
-## Cómo se levanta
-
-Hace falta el backend corriendo. Desde `../backend`:
-
-```bash
-docker compose up -d                    # postgres, redis, almacenamiento
-npm run migration:run
-node --env-file=.env dist/main.js       # ojo: ver «lo que falta»
-```
-
-Y aquí:
+## Arrancar
 
 ```bash
 npm install
-npm start                               # http://localhost:4200
-npm run lint                            # mismo listón que el backend
-npm run format:check
+npm start          # http://localhost:4200
 ```
 
-El backend ya trae `http://localhost:4200` en su lista blanca de orígenes de
-desarrollo, así que no hay que tocar CORS.
+`ng serve` usa `proxy.conf.json`, que reenvía `/api` a `http://127.0.0.1:3000`.
+Esto no es un detalle de comodidad: el backend entrega la sesión en una **cookie
+HttpOnly** y, al servir la web y la API bajo el mismo origen, la cookie viaja
+sola y no hace falta CORS ni guardar ningún token en JavaScript.
 
-## La sesión no se guarda aquí
+Para apuntar a otro backend se cambia el `target` de `proxy.conf.json` (en
+desarrollo) o la configuración del proxy que sirva el build (en producción).
 
-En web el token viaja en una **cookie HttpOnly** y JavaScript no lo puede leer:
-es el control central del paquete 3.5 del backend. Consecuencias que conviene
-tener claras antes de tocar `nucleo/sesion`:
+```bash
+npm run build      # build de producción en dist/
+npm run formato    # prettier sobre todo el código
+```
 
-- El front **no puede** saber si hay sesión mirando el navegador. Lo pregunta:
-  `GET /autenticacion/yo` responde 200 con la identidad o 401 sin ella.
-- Nada se guarda en `localStorage` ni en `sessionStorage`. Sería un atajo que
-  mentiría: la cookie puede vencer o cerrarse en otra pestaña, y el front
-  seguiría pintando un panel que el servidor ya no sirve.
-- Toda petición va con `withCredentials: true`, puesto una sola vez en
-  `nucleo/api/api.ts`. Olvidarlo da un 401 que parece de permisos y es de
-  transporte.
-- En la APK es al revés: el token va en el cuerpo y lo guarda el KeyStore. Por
-  eso el login manda `cliente: 'web'` explícito y no se adivina por User-Agent.
+Requisitos: Node ≥ 20.19 (el backend ya fija su versión en `.nvmrc`).
 
-**Los guardias de ruta no son seguridad.** Solo deciden qué se pinta. Quien
-protege los datos es el backend, que devuelve 404 —no 403— ante un recurso de
-otra empresa.
+---
 
-## Qué hay construido
+## Cómo está organizado
 
-| Pantalla | Ruta | Estado |
-|---|---|---|
-| Entrar | `/entrar` | ✅ contra `POST /autenticacion/login` |
-| A02 · Panel de vacantes | `/panel` | ✅ contra `GET /reportes/panel`, una sola llamada |
+```
+src/
+  styles/            tokens, reinicio y vocabulario visual compartido
+  entornos/          configuración por entorno (apiBase, sondeos)
+  app/
+    nucleo/          lo que no es pantalla
+      api/           modelos del contrato + un servicio por módulo del backend
+      sesion/        identidad, guardias de ruta
+      http/          interceptores (credenciales, renovación, avisos)
+      estado/        `recurso()` y `accion()`
+      ui/            avisos y tema
+    compartido/      dominio, formatos y componentes de interfaz reutilizables
+    layout/          el marco de la aplicación
+    funciones/       una carpeta por área de producto, toda carga diferida
+```
 
-El MVP acordado son **diez pantallas** (`backend/docs/matriz-pantallas.md` §8):
-A01 → A02 → A03 → A04 → A06 → A07 → A08 y B11 → B14 → B17 → B22.
+### Las tres decisiones que explican el resto
 
-### El panel, en detalle
+**1. Los tokens mandan.** Ningún componente escribe un color, una fuente ni un
+espaciado literal: todo sale de `src/styles/_tokens.scss`. Cambiar la paleta, la
+tipografía o el ritmo de la aplicación entera es editar ese archivo. El tema
+claro existe precisamente porque el sistema de tokens lo hace barato: redefine
+color y no toca nada más.
 
-Sale de **una sola llamada**. Pedirlo vacante por vacante es lo que esta
-pantalla no se puede permitir con veinte procesos abiertos.
+**2. El aspecto es global; el comportamiento, del componente.** Botones, campos,
+tablas, chips y paneles se definen una vez en `_componentes.scss`. Por eso un
+componente nuevo nace ya con el aspecto correcto y una pantalla se escribe en
+decenas de líneas y no en cientos.
 
-Tres casos que la pantalla distingue a propósito, y que es fácil romper:
+**3. Cargar y enviar se resuelven una vez.** `recurso()` da el trío
+`cargando / error / datos` con recarga, y `accion()` da `enviando / error` con
+protección contra doble clic. Ninguna pantalla repite ese andamiaje, y por eso
+tampoco puede olvidarse de apagar un indicador de carga en un `catch`.
 
-1. **`avance === null` no es `0`.** Null es «no has invitado a nadie» y cero es
-   «invitaste y nadie ha avanzado». Una barra vacía en el primer caso diría que
-   el proceso está parado cuando no ha empezado.
-2. **Un cierre estimado en el pasado se muestra**, marcado. El backend acepta
-   fechas pasadas justamente para que el panel pueda enseñar que un proceso se
-   venció (D-13).
-3. **Evaluar a más gente de la planeada no es un error.** `finalistasAEvaluar`
-   es un plan, no un tope (D-12).
+### Añadir una pantalla
 
-## Lo que falta, y no es poco
+1. Crea el componente en `src/app/funciones/<area>/`.
+2. Decláralo en `app.routes.ts` con `loadComponent` y su guardia de rol.
+3. Si habla con el backend, añade el método al servicio del módulo que
+   corresponda en `nucleo/api/` y el tipo en `modelos.ts`.
+4. Usa `recurso()` / `accion()` y las clases de `_componentes.scss`. Si necesitas
+   un estilo que no existe, pregúntate primero si debería existir para todos: si
+   la respuesta es sí, va a `_componentes.scss`.
 
-- **Pruebas.** El andamiaje trae Vitest —el mismo que el backend— y no hay ni
-  una prueba escrita. Es el hueco más grande: por eso la CI de aquí tiene tres
-  verificaciones y la del backend cinco.
-- **Capacitor.** Los paquetes 3.1 y 3.2 incluyen la APK, y todavía no está.
-- **Las otras ocho pantallas del MVP.**
-- **Configuración por entorno.** `API` está fija en `nucleo/api/api.ts`; para
-  desplegar hay que reemplazarla por configuración de build.
+---
 
-### Un tropiezo del backend que se encontró montando esto
+## Decisiones de interfaz, y por qué
 
-`npm start` en el backend **falla** con `SASL: client password must be a
-string`: `nest start` no carga `.env` y algo lee `process.env` antes de que
-`ConfigModule` lo rellene. El rodeo es `node --env-file=.env dist/main.js`,
-igual que hace `migration:run`. Conviene arreglarlo en los scripts del backend:
-hoy quien clone el repositorio y haga `npm start` recibe un error que no dice
-lo que pasa.
+| Decisión | Motivo |
+|---|---|
+| Sin tokens en `localStorage` | El backend los entrega en cookie HttpOnly. Guardar algo en JavaScript sería deshacer esa protección. |
+| La identidad se pregunta a `/autenticacion/yo` al arrancar | Es la única fuente fiable de quién eres y con qué rol; los guardias deciden con la verdad y no con una suposición. |
+| La navegación se arma desde el rol | Un candidato nunca ve que existe «Ejercicios» ni descubre sus límites a base de 403. |
+| Validación de archivo antes de subir | Las mismas reglas que aplica el backend (extensiones, 25 MiB), adelantadas para no gastar un minuto subiendo algo que va a rebotar. |
+| Suma de pesos de la rúbrica en vivo | El backend exige que sumen 100. Verlo mientras se escribe evita el 400 en vez de explicarlo después. |
+| Confirmación solo en lo irreversible | Publicar, cerrar y retirar no se deshacen. Preguntar por todo enseña a confirmar sin leer. |
+| Sondeo mientras algo se evalúa, y solo entonces | HU-16 pide que el candidato no espere en pantalla; HU-15, que pueda consultar el estado. El sondeo se detiene cuando no queda nada en proceso. |
+| El ranking enlaza siempre al detalle | Una nota sin la evidencia que la sostiene es justo lo que MeritIA existe para evitar. |
+
+## Accesibilidad
+
+- Un único anillo de foco visible en todo el producto, y enlace para saltar al
+  contenido.
+- Estados comunicados con texto y forma, nunca solo con color; los chips llevan
+  siempre su etiqueta.
+- `role="status"` / `aria-live` en avisos, cola y estados de evaluación.
+- Barras de nota con `role="meter"` y sus valores accesibles.
+- Errores de formulario con `role="alert"`, anunciados solo cuando el campo ya
+  fue tocado.
+- `prefers-reduced-motion` respetado globalmente.
+- Objetivos táctiles de 40 px o más y sin desbordamiento horizontal desde 360 px.
+
+---
+
+## Dependencia del backend que todavía falta
+
+`GET /ejercicios/:id` exige el permiso `ejercicios:leer`, que la matriz de roles
+concede solo a reclutador y administrador. Un candidato, por tanto, **no puede
+leer el enunciado del ejercicio que debe resolver**, y `GET /vacantes/:id` le
+devuelve únicamente los identificadores asociados.
+
+Eso deja incompleta la HU-13 («consultar el enunciado de cada ejercicio»). La
+interfaz lo resuelve hoy sin romperse: muestra el ejercicio por su orden y avisa
+de que el enunciado lo comparte la empresa. En cuanto el backend exponga el
+enunciado al candidato invitado —un endpoint de solo lectura, o incluir la
+versión vigente en `GET /vacantes/:id`—, basta con pasarlo a la entrada
+`enunciado` de `app-panel-ejercicio`, que ya lo pinta.
+
+Lo mismo, en menor grado, con invitar candidatos: el backend acepta el UUID de
+la cuenta y no existe una búsqueda por correo, así que la interfaz pide el UUID.

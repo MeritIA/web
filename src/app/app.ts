@@ -1,10 +1,16 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { AvisosOutlet } from './compartido/ui/avisos-outlet';
+import { Confirmacion } from './compartido/ui/confirmacion';
 
-/** Solo sostiene el router: cada pantalla trae su propia barra y su diseño. */
 @Component({
-  imports: [RouterOutlet],
-  selector: 'app-root',
-  template: '<router-outlet />',
+  selector: 'app-raiz',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterOutlet, AvisosOutlet, Confirmacion],
+  template: `
+    <router-outlet />
+    <ui-avisos />
+    <ui-confirmacion />
+  `,
 })
 export class App {}

@@ -1,0 +1,129 @@
+// ---------------------------------------------------------------------------
+// MeritIA · Design tokens
+//
+// UNICA fuente de verdad del diseno. Cambiar un color, una tipografia o un
+// espaciado de todo el producto es editar este archivo y nada mas: ningun
+// componente escribe un color literal.
+//
+// Los tokens son custom properties de CSS (no variables de Sass) a proposito:
+// se pueden reasignar por tema en tiempo de ejecucion y se inspeccionan en el
+// navegador.
+// ---------------------------------------------------------------------------
+
+:root {
+  color-scheme: dark;
+
+  // --- Tipografia --------------------------------------------------------
+  --fuente-display: 'Archivo', 'Helvetica Neue', system-ui, sans-serif;
+  --fuente-texto: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fuente-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+
+  // Escala fluida: un solo juego de tamanos para todo el producto.
+  --t-display: clamp(2.6rem, 1.6rem + 4.4vw, 5.6rem);
+  --t-1: clamp(1.9rem, 1.4rem + 2vw, 3rem);
+  --t-2: clamp(1.45rem, 1.2rem + 1vw, 1.95rem);
+  --t-3: 1.2rem;
+  --t-4: 1.02rem;
+  --t-cuerpo: 0.95rem;
+  --t-menor: 0.845rem;
+  --t-micro: 0.72rem; // etiquetas mono en versales
+
+  --peso-display: 200; // el titular fino es la firma visual
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-fuerte: 600;
+
+  --interlinea-display: 1.04;
+  --interlinea: 1.6;
+  --tracking-display: -0.02em;
+  --tracking-micro: 0.18em;
+
+  // --- Color: tema oscuro (por omision) ----------------------------------
+  --c-fondo: #08080a;
+  --c-superficie: #0d0d11;
+  --c-superficie-alta: #141419;
+  --c-superficie-viva: #1b1b21; // hover de filas y celdas
+  --c-borde: rgb(255 255 255 / 10%);
+  --c-borde-fuerte: rgb(255 255 255 / 24%);
+  --c-texto: #eef0f3;
+  --c-texto-suave: #9a9da6;
+  --c-texto-tenue: #5c5f68;
+  --c-sombra: 0 24px 60px -30px rgb(0 0 0 / 85%);
+
+  // Acentos semanticos. Cada uno con su version "tenue" para fondos.
+  --c-acento: #5fd49b;
+  --c-acento-tenue: rgb(95 212 155 / 13%);
+  --c-acento-contraste: #04140d;
+  --c-aviso: #e3b341;
+  --c-aviso-tenue: rgb(227 179 65 / 14%);
+  --c-peligro: #f0674f;
+  --c-peligro-tenue: rgb(240 103 79 / 14%);
+  --c-info: #7fa9ff;
+  --c-info-tenue: rgb(127 169 255 / 14%);
+  --c-neutro-tenue: rgb(255 255 255 / 7%);
+
+  // Malla de fondo: la reticula fina de la referencia visual.
+  --c-malla: rgb(255 255 255 / 3.5%);
+
+  // --- Medidas ------------------------------------------------------------
+  --e-1: 0.25rem;
+  --e-2: 0.5rem;
+  --e-3: 0.75rem;
+  --e-4: 1rem;
+  --e-5: 1.5rem;
+  --e-6: 2rem;
+  --e-7: 3rem;
+  --e-8: 4.5rem;
+
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-pill: 100px;
+
+  --ancho-contenido: 1240px;
+  --ancho-lectura: 68ch;
+  --ancho-lateral: 248px;
+  --alto-barra: 60px;
+
+  // --- Movimiento ---------------------------------------------------------
+  --mov-rapido: 120ms;
+  --mov: 220ms;
+  --mov-lento: 420ms;
+  --curva: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  --anillo: 0 0 0 2px var(--c-fondo), 0 0 0 4px var(--c-acento);
+  --z-barra: 20;
+  --z-capa: 60;
+  --z-aviso: 80;
+}
+
+// ---------------------------------------------------------------------------
+// Tema claro. Solo redefine color: todo lo demas (tipografia, ritmo, radios)
+// es compartido, que es justo lo que hace barato tener dos temas.
+// ---------------------------------------------------------------------------
+:root[data-tema='claro'] {
+  color-scheme: light;
+
+  --c-fondo: #f7f7f8;
+  --c-superficie: #ffffff;
+  --c-superficie-alta: #ffffff;
+  --c-superficie-viva: #f1f1f4;
+  --c-borde: rgb(16 16 20 / 12%);
+  --c-borde-fuerte: rgb(16 16 20 / 28%);
+  --c-texto: #15161a;
+  --c-texto-suave: #5a5d66;
+  --c-texto-tenue: #8b8e97;
+  --c-sombra: 0 18px 44px -28px rgb(16 16 20 / 35%);
+
+  --c-acento: #14825a;
+  --c-acento-tenue: rgb(20 130 90 / 11%);
+  --c-acento-contraste: #ffffff;
+  --c-aviso: #96620a;
+  --c-aviso-tenue: rgb(150 98 10 / 12%);
+  --c-peligro: #c0392b;
+  --c-peligro-tenue: rgb(192 57 43 / 11%);
+  --c-info: #2b5fd9;
+  --c-info-tenue: rgb(43 95 217 / 11%);
+  --c-neutro-tenue: rgb(16 16 20 / 6%);
+  --c-malla: rgb(16 16 20 / 4%);
+}
