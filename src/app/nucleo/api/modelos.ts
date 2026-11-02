@@ -447,6 +447,15 @@ export interface VacanteAbierta {
   intentosPorEjercicio: number;
   publicadaEn: string;
   cierreEstimado: string | null;
+  /** Vacante publicada de verdad en el backend: aceptar a alguien la invita de verdad. */
+  real?: boolean;
+}
+
+/** Quien se postuló a una vacante, visto por la empresa. Solo el identificador: el ranking es a ciegas. */
+export interface Postulante {
+  idCandidato: string;
+  estado: EstadoPostulacion;
+  creadaEn: string;
 }
 
 export interface Postulacion {

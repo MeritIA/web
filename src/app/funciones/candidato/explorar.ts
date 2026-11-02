@@ -36,7 +36,8 @@ type Vista = 'todas' | 'postuladas';
       <ui-chip tono="aviso">Datos de demostración</ui-chip>
       <p>
         El catálogo y las postulaciones están simulados en tu navegador: todavía no existe el
-        servicio que las reciba. Nada de lo que hagas aquí le llega a una empresa.
+        servicio que las reciba. Las vacantes que una empresa publica en este mismo navegador
+        aparecen aquí; las demás son ejemplos.
       </p>
     </aside>
 
@@ -152,15 +153,21 @@ type Vista = 'todas' | 'postuladas';
               {{ abierta() === vacante.id ? 'Ver menos' : 'Ver más' }}
             </button>
 
-            @if (postulacionDe(vacante.id)) {
-              <button
-                type="button"
-                class="btn btn--sm"
-                [disabled]="retirar.enviando()"
-                (click)="pedirRetirar(vacante)"
-              >
-                Retirar postulación
-              </button>
+            @if (postulacionDe(vacante.id); as p) {
+              @if (p.estado === 'aceptada' && vacante.real) {
+                <a [routerLink]="['/mis-pruebas', vacante.id]" class="btn btn--primario">
+                  Hacer la prueba
+                </a>
+              } @else if (p.estado === 'en_revision') {
+                <button
+                  type="button"
+                  class="btn btn--sm"
+                  [disabled]="retirar.enviando()"
+                  (click)="pedirRetirar(vacante)"
+                >
+                  Retirar postulación
+                </button>
+              }
             } @else {
               <button
                 type="button"

@@ -10,15 +10,16 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ENTREGA, VACANTE } from '../../compartido/dominio';
+import { ENTREGA, POSTULACION, VACANTE } from '../../compartido/dominio';
 import { CortoPipe } from '../../compartido/formato';
-import { Estado, EstadoRecurso, Panel } from '../../compartido/ui/basicos';
+import { Chip, Estado, EstadoRecurso, Panel } from '../../compartido/ui/basicos';
 import { Campo } from '../../compartido/ui/campo';
 import { Confirmaciones } from '../../compartido/ui/confirmacion';
 import { EjerciciosServicio } from '../../nucleo/api/ejercicios.servicio';
 import { EntregasServicio } from '../../nucleo/api/entregas.servicio';
-import type { Vacante } from '../../nucleo/api/modelos';
 import { NotificacionesServicio } from '../../nucleo/api/notificaciones.servicio';
+import type { Postulante, Vacante } from '../../nucleo/api/modelos';
+import { PostulacionesServicio } from '../../nucleo/api/postulaciones.servicio';
 import { VacantesServicio } from '../../nucleo/api/vacantes.servicio';
 import { accion, recurso, recursoPor } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
@@ -38,6 +39,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
     RouterLink,
     DatePipe,
     ReactiveFormsModule,
+    Chip,
     Estado,
     EstadoRecurso,
     Panel,
@@ -225,6 +227,60 @@ import { Avisos } from '../../nucleo/ui/avisos';
         </ui-panel>
       </div>
 
+      <!-- ------------------------------------------------- Postulantes -->
+      @if (v.estado !== 'borrador') {
+        <ui-panel antetitulo="quién quiere entrar" titulo="Postulantes">
+          <ui-chip acciones tono="aviso">Simulado</ui-chip>
+
+          <ui-recurso
+            [cargando]="postulantes.cargando() && !postulantes.datos()"
+            [error]="postulantes.error()"
+            [vacio]="(postulantes.datos()?.length ?? 0) === 0 && !postulantes.cargando()"
+            tituloVacio="Nadie se ha postulado todavía"
+            textoVacio="Los candidatos que exploren y se postulen a esta vacante aparecerán aquí. Si aceptas a alguien, queda invitado de verdad."
+            (reintentar)="postulantes.recargar()"
+          />
+
+          @if ((postulantes.datos()?.length ?? 0) > 0) {
+            <ul class="lista-simple">
+              @for (postulante of postulantes.datos() ?? []; track postulante.idCandidato) {
+                <li>
+                  <span>
+                    Candidato #{{ postulante.idCandidato | corto }}
+                    <span class="micro">· {{ postulante.creadaEn | date: 'd MMM, HH:mm' }}</span>
+                  </span>
+                  @if (postulante.estado === 'en_revision' && v.estado === 'publicada') {
+                    <span class="fila">
+                      <button
+                        type="button"
+                        class="btn btn--sm"
+                        [disabled]="decidir.enviando()"
+                        (click)="decidir.correr(postulante, 'rechazada')"
+                      >
+                        Rechazar
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn--sm btn--primario"
+                        [disabled]="decidir.enviando()"
+                        (click)="decidir.correr(postulante, 'aceptada')"
+                      >
+                        Aceptar e invitar
+                      </button>
+                    </span>
+                  } @else {
+                    <ui-estado [p]="estadoPostulante(postulante)" />
+                  }
+                </li>
+              }
+            </ul>
+          }
+          @if (decidir.error(); as error) {
+            <p class="campo__error" role="alert">{{ error }}</p>
+          }
+        </ui-panel>
+      }
+
       <!-- ---------------------------------------------------- Entregas -->
       <ui-panel antetitulo="actividad" titulo="Entregas recibidas" plano>
         <button acciones type="button" class="btn btn--sm" (click)="entregas.recargar()">
@@ -318,6 +374,10 @@ import { Avisos } from '../../nucleo/ui/avisos';
     }
   `,
   styles: `
+    .columnas ~ ui-panel {
+      display: block;
+      margin-top: var(--e-4);
+    }
     .cabecera {
       display: flex;
       flex-wrap: wrap;
@@ -423,12 +483,14 @@ export class VacanteDetalle {
   readonly #ejercicios = inject(EjerciciosServicio);
   readonly #entregas = inject(EntregasServicio);
   readonly #notificaciones = inject(NotificacionesServicio);
+  readonly #postulaciones = inject(PostulacionesServicio);
   readonly #avisos = inject(Avisos);
   readonly #confirmaciones = inject(Confirmaciones);
   readonly #fb = inject(FormBuilder).nonNullable;
 
   protected readonly vacante = recursoPor(this.id, (id) => this.#vacantes.obtener(id));
   protected readonly entregas = recursoPor(this.id, (id) => this.#entregas.deVacante(id));
+  protected readonly postulantes = recursoPor(this.id, (id) => this.#postulaciones.deVacante(id));
   protected readonly banco = recurso(() => this.#ejercicios.listar());
   protected readonly avisosDeCierre = recursoPor(this.id, (id) =>
     this.#notificaciones.deVacante(id),
@@ -460,6 +522,12 @@ export class VacanteDetalle {
   constructor() {
     // La selección parte de lo que ya tiene la vacante, para que el botón de
     // guardar solo se encienda cuando de verdad hay un cambio.
+    // Una vacante publicada entra al catálogo simulado de «Explorar».
+    effect(() => {
+      const publicada = this.vacante.datos();
+      if (publicada) this.#postulaciones.registrarVacante(publicada);
+    });
+
     effect(() => {
       const asociados = new Set((this.vacante.datos()?.ejercicios ?? []).map((e) => e.idEjercicio));
       this.#asociadosAlCargar = asociados;
@@ -502,6 +570,22 @@ export class VacanteDetalle {
   protected readonly cerrar = accion(async () => {
     this.vacante.fijar(await this.#vacantes.cerrar(this.id()));
     this.#avisos.info('Vacante cerrada. El proceso queda auditable tal como terminó.');
+  });
+
+  protected readonly estadoPostulante = (p: Postulante) => POSTULACION[p.estado];
+
+  /** Aceptar invita de verdad en el backend; solo la postulación es simulada. */
+  protected readonly decidir = accion(async (p: Postulante, estado: 'aceptada' | 'rechazada') => {
+    if (estado === 'aceptada') {
+      this.vacante.fijar(await this.#vacantes.invitarCandidato(this.id(), p.idCandidato));
+    }
+    await this.#postulaciones.decidir(this.id(), p.idCandidato, estado);
+    await this.postulantes.recargar();
+    this.#avisos.exito(
+      estado === 'aceptada'
+        ? 'Candidato aceptado e invitado a la prueba.'
+        : 'Postulación rechazada.',
+    );
   });
 
   protected readonly reenviar = accion(async () => {

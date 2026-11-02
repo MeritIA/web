@@ -53,6 +53,7 @@ ayuda técnica.
 | Invitación de candidatos por identificador | hecho |
 | Búsqueda de candidatos por correo al invitar | **pendiente de backend** (mientras tanto, el candidato copia su identificador desde «Mi cuenta») |
 | Explorar vacantes abiertas y postularse (**simulado en el navegador**: el backend no tiene catálogo ni postulaciones; el cambio es un solo servicio, `postulaciones.servicio.ts`) | simulado |
+| Postulantes de la vacante: aceptar (invita de verdad en el backend) o rechazar (**simulado**, mismo servicio) | simulado |
 | Panel de la empresa con avance por vacante, meta de finalistas y cierre estimado | hecho |
 
 **Demostración.** Crear un ejercicio con cuatro criterios, publicar una segunda
