@@ -1,0 +1,126 @@
+// Reinicio y estilos de elemento. Nada de clases aqui: solo como se ve el HTML
+// desnudo, para que un componente nuevo nazca ya con el aspecto correcto.
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--c-fondo);
+  color: var(--c-texto);
+  font-family: var(--fuente-texto);
+  font-size: var(--t-cuerpo);
+  line-height: var(--interlinea);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fuente-display);
+  font-weight: var(--peso-display);
+  line-height: var(--interlinea-display);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--t-1);
+}
+h2 {
+  font-size: var(--t-2);
+}
+h3 {
+  font-size: var(--t-3);
+}
+
+h4,
+h5 {
+  font-size: var(--t-4);
+  font-weight: var(--peso-medio);
+  line-height: 1.35;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: var(--c-borde-fuerte);
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--mov-rapido) var(--curva);
+
+  &:hover {
+    text-decoration-color: currentcolor;
+  }
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+code,
+kbd,
+samp {
+  font-family: var(--fuente-mono);
+  font-size: 0.9em;
+}
+
+// Un solo anillo de foco en todo el producto, siempre visible con teclado.
+:focus-visible {
+  outline: none;
+  box-shadow: var(--anillo);
+  border-radius: var(--r-sm);
+}
+
+::selection {
+  background: var(--c-acento-tenue);
+}
+
+// Barra de scroll discreta, en linea con la paleta.
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-borde-fuerte) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
