@@ -210,6 +210,7 @@ export class Marco {
   protected readonly enlaces = computed<Enlace[]>(() => {
     if (this.sesion.esCandidato()) {
       return [
+        { ruta: '/explorar', texto: 'Explorar' },
         { ruta: '/mis-pruebas', texto: 'Mis pruebas' },
         { ruta: '/mis-resultados', texto: 'Mis resultados' },
         { ruta: '/mi-cuenta', texto: 'Mi cuenta' },

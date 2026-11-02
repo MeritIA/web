@@ -431,6 +431,30 @@ export interface ResumenDeAvisos {
   omitido?: string;
 }
 
+// --- Explorar y postular (SIMULADO: el backend aún no lo ofrece) -----------
+export type EstadoPostulacion = 'en_revision' | 'aceptada' | 'rechazada';
+
+export interface VacanteAbierta {
+  id: string;
+  titulo: string;
+  empresa: string;
+  sector: Sector;
+  ubicacion: string;
+  modalidad: 'remoto' | 'híbrido' | 'presencial';
+  descripcion: string;
+  tecnologias: string[];
+  ejercicios: number;
+  intentosPorEjercicio: number;
+  publicadaEn: string;
+  cierreEstimado: string | null;
+}
+
+export interface Postulacion {
+  idVacante: string;
+  estado: EstadoPostulacion;
+  creadaEn: string;
+}
+
 // --- Errores ----------------------------------------------------------------
 /** Forma unica de error de la API (`src/common/errores/respuesta-error.ts`). */
 export interface RespuestaError {
