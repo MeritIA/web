@@ -134,6 +134,12 @@ export const rutas: Routes = [
         ],
       },
       {
+        path: 'explorar',
+        title: titulo('Explorar vacantes'),
+        canActivate: [guardiaRol('candidato')],
+        loadComponent: () => import('./funciones/candidato/explorar').then((m) => m.Explorar),
+      },
+      {
         path: 'mis-resultados',
         title: titulo('Mis resultados'),
         canActivate: [guardiaRol('candidato')],

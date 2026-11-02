@@ -1,4 +1,10 @@
-import type { EstadoEntrega, EstadoVacante, Riesgo, Rol } from '../nucleo/api/modelos';
+import type {
+  EstadoEntrega,
+  EstadoPostulacion,
+  EstadoVacante,
+  Riesgo,
+  Rol,
+} from '../nucleo/api/modelos';
 
 export type Tono = 'neutro' | 'exito' | 'aviso' | 'peligro' | 'info';
 
@@ -44,6 +50,21 @@ export const ENTREGA: Record<EstadoEntrega, Presentacion> = {
     tono: 'peligro',
     ayuda:
       'No es culpa de la entrega: falló el servicio de evaluación. Se puede reintentar sin gastar un intento.',
+  },
+};
+
+export const POSTULACION: Record<EstadoPostulacion, Presentacion> = {
+  en_revision: {
+    texto: 'En revisión',
+    tono: 'info',
+    vivo: true,
+    ayuda: 'La empresa aún no decide si te invita a la prueba.',
+  },
+  aceptada: { texto: 'Invitado', tono: 'exito', ayuda: 'Ya puedes hacer la prueba.' },
+  rechazada: {
+    texto: 'No continúa',
+    tono: 'neutro',
+    ayuda: 'La empresa no te invitó a esta prueba.',
   },
 };
 

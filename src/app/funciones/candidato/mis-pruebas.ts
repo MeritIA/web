@@ -34,7 +34,9 @@ import { recurso } from '../../nucleo/estado/recurso';
       tituloVacio="Todavía no te han invitado a ninguna prueba"
       textoVacio="Cuando una empresa te invite a su proceso, la prueba aparecerá aquí automáticamente."
       (reintentar)="vacantes.recargar()"
-    />
+    >
+      <a accion-vacio routerLink="/explorar" class="btn btn--primario">Explorar vacantes</a>
+    </ui-recurso>
 
     <div class="rejilla rejilla--ancha">
       @for (vacante of vacantes.datos() ?? []; track vacante.id) {
