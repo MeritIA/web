@@ -6,8 +6,11 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "formato": "prettier --write \"src/**/*.{ts,html,scss}\"",
-    "verificar": "ng build --configuration production",
-    "ng": "ng"
+    "verificar": "npm run lint && npm run format:check && ng build --configuration production",
+    "ng": "ng",
+    "lint": "ng lint",
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss}\"",
+    "test": "ng test"
   },
   "private": true,
   "packageManager": "npm@10.9.4",
@@ -25,8 +28,14 @@
     "@angular/build": "^21.2.28",
     "@angular/cli": "^21.2.28",
     "@angular/compiler-cli": "^21.2.0",
+    "@eslint/js": "^10.0.1",
+    "angular-eslint": "22.6.0",
+    "eslint": "^10.12.0",
+    "jsdom": "^28.0.1",
     "prettier": "^3.8.1",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "typescript-eslint": "8.71.0",
+    "vitest": "^4.1.12"
   },
   "description": "Frontend web de MeritIA: evaluación de candidatos con ejercicios calificados por rúbrica."
 }

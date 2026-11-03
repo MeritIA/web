@@ -48,6 +48,56 @@ module.exports = defineConfig([
       // mas comun de un front que habla con una API, y el mas dificil de ver.
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
+
+      // `ignoreStatic` porque los 27 avisos que daba esta regla en este
+      // proyecto eran todos `Validators.required`, `Validators.min(...)` y
+      // compania: funciones ESTATICAS de Angular que no usan `this`, pasadas
+      // como referencia tal y como documenta Angular. Son falsos positivos, y
+      // dejarlos encendidos entrena a ignorar el linter. Lo que la regla si
+      // sigue cazando --un metodo de instancia desligado de su objeto-- se
+      // queda activo.
+      '@typescript-eslint/unbound-method': ['error', { ignoreStatic: true }],
+
+      // Un `_` al desestructurar es la forma de decir "este campo lo tiro a
+      // proposito". Sin esta excepcion habria que escribir codigo peor para
+      // callar al linter.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+      ],
+    },
+  },
+  {
+    /**
+     * El sistema de diseno no lleva prefijo, y es una decision.
+     *
+     * El prefijo `app-` existe para no chocar con elementos nativos ni con
+     * componentes de terceros. Estas piezas son las primitivas del sistema de
+     * diseno --`<boton>`, `<campo>`, `<desglose>`--, tienen nombre en
+     * castellano como el resto del proyecto, y leerlas en una plantilla con
+     * `app-` delante solo anade ruido. Las pantallas de funcionalidad SI llevan
+     * prefijo: la regla sigue activa fuera de esta carpeta.
+     */
+    files: ['src/app/compartido/ui/**/*.ts'],
+    rules: { '@angular-eslint/component-selector': 'off' },
+  },
+  {
+    /**
+     * Las pruebas se analizan con SU tsconfig.
+     *
+     * `tsconfig.spec.json` es el que incluye los `*.spec.ts` y el que anade los
+     * tipos de vitest. El `projectService` no lo encuentra por su cuenta --no
+     * esta referenciado desde el tsconfig raiz-- y sin esto el linter falla con
+     * "was not found by the project service" en cada prueba, que parece un
+     * error del codigo y es de configuracion.
+     */
+    files: ['**/*.spec.ts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: ['tsconfig.spec.json'],
+        tsconfigRootDir: __dirname,
+      },
     },
   },
   {
