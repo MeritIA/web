@@ -59,9 +59,23 @@ export class Sesion {
     return this.#identificar();
   }
 
+  /**
+   * Cierra la sesión. **Nunca falla**, y eso es deliberado.
+   *
+   * La llamada al servidor es el mejor esfuerzo: sirve para invalidar las demás
+   * sesiones de la persona. Si no responde, la sesión local ya está borrada por
+   * el `finally`, así que dejar que el error subiera solo conseguía que quien
+   * llama no llegara a navegar: en `marco.ts` el `await this.sesion.salir()`
+   * se quedaba a medias y la persona veía la misma pantalla después de pulsar
+   * «Salir». Se enteraría al siguiente clic, cuando un 401 la expulsara.
+   *
+   * Salir es la acción que más tiene que funcionar incluso cuando nada funciona.
+   */
   async salir(): Promise<void> {
     try {
       await this.#api.post('/autenticacion/cerrar-sesiones');
+    } catch {
+      // Se traga a propósito: ver arriba.
     } finally {
       this.#usuario.set(null);
     }
