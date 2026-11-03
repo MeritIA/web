@@ -1,7 +1,8 @@
 /** E2E de Explorar y postular (mock). Mismos requisitos que flujo-completo.mjs, pero solo necesita web y backend para registrarse. Ejecutar desde web/ (guarda una captura en capturas/, que debe existir). */
 import { chromium } from 'playwright-core';
+import { rutaDeChrome } from './entorno.mjs';
 const WEB = 'http://localhost:4200';
-const b = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe' });
+const b = await chromium.launch({ executablePath: rutaDeChrome });
 const p = await (await b.newContext({ viewport: { width: 1280, height: 1000 } })).newPage();
 const ok = (n) => console.log('  OK  ', n);
 const correo = `exp-${Date.now().toString(36)}@cand.test`;

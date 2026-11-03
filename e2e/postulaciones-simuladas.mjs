@@ -9,6 +9,7 @@
  */
 import { chromium } from 'playwright-core';
 import pg from 'pg';
+import { baseDeDatos, rutaDeChrome } from './entorno.mjs';
 
 const WEB = 'http://localhost:4200';
 const API = `${WEB}/api/v1`;
@@ -36,7 +37,7 @@ async function api(ruta, { token, cuerpo, metodo } = {}) {
   return texto ? JSON.parse(texto) : null;
 }
 
-const db = new pg.Client({ host: 'localhost', port: 15432, user: 'meritia', password: 'meritia-local-e2e', database: 'meritia' });
+const db = new pg.Client(baseDeDatos);
 await db.connect();
 
 // --- Setup por API: admin -> empresa -> reclutador -> ejercicio -> vacante publicada
@@ -75,7 +76,7 @@ await api(`/vacantes/${vacante.id}/ejercicios`, { token: recluTok, metodo: 'PUT'
 await api(`/vacantes/${vacante.id}/publicar`, { token: recluTok, cuerpo: {} });
 
 // --- Flujo en el navegador
-const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
+const browser = await chromium.launch({ executablePath: rutaDeChrome, headless: true });
 const page = await (await browser.newContext({ viewport: { width: 1280, height: 1000 } })).newPage();
 const ok = (n) => console.log('  OK  ', n);
 

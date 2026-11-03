@@ -16,7 +16,8 @@
  *
  *   node e2e/flujo-completo.mjs
  *
- * Ajusta la ruta de Chrome y las credenciales de Postgres abajo si difieren.
+ * La contrasena de Postgres y la ruta de Chrome salen del entorno: ver
+ * e2e/entorno.mjs. Hace falta DATABASE_PASSWORD.
  */
 // E2E de MeritIA contra el stack real: web (ng serve) -> backend -> Postgres/Redis/S3 -> IA.
 import { chromium } from 'playwright-core';
@@ -24,6 +25,7 @@ import pg from 'pg';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { baseDeDatos, rutaDeChrome } from './entorno.mjs';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const WEB = 'http://localhost:4200';
@@ -53,7 +55,7 @@ function archivo(nombre, contenido) {
 }
 
 const browser = await chromium.launch({
-  executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+  executablePath: rutaDeChrome,
   headless: true,
 });
 
@@ -79,9 +81,7 @@ async function salir(page) {
   await page.waitForURL('**/acceso');
 }
 
-const db = new pg.Client({
-  host: 'localhost', port: 15432, user: 'meritia', password: 'meritia-local-e2e', database: 'meritia',
-});
+const db = new pg.Client(baseDeDatos);
 await db.connect();
 
 const adminCorreo = `admin-${SUF}@meritia.test`;
