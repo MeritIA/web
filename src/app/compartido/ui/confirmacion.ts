@@ -48,7 +48,15 @@ export class Confirmaciones {
   host: { '(document:keydown.escape)': 'confirmaciones.responder(false)' },
   template: `
     @if (confirmaciones.pendiente(); as p) {
-      <div class="fondo" (click)="confirmaciones.responder(false)"></div>
+      <!--
+        El fondo es decorativo: pulsarlo es un atajo con raton para cancelar.
+        El camino de teclado existe y es Escape, enganchado en el host de este
+        componente. El aria-hidden dice justo eso --que un lector de pantalla no
+        tiene nada que anunciar aqui-- y con ello las reglas de accesibilidad
+        quedan satisfechas sin desactivar ninguna. Si algun dia se quita el
+        Escape del host, hay que volver a mirar esta linea.
+      -->
+      <div class="fondo" aria-hidden="true" (click)="confirmaciones.responder(false)"></div>
       <div
         class="caja panel"
         role="alertdialog"

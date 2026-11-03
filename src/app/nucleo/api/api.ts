@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpEventType, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom, type Observable } from 'rxjs';
 import { entorno } from '../../../entornos/entorno';
@@ -53,9 +53,11 @@ export class Api {
         .post<T>(this.#url(ruta), formulario, { reportProgress: true, observe: 'events' })
         .subscribe({
           next: (evento) => {
-            if (evento.type === 1 && evento.total) {
+            // Con el enum y no con 1 y 4: el lint con tipos lo caza, y un
+            // numero suelto no dice que evento es.
+            if (evento.type === HttpEventType.UploadProgress && evento.total) {
               avance(Math.round((evento.loaded / evento.total) * 100));
-            } else if (evento.type === 4) {
+            } else if (evento.type === HttpEventType.Response) {
               avance(100);
               resolver(evento.body as T);
             }

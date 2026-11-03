@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, booleanAttribute, input } from '@angular/core';
-import type { AbstractControl, ValidationErrors } from '@angular/forms';
+import type { AbstractControl } from '@angular/forms';
 
 /**
  * Mensajes de validación, en un solo sitio.
@@ -7,7 +7,22 @@ import type { AbstractControl, ValidationErrors } from '@angular/forms';
  * Que «obligatorio» se diga igual en las nueve pantallas no es cosmética: un
  * sistema que se explica de nueve maneras distintas se aprende nueve veces.
  */
-const MENSAJES: Record<string, (detalle: ValidationErrors[string]) => string> = {
+/**
+ * Lo que los validadores en uso ponen en el detalle del error.
+ *
+ * `ValidationErrors[string]` es `any`, asi que leer `.requiredLength` de ahi es
+ * invisible para el compilador. Declararlo cuesta cinco lineas y convierte un
+ * cambio de validador en un error de compilacion en vez de en un mensaje que
+ * dice "Minimo undefined caracteres".
+ */
+interface DetalleDeError {
+  readonly requiredLength?: number;
+  readonly min?: number;
+  readonly max?: number;
+  readonly suma?: number;
+}
+
+const MENSAJES: Record<string, (detalle: DetalleDeError) => string> = {
   required: () => 'Este campo es obligatorio.',
   email: () => 'Escribe un correo con formato válido.',
   minlength: (d) => `Mínimo ${d.requiredLength} caracteres.`,
@@ -68,8 +83,9 @@ export class Campo {
   get mensaje(): string | null {
     const control = this.control();
     if (!control || control.valid || !(control.touched || control.dirty)) return null;
-    const [clave, detalle] = Object.entries(control.errors ?? {})[0] ?? [];
+    const entradas = Object.entries<DetalleDeError>(control.errors ?? {});
+    const [clave, detalle] = entradas[0] ?? [];
     if (!clave) return null;
-    return MENSAJES[clave]?.(detalle) ?? 'Revisa este campo.';
+    return MENSAJES[clave]?.(detalle ?? {}) ?? 'Revisa este campo.';
   }
 }
