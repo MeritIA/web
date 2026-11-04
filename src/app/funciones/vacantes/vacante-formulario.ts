@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Campo } from '../../compartido/ui/campo';
-import { LIMITES } from '../../nucleo/api/modelos';
+import { MODALIDAD } from '../../compartido/dominio';
+import { LIMITES, type Modalidad } from '../../nucleo/api/modelos';
 import { VacantesServicio } from '../../nucleo/api/vacantes.servicio';
 import { accion } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
@@ -67,10 +68,36 @@ import { Avisos } from '../../nucleo/ui/avisos';
             class="control"
             formControlName="ubicacion"
             maxlength="120"
-            placeholder="Bogotá · híbrido"
+            placeholder="Bogotá"
           />
         </ui-campo>
 
+        <ui-campo etiqueta="Modalidad" para="modalidad" opcional>
+          <select id="modalidad" class="control" formControlName="modalidad">
+            <option value="">Sin definir</option>
+            @for (m of opciones; track m) {
+              <option [value]="m">{{ modalidades[m] }}</option>
+            }
+          </select>
+        </ui-campo>
+      </div>
+
+      <ui-campo
+        etiqueta="Tecnologías"
+        para="tecnologias"
+        opcional
+        ayuda="Separadas por coma, hasta 10. El candidato las usa para filtrar."
+      >
+        <input
+          id="tecnologias"
+          type="text"
+          class="control"
+          formControlName="tecnologias"
+          placeholder="Node.js, TypeScript, PostgreSQL"
+        />
+      </ui-campo>
+
+      <div class="dos">
         <ui-campo
           etiqueta="Intentos por ejercicio"
           para="intentos"
@@ -163,11 +190,15 @@ export class VacanteFormulario {
   readonly #fb = inject(FormBuilder).nonNullable;
 
   protected readonly limites = LIMITES;
+  protected readonly modalidades = MODALIDAD;
+  protected readonly opciones = Object.keys(MODALIDAD) as Modalidad[];
 
   protected readonly formulario = this.#fb.group({
     titulo: ['', [Validators.required, Validators.maxLength(160)]],
     descripcion: ['', [Validators.required, Validators.minLength(20)]],
     ubicacion: [''],
+    modalidad: ['' as Modalidad | ''],
+    tecnologias: [''],
     cierreEstimado: [''],
     finalistasAEvaluar: [null as number | null, [Validators.min(1), Validators.max(1000)]],
     intentosPermitidos: [
@@ -181,11 +212,17 @@ export class VacanteFormulario {
   });
 
   protected readonly crear = accion(async () => {
-    const { ubicacion, cierreEstimado, finalistasAEvaluar, ...resto } =
+    const { ubicacion, modalidad, tecnologias, cierreEstimado, finalistasAEvaluar, ...resto } =
       this.formulario.getRawValue();
+    const etiquetas = tecnologias
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
     const vacante = await this.#servicio.crear({
       ...resto,
       ...(ubicacion ? { ubicacion } : {}),
+      ...(modalidad ? { modalidad } : {}),
+      ...(etiquetas.length ? { tecnologias: etiquetas } : {}),
       // El backend pide fecha-hora ISO; el campo entrega solo el día. Se cierra al final de ese día.
       ...(cierreEstimado
         ? { cierreEstimado: new Date(`${cierreEstimado}T23:59:59`).toISOString() }

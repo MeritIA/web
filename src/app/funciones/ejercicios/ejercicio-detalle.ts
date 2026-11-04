@@ -3,7 +3,8 @@ import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angu
 import { RouterLink } from '@angular/router';
 import { Chip, EstadoRecurso, Panel } from '../../compartido/ui/basicos';
 import { EjerciciosServicio } from '../../nucleo/api/ejercicios.servicio';
-import { recursoPor } from '../../nucleo/estado/recurso';
+import { accion, recursoPor } from '../../nucleo/estado/recurso';
+import { Avisos } from '../../nucleo/ui/avisos';
 
 /**
  * Historia completa de un ejercicio.
@@ -68,6 +69,38 @@ import { recursoPor } from '../../nucleo/estado/recurso';
                 <p class="motivo">Motivo del cambio: {{ version.motivoDelCambio }}</p>
               }
               <p class="enunciado">{{ version.enunciado }}</p>
+              @if (version.duracionMinutos) {
+                <p class="micro">Tiempo límite: {{ version.duracionMinutos }} minutos</p>
+              }
+
+              <h3 class="micro">Archivos adjuntos</h3>
+              @if ((version.adjuntos ?? []).length === 0) {
+                <p class="micro">Ninguno.</p>
+              } @else {
+                <ul class="adjuntos">
+                  @for (a of version.adjuntos ?? []; track a.id) {
+                    <li>
+                      {{ a.nombre }} <span class="micro">· {{ a.bytes }} B</span>
+                    </li>
+                  }
+                </ul>
+              }
+              @if (indice() === 0) {
+                <label class="btn btn--sm" for="adjunto"
+                  >Adjuntar archivo (dataset, esqueleto)</label
+                >
+                <input
+                  id="adjunto"
+                  type="file"
+                  class="oculto"
+                  (change)="
+                    adjuntar.correr($any($event.target).files?.[0]); $any($event.target).value = ''
+                  "
+                />
+                @if (adjuntar.error(); as error) {
+                  <p class="campo__error" role="alert">{{ error }}</p>
+                }
+              }
             </ui-panel>
 
             <ui-panel antetitulo="rúbrica" titulo="Criterios y pesos" plano>
@@ -134,6 +167,18 @@ import { recursoPor } from '../../nucleo/estado/recurso';
       color: var(--c-aviso);
       font-size: var(--t-menor);
     }
+    .oculto {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      opacity: 0;
+    }
+    .adjuntos {
+      margin: 0 0 var(--e-3);
+      padding-left: var(--e-4);
+      font-size: var(--t-menor);
+    }
     .enunciado {
       white-space: pre-wrap;
       color: var(--c-texto-suave);
@@ -154,4 +199,13 @@ export class EjercicioDetalle {
   protected readonly ejercicio = recursoPor(this.id, (id) => this.#servicio.obtener(id));
   /** 0 es la versión más reciente: el backend las entrega de nueva a vieja. */
   protected readonly indice = signal(0);
+
+  readonly #avisos = inject(Avisos);
+  /** Cuelga el archivo de la versión vigente: una versión es una unidad cerrada, no se toca la vieja. */
+  protected readonly adjuntar = accion(async (archivo: File | undefined) => {
+    if (!archivo) return;
+    await this.#servicio.adjuntar(this.id(), archivo);
+    await this.ejercicio.recargar();
+    this.#avisos.exito('Archivo adjuntado a la versión vigente.');
+  });
 }

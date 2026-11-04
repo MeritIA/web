@@ -204,7 +204,11 @@ export class Marco {
   });
 
   protected readonly inicio = computed(() =>
-    this.sesion.esCandidato() ? '/mis-pruebas' : '/panel',
+    this.sesion.esCandidato()
+      ? '/mis-pruebas'
+      : this.sesion.esModerador()
+        ? '/moderacion'
+        : '/panel',
   );
 
   protected readonly enlaces = computed<Enlace[]>(() => {
@@ -213,16 +217,29 @@ export class Marco {
         { ruta: '/explorar', texto: 'Explorar' },
         { ruta: '/mis-pruebas', texto: 'Mis pruebas' },
         { ruta: '/mis-resultados', texto: 'Mis resultados' },
+        { ruta: '/mentor', texto: 'Mentor' },
+        { ruta: '/mis-pagos', texto: 'Pagos' },
         { ruta: '/mi-cuenta', texto: 'Mi cuenta' },
+      ];
+    }
+    if (this.sesion.esModerador()) {
+      return [
+        { ruta: '/moderacion', texto: 'Casos' },
+        { ruta: '/moderacion/metricas', texto: 'Métricas' },
       ];
     }
     const base: Enlace[] = [
       { ruta: '/panel', texto: 'Panel' },
       { ruta: '/vacantes', texto: 'Vacantes' },
       { ruta: '/ejercicios', texto: 'Ejercicios' },
+      { ruta: '/talento', texto: 'Talento' },
     ];
     return this.sesion.esAdministrador()
-      ? [...base, { ruta: '/administracion', texto: 'Administración' }]
+      ? [
+          ...base,
+          { ruta: '/moderacion/metricas', texto: 'Moderación' },
+          { ruta: '/administracion', texto: 'Administración' },
+        ]
       : base;
   });
 

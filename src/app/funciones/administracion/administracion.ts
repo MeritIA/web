@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Chip, EstadoRecurso, Panel } from '../../compartido/ui/basicos';
 import { Campo } from '../../compartido/ui/campo';
+import { ModeracionServicio } from '../../nucleo/api/moderacion.servicio';
 import { EmpresasServicio } from '../../nucleo/api/empresas.servicio';
 import { SECTORES, type Sector } from '../../nucleo/api/modelos';
 import { EvaluacionesServicio } from '../../nucleo/api/evaluaciones.servicio';
@@ -230,6 +231,50 @@ import { Avisos } from '../../nucleo/ui/avisos';
         </form>
       </ui-panel>
     </div>
+
+    <ui-panel antetitulo="revisión humana" titulo="Moderadores">
+      <p class="ayuda">
+        Personal de la plataforma que revisa evaluaciones marcadas. No pertenecen a ninguna empresa.
+      </p>
+      <form
+        class="pila pila--sm"
+        [formGroup]="nuevoModerador"
+        (ngSubmit)="crearModerador.correr()"
+        novalidate
+      >
+        <input
+          class="control"
+          formControlName="nombreCompleto"
+          placeholder="Nombre completo"
+          aria-label="Nombre del moderador"
+        />
+        <input
+          class="control"
+          type="email"
+          formControlName="correo"
+          placeholder="correo@meritia.co"
+          aria-label="Correo del moderador"
+        />
+        <input
+          class="control"
+          type="password"
+          formControlName="contrasena"
+          placeholder="Contraseña (mínimo 12)"
+          autocomplete="new-password"
+          aria-label="Contraseña del moderador"
+        />
+        @if (crearModerador.error(); as error) {
+          <p class="campo__error" role="alert">{{ error }}</p>
+        }
+        <button
+          type="submit"
+          class="btn btn--sm"
+          [disabled]="nuevoModerador.invalid || crearModerador.enviando()"
+        >
+          Crear moderador
+        </button>
+      </form>
+    </ui-panel>
   `,
   styles: `
     .cabecera {
@@ -310,6 +355,18 @@ export class Administracion {
     correo: ['', [Validators.required, Validators.email]],
     contrasena: ['', [Validators.required, Validators.minLength(12)]],
     rol: ['reclutador' as 'reclutador' | 'administrador', [Validators.required]],
+  });
+
+  readonly #moderacion = inject(ModeracionServicio);
+  protected readonly nuevoModerador = this.#fb.group({
+    nombreCompleto: ['', [Validators.required, Validators.minLength(3)]],
+    correo: ['', [Validators.required, Validators.email]],
+    contrasena: ['', [Validators.required, Validators.minLength(12)]],
+  });
+  protected readonly crearModerador = accion(async () => {
+    await this.#moderacion.crearModerador(this.nuevoModerador.getRawValue());
+    this.nuevoModerador.reset();
+    this.#avisos.exito('Moderador creado. Ya puede entrar con su correo.');
   });
 
   protected readonly reintento = this.#fb.group({

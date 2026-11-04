@@ -2,6 +2,9 @@ import { Injectable, inject } from '@angular/core';
 import { entorno } from '../../../entornos/entorno';
 import { Api } from './api';
 import type {
+  AuditoriaDeVacante,
+  UsoDeEjercicio,
+  FilaDeTalento,
   IdentidadRevelada,
   PanelDeEmpresa,
   ReporteDeCandidato,
@@ -12,6 +15,16 @@ import type {
 @Injectable({ providedIn: 'root' })
 export class ReportesServicio {
   readonly #api = inject(Api);
+
+  auditoria = (idVacante: string) =>
+    this.#api.get<AuditoriaDeVacante>(`/reportes/vacantes/${idVacante}/auditoria`);
+
+  usoDeEjercicios = () => this.#api.get<UsoDeEjercicio[]>('/reportes/ejercicios');
+
+  /** «Descargar mis datos» (Ley 1581): todo lo que se guarda de quien pregunta. */
+  misDatos = () => this.#api.get<unknown>('/reportes/mis-datos');
+
+  bancoDeTalento = () => this.#api.get<FilaDeTalento[]>('/reportes/banco-de-talento');
 
   panel = () => this.#api.get<PanelDeEmpresa>('/reportes/panel');
 

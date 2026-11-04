@@ -34,8 +34,10 @@ export class Api {
     return this.#pedir(this.#http.put<T>(this.#url(ruta), cuerpo));
   }
 
-  borrar<T>(ruta: string): Promise<T> {
-    return this.#pedir(this.#http.delete<T>(this.#url(ruta)));
+  borrar<T>(ruta: string, cuerpo?: unknown): Promise<T> {
+    return this.#pedir(
+      this.#http.delete<T>(this.#url(ruta), cuerpo === undefined ? {} : { body: cuerpo }),
+    );
   }
 
   /** Envío multipart. El progreso real lo expone `subirConProgreso`. */

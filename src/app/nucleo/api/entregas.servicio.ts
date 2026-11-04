@@ -1,6 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { Api } from './api';
-import { LIMITES, type EnlaceDeDescarga, type Entrega } from './modelos';
+import {
+  LIMITES,
+  type EnlaceDeDescarga,
+  type Entrega,
+  type SesionDeEjercicio,
+  type VerificacionDeEntrega,
+} from './modelos';
 
 @Injectable({ providedIn: 'root' })
 export class EntregasServicio {
@@ -10,6 +16,26 @@ export class EntregasServicio {
   deVacante = (idVacante: string) => this.#api.get<Entrega[]>(`/entregas/vacante/${idVacante}`);
   obtener = (id: string) => this.#api.get<Entrega>(`/entregas/${id}`);
   enlaceDeDescarga = (id: string) => this.#api.get<EnlaceDeDescarga>(`/entregas/${id}/descarga`);
+
+  sesion = (idVacante: string, idEjercicio: string) =>
+    this.#api.get<SesionDeEjercicio>('/entregas/sesion', { idVacante, idEjercicio });
+  iniciarSesion = (idVacante: string, idEjercicio: string) =>
+    this.#api.post<SesionDeEjercicio>('/entregas/sesion', { idVacante, idEjercicio });
+
+  verificacion = (id: string) =>
+    this.#api.get<VerificacionDeEntrega>(`/entregas/${id}/verificacion`);
+
+  /** `camara` lleva la foto; `alterna` no: la empresa verifica a mano. */
+  verificar(
+    id: string,
+    modalidad: 'camara' | 'alterna',
+    foto?: Blob,
+  ): Promise<VerificacionDeEntrega> {
+    const formulario = new FormData();
+    formulario.append('modalidad', modalidad);
+    if (foto) formulario.append('foto', foto, 'verificacion.jpg');
+    return this.#api.subir<VerificacionDeEntrega>(`/entregas/${id}/verificacion`, formulario);
+  }
 
   entregar(
     idVacante: string,

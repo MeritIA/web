@@ -65,8 +65,9 @@ import { MarcoAcceso } from './marco-acceso';
 
         <p class="pie">
           ¿Eres candidato y aún no tienes cuenta?
-          <a routerLink="/registro">Crea una</a>. Las cuentas de reclutador las crea el
-          administrador de tu empresa.
+          <a routerLink="/registro">Crea una</a>. ¿Representas a una empresa?
+          <a routerLink="/registro-empresa">Regístrala</a>. Las demás cuentas de tu empresa las crea
+          su administrador.
         </p>
       </form>
     </app-marco-acceso>

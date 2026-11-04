@@ -10,15 +10,22 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ENTREGA, POSTULACION, VACANTE } from '../../compartido/dominio';
+import { ENTREGA, MODALIDAD, POSTULACION, VACANTE } from '../../compartido/dominio';
 import { CortoPipe } from '../../compartido/formato';
-import { Chip, Estado, EstadoRecurso, Panel } from '../../compartido/ui/basicos';
+import { Estado, EstadoRecurso, Panel } from '../../compartido/ui/basicos';
+import { VerificacionEntrega } from '../candidato/verificacion-entrega';
 import { Campo } from '../../compartido/ui/campo';
 import { Confirmaciones } from '../../compartido/ui/confirmacion';
 import { EjerciciosServicio } from '../../nucleo/api/ejercicios.servicio';
 import { EntregasServicio } from '../../nucleo/api/entregas.servicio';
 import { NotificacionesServicio } from '../../nucleo/api/notificaciones.servicio';
-import type { Postulante, Vacante } from '../../nucleo/api/modelos';
+import {
+  LIMITES,
+  type Entrega,
+  type Modalidad,
+  type Postulante,
+  type Vacante,
+} from '../../nucleo/api/modelos';
 import { PostulacionesServicio } from '../../nucleo/api/postulaciones.servicio';
 import { VacantesServicio } from '../../nucleo/api/vacantes.servicio';
 import { accion, recurso, recursoPor } from '../../nucleo/estado/recurso';
@@ -39,12 +46,12 @@ import { Avisos } from '../../nucleo/ui/avisos';
     RouterLink,
     DatePipe,
     ReactiveFormsModule,
-    Chip,
     Estado,
     EstadoRecurso,
     Panel,
     Campo,
     CortoPipe,
+    VerificacionEntrega,
   ],
   template: `
     <nav class="migas"><a routerLink="/vacantes">Vacantes</a> <span>/ Detalle</span></nav>
@@ -66,8 +73,20 @@ import { Avisos } from '../../nucleo/ui/avisos';
             }
           </div>
           <h1>{{ v.titulo }}</h1>
-          @if (v.ubicacion) {
-            <p class="micro">{{ v.ubicacion }}</p>
+          @if (v.ubicacion || v.modalidad) {
+            <p class="micro">
+              {{ v.ubicacion }}
+              @if (v.modalidad; as modalidad) {
+                {{ v.ubicacion ? '·' : '' }} {{ modalidades[modalidad] }}
+              }
+            </p>
+          }
+          @if ((v.tecnologias?.length ?? 0) > 0) {
+            <ul class="etiquetas" aria-label="Tecnologías">
+              @for (tecnologia of v.tecnologias ?? []; track tecnologia) {
+                <li class="chip chip--limpio">{{ tecnologia }}</li>
+              }
+            </ul>
           }
           @if (v.cierreEstimado || v.finalistasAEvaluar) {
             <p class="micro">
@@ -84,6 +103,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
         <div class="fila">
           @if (v.estado !== 'borrador') {
             <a [routerLink]="['/vacantes', v.id, 'reporte']" class="btn">Ver ranking</a>
+            <a [routerLink]="['/vacantes', v.id, 'auditoria']" class="btn">Auditoría</a>
           }
           @if (v.estado === 'borrador') {
             <button
@@ -97,10 +117,99 @@ import { Avisos } from '../../nucleo/ui/avisos';
             </button>
           }
           @if (v.estado !== 'cerrada') {
+            <button type="button" class="btn" (click)="alternarEdicion(v)">
+              {{ editando() ? 'Cancelar edición' : 'Editar datos' }}
+            </button>
             <button type="button" class="btn btn--peligro" (click)="pedirCerrar()">Cerrar</button>
           }
         </div>
       </header>
+
+      @if (editando() && v.estado !== 'cerrada') {
+        <form class="edicion panel" [formGroup]="edicion" (ngSubmit)="guardarEdicion()" novalidate>
+          <ui-campo etiqueta="Título" para="e-titulo" [control]="edicion.controls.titulo">
+            <input id="e-titulo" class="control" formControlName="titulo" maxlength="160" />
+          </ui-campo>
+          <ui-campo
+            etiqueta="Descripción"
+            para="e-descripcion"
+            [control]="edicion.controls.descripcion"
+          >
+            <textarea
+              id="e-descripcion"
+              class="control"
+              formControlName="descripcion"
+              rows="5"
+            ></textarea>
+          </ui-campo>
+          <div class="dos">
+            <ui-campo etiqueta="Ubicación" para="e-ubicacion" opcional>
+              <input id="e-ubicacion" class="control" formControlName="ubicacion" maxlength="120" />
+            </ui-campo>
+            <ui-campo etiqueta="Modalidad" para="e-modalidad" opcional>
+              <select id="e-modalidad" class="control" formControlName="modalidad">
+                <option value="">Sin definir</option>
+                @for (m of opcionesModalidad; track m) {
+                  <option [value]="m">{{ modalidades[m] }}</option>
+                }
+              </select>
+            </ui-campo>
+          </div>
+          <ui-campo
+            etiqueta="Tecnologías"
+            para="e-tecnologias"
+            opcional
+            ayuda="Separadas por coma. Hasta 10."
+          >
+            <input id="e-tecnologias" class="control" formControlName="tecnologias" />
+          </ui-campo>
+          <div class="dos">
+            <ui-campo etiqueta="Cierre estimado" para="e-cierre" opcional>
+              <input id="e-cierre" type="date" class="control" formControlName="cierreEstimado" />
+            </ui-campo>
+            <ui-campo
+              etiqueta="Finalistas a evaluar"
+              para="e-finalistas"
+              opcional
+              [control]="edicion.controls.finalistasAEvaluar"
+            >
+              <input
+                id="e-finalistas"
+                type="number"
+                class="control"
+                formControlName="finalistasAEvaluar"
+                min="1"
+                max="1000"
+              />
+            </ui-campo>
+          </div>
+          @if (v.estado === 'borrador') {
+            <ui-campo
+              etiqueta="Intentos por ejercicio"
+              para="e-intentos"
+              ayuda="Solo se cambia mientras sea borrador."
+              [control]="edicion.controls.intentosPermitidos"
+            >
+              <input
+                id="e-intentos"
+                type="number"
+                class="control"
+                formControlName="intentosPermitidos"
+                [min]="limites.intentosMin"
+                [max]="limites.intentosMax"
+              />
+            </ui-campo>
+          }
+          @if (guardar.error(); as error) {
+            <p class="campo__error" role="alert">{{ error }}</p>
+          }
+          <div class="fila">
+            <button type="submit" class="btn btn--primario" [disabled]="guardar.enviando()">
+              {{ guardar.enviando() ? 'Guardando…' : 'Guardar cambios' }}
+            </button>
+          </div>
+        </form>
+      }
 
       <p class="descripcion lectura">{{ v.descripcion }}</p>
 
@@ -199,17 +308,17 @@ import { Avisos } from '../../nucleo/ui/avisos';
             <div class="separador"></div>
             <form class="pila pila--sm" [formGroup]="invitacion" (ngSubmit)="invitar.correr()">
               <ui-campo
-                etiqueta="Identificador del candidato"
-                para="idCandidato"
-                ayuda="UUID de la cuenta del candidato, tal como lo entrega el registro."
-                [control]="invitacion.controls.idCandidato"
+                etiqueta="Correo del candidato"
+                para="destinatario"
+                ayuda="El correo con el que se registró. También sirve su identificador (UUID)."
+                [control]="invitacion.controls.destinatario"
               >
                 <input
-                  id="idCandidato"
+                  id="destinatario"
                   type="text"
                   class="control"
-                  formControlName="idCandidato"
-                  placeholder="00000000-0000-4000-8000-000000000000"
+                  formControlName="destinatario"
+                  placeholder="persona@correo.com"
                 />
               </ui-campo>
               @if (invitar.error(); as error) {
@@ -230,14 +339,12 @@ import { Avisos } from '../../nucleo/ui/avisos';
       <!-- ------------------------------------------------- Postulantes -->
       @if (v.estado !== 'borrador') {
         <ui-panel antetitulo="quién quiere entrar" titulo="Postulantes">
-          <ui-chip acciones tono="aviso">Simulado</ui-chip>
-
           <ui-recurso
             [cargando]="postulantes.cargando() && !postulantes.datos()"
             [error]="postulantes.error()"
             [vacio]="(postulantes.datos()?.length ?? 0) === 0 && !postulantes.cargando()"
             tituloVacio="Nadie se ha postulado todavía"
-            textoVacio="Los candidatos que exploren y se postulen a esta vacante aparecerán aquí. Si aceptas a alguien, queda invitado de verdad."
+            textoVacio="Los candidatos que exploren y se postulen a esta vacante aparecerán aquí. Si aceptas a alguien, queda invitado a la prueba."
             (reintentar)="postulantes.recargar()"
           />
 
@@ -255,7 +362,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
                         type="button"
                         class="btn btn--sm"
                         [disabled]="decidir.enviando()"
-                        (click)="decidir.correr(postulante, 'rechazada')"
+                        (click)="empezarRechazo(postulante.idCandidato)"
                       >
                         Rechazar
                       </button>
@@ -270,8 +377,42 @@ import { Avisos } from '../../nucleo/ui/avisos';
                     </span>
                   } @else {
                     <ui-estado [p]="estadoPostulante(postulante)" />
+                    @if (postulante.decididaEn) {
+                      <span class="micro">{{ postulante.decididaEn | date: 'd MMM, HH:mm' }}</span>
+                    }
                   }
                 </li>
+                @if (rechazando() === postulante.idCandidato) {
+                  <li class="rechazo">
+                    <ui-campo
+                      etiqueta="Por qué no avanza"
+                      para="motivo"
+                      ayuda="Se lo mostramos tal cual al candidato: escríbelo para que lo lea él."
+                      [control]="motivo"
+                    >
+                      <textarea
+                        id="motivo"
+                        class="control"
+                        rows="3"
+                        maxlength="500"
+                        [formControl]="motivo"
+                      ></textarea>
+                    </ui-campo>
+                    <span class="fila">
+                      <button type="button" class="btn btn--sm" (click)="rechazando.set(null)">
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn--sm btn--peligro"
+                        [disabled]="decidir.enviando()"
+                        (click)="confirmarRechazo(postulante)"
+                      >
+                        Enviar rechazo
+                      </button>
+                    </span>
+                  </li>
+                }
               }
             </ul>
           }
@@ -309,6 +450,8 @@ import { Avisos } from '../../nucleo/ui/avisos';
                   <th scope="col">Intento</th>
                   <th scope="col">Estado</th>
                   <th scope="col">Recibida</th>
+                  <th scope="col">Verificación</th>
+                  <th scope="col">Archivo</th>
                 </tr>
               </thead>
               <tbody>
@@ -323,6 +466,19 @@ import { Avisos } from '../../nucleo/ui/avisos';
                     <td class="tabla__num">{{ entrega.numeroIntento }}</td>
                     <td><ui-estado [p]="estadoEntrega(entrega.estado)" /></td>
                     <td>{{ entrega.creadaEn | date: 'd MMM, HH:mm' }}</td>
+                    <td>
+                      <app-verificacion-entrega [idEntrega]="entrega.id" [soloLectura]="true" />
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        class="btn btn--sm btn--fantasma"
+                        [disabled]="descargar.enviando()"
+                        (click)="descargar.correr(entrega)"
+                      >
+                        Descargar
+                      </button>
+                    </td>
                   </tr>
                 }
               </tbody>
@@ -438,6 +594,34 @@ import { Avisos } from '../../nucleo/ui/avisos';
       padding-bottom: var(--e-2);
       border-bottom: 1px solid var(--c-borde);
     }
+    .etiquetas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--e-2);
+      margin: var(--e-2) 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .edicion {
+      display: grid;
+      gap: var(--e-4);
+      margin: var(--e-4) 0;
+      padding: var(--e-4);
+    }
+    .dos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--e-4);
+    }
+    @media (max-width: 620px) {
+      .dos {
+        grid-template-columns: 1fr;
+      }
+    }
+    .lista-simple li.rechazo {
+      display: grid;
+      gap: var(--e-3);
+    }
     .vacio-breve {
       color: var(--c-texto-tenue);
       font-size: var(--t-menor);
@@ -501,7 +685,10 @@ export class VacanteDetalle {
   #asociadosAlCargar = new Set<string>();
 
   protected readonly invitacion = this.#fb.group({
-    idCandidato: ['', [Validators.required, Validators.pattern(/^[0-9a-f-]{36}$/i)]],
+    destinatario: [
+      '',
+      [Validators.required, Validators.pattern(/^([0-9a-f-]{36}|[^\s@]+@[^\s@]+\.[^\s@]+)$/i)],
+    ],
   });
 
   protected readonly presentacion = (v: Vacante) => VACANTE[v.estado];
@@ -522,12 +709,6 @@ export class VacanteDetalle {
   constructor() {
     // La selección parte de lo que ya tiene la vacante, para que el botón de
     // guardar solo se encienda cuando de verdad hay un cambio.
-    // Una vacante publicada entra al catálogo simulado de «Explorar».
-    effect(() => {
-      const publicada = this.vacante.datos();
-      if (publicada) this.#postulaciones.registrarVacante(publicada);
-    });
-
     effect(() => {
       const asociados = new Set((this.vacante.datos()?.ejercicios ?? []).map((e) => e.idEjercicio));
       this.#asociadosAlCargar = asociados;
@@ -556,8 +737,8 @@ export class VacanteDetalle {
   });
 
   protected readonly invitar = accion(async () => {
-    const { idCandidato } = this.invitacion.getRawValue();
-    this.vacante.fijar(await this.#vacantes.invitarCandidato(this.id(), idCandidato));
+    const destinatario = this.invitacion.getRawValue().destinatario.trim();
+    this.vacante.fijar(await this.#vacantes.invitarCandidato(this.id(), destinatario));
     this.invitacion.reset();
     this.#avisos.exito('Candidato invitado. Ya puede ver la vacante y entregar.');
   });
@@ -574,18 +755,120 @@ export class VacanteDetalle {
 
   protected readonly estadoPostulante = (p: Postulante) => POSTULACION[p.estado];
 
-  /** Aceptar invita de verdad en el backend; solo la postulación es simulada. */
+  protected readonly descargar = accion(async (entrega: Entrega) => {
+    const { url } = await this.#entregas.enlaceDeDescarga(entrega.id);
+    window.open(url, '_blank', 'noopener');
+  });
+
+  protected readonly modalidades = MODALIDAD;
+  protected readonly opcionesModalidad = Object.keys(MODALIDAD) as Modalidad[];
+  protected readonly limites = LIMITES;
+
+  // --- Postulantes -------------------------------------------------------------
+  protected readonly rechazando = signal<string | null>(null);
+  protected readonly motivo = this.#fb.control('', [
+    Validators.required,
+    Validators.minLength(20),
+    Validators.maxLength(500),
+  ]);
+
+  protected empezarRechazo(idCandidato: string): void {
+    this.motivo.reset('');
+    this.rechazando.set(idCandidato);
+  }
+
+  protected confirmarRechazo(p: Postulante): void {
+    if (this.motivo.invalid) {
+      this.motivo.markAsTouched();
+      return;
+    }
+    void this.decidir.correr(p, 'rechazada');
+  }
+
+  /** Aceptar invita en la misma transacción del backend; rechazar exige un motivo. */
   protected readonly decidir = accion(async (p: Postulante, estado: 'aceptada' | 'rechazada') => {
     if (estado === 'aceptada') {
-      this.vacante.fijar(await this.#vacantes.invitarCandidato(this.id(), p.idCandidato));
+      await this.#postulaciones.aceptar(this.id(), p.idCandidato);
+      await this.vacante.recargar();
+    } else {
+      await this.#postulaciones.rechazar(this.id(), p.idCandidato, this.motivo.value.trim());
+      this.rechazando.set(null);
     }
-    await this.#postulaciones.decidir(this.id(), p.idCandidato, estado);
     await this.postulantes.recargar();
     this.#avisos.exito(
       estado === 'aceptada'
         ? 'Candidato aceptado e invitado a la prueba.'
-        : 'Postulación rechazada.',
+        : 'Postulación rechazada. El candidato leerá tu motivo.',
     );
+  });
+
+  // --- Edición de datos --------------------------------------------------------
+  protected readonly editando = signal(false);
+  protected readonly edicion = this.#fb.group({
+    titulo: ['', [Validators.required, Validators.maxLength(160)]],
+    descripcion: ['', [Validators.required, Validators.minLength(20)]],
+    ubicacion: [''],
+    modalidad: ['' as Modalidad | ''],
+    tecnologias: [''],
+    cierreEstimado: [''],
+    finalistasAEvaluar: [null as number | null, [Validators.min(1), Validators.max(1000)]],
+    intentosPermitidos: [
+      1,
+      [Validators.min(LIMITES.intentosMin), Validators.max(LIMITES.intentosMax)],
+    ],
+  });
+
+  protected alternarEdicion(v: Vacante): void {
+    if (this.editando()) {
+      this.editando.set(false);
+      return;
+    }
+    this.edicion.reset({
+      titulo: v.titulo,
+      descripcion: v.descripcion,
+      ubicacion: v.ubicacion ?? '',
+      modalidad: v.modalidad ?? '',
+      tecnologias: (v.tecnologias ?? []).join(', '),
+      cierreEstimado: v.cierreEstimado ? diaLocal(v.cierreEstimado) : '',
+      finalistasAEvaluar: v.finalistasAEvaluar ?? null,
+      intentosPermitidos: v.intentosPermitidos,
+    });
+    this.editando.set(true);
+  }
+
+  protected guardarEdicion(): void {
+    if (this.edicion.invalid) {
+      this.edicion.markAllAsTouched();
+      return;
+    }
+    void this.guardar.correr();
+  }
+
+  protected readonly guardar = accion(async () => {
+    const actual = this.vacante.datos();
+    const f = this.edicion.getRawValue();
+    const tecnologias = f.tecnologias
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+    this.vacante.fijar(
+      await this.#vacantes.editar(this.id(), {
+        titulo: f.titulo,
+        descripcion: f.descripcion,
+        ubicacion: f.ubicacion.trim() || null,
+        modalidad: f.modalidad || null,
+        tecnologias,
+        // El backend pide fecha-hora ISO; el campo entrega solo el día. Se cierra al final de ese día.
+        cierreEstimado: f.cierreEstimado
+          ? new Date(`${f.cierreEstimado}T23:59:59`).toISOString()
+          : null,
+        finalistasAEvaluar: f.finalistasAEvaluar,
+        // Los intentos solo se aceptan en borrador: fuera de él ni se envían.
+        ...(actual?.estado === 'borrador' ? { intentosPermitidos: f.intentosPermitidos } : {}),
+      }),
+    );
+    this.editando.set(false);
+    this.#avisos.exito('Cambios guardados.');
   });
 
   protected readonly reenviar = accion(async () => {
@@ -619,4 +902,11 @@ export class VacanteDetalle {
     });
     if (confirmado) void this.cerrar.correr();
   }
+}
+
+/** El día en la zona de quien edita: el campo `date` no entiende de UTC. */
+function diaLocal(iso: string): string {
+  const d = new Date(iso);
+  const dos = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`;
 }

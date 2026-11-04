@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, booleanAttribute, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  booleanAttribute,
+  effect,
+  inject,
+  input,
+} from '@angular/core';
 import type { AbstractControl, ValidationErrors } from '@angular/forms';
 
 /**
@@ -63,6 +71,17 @@ export class Campo {
   readonly control = input<AbstractControl | null>(null);
   readonly ayuda = input('');
   readonly opcional = input(false, { transform: booleanAttribute });
+
+  readonly #cdr = inject(ChangeDetectorRef);
+
+  constructor() {
+    // Tocar, escribir o `markAllAsTouched()` no cambian ningún input: sin esto
+    // el error no se pintaría al enviar un formulario inválido (OnPush).
+    effect((limpiar) => {
+      const suscripcion = this.control()?.events.subscribe(() => this.#cdr.markForCheck());
+      limpiar(() => suscripcion?.unsubscribe());
+    });
+  }
 
   /** Un solo error a la vez: la lista completa abruma y no ayuda a corregir. */
   get mensaje(): string | null {

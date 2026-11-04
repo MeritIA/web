@@ -2,6 +2,7 @@ import type {
   EstadoEntrega,
   EstadoPostulacion,
   EstadoVacante,
+  Modalidad,
   Riesgo,
   Rol,
 } from '../nucleo/api/modelos';
@@ -53,6 +54,13 @@ export const ENTREGA: Record<EstadoEntrega, Presentacion> = {
   },
 };
 
+/** El valor de contrato no lleva tilde; el texto que se lee, sí. */
+export const MODALIDAD: Record<Modalidad, string> = {
+  remoto: 'Remoto',
+  hibrido: 'Híbrido',
+  presencial: 'Presencial',
+};
+
 export const POSTULACION: Record<EstadoPostulacion, Presentacion> = {
   en_revision: {
     texto: 'En revisión',
@@ -79,6 +87,7 @@ export const ROL: Record<Rol, string> = {
   candidato: 'Candidato',
   reclutador: 'Reclutador',
   administrador: 'Administrador',
+  moderador: 'Moderador',
 };
 
 /** La escala de notas del producto: 0 a 100, con el mismo corte en todas partes. */

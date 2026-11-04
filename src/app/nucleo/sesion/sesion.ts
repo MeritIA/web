@@ -3,6 +3,7 @@ import { Api } from '../api/api';
 import type {
   Credenciales,
   Registro,
+  RegistroDeEmpresa,
   Rol,
   Sesion as RespuestaSesion,
   Usuario,
@@ -30,6 +31,7 @@ export class Sesion {
   readonly esCandidato = computed(() => this.rol() === 'candidato');
   readonly esReclutador = computed(() => this.rol() === 'reclutador');
   readonly esAdministrador = computed(() => this.rol() === 'administrador');
+  readonly esModerador = computed(() => this.rol() === 'moderador');
   /** Reclutador o administrador: quien gestiona procesos de selección. */
   readonly gestiona = computed(() => this.esReclutador() || this.esAdministrador());
 
@@ -59,12 +61,24 @@ export class Sesion {
     return this.#identificar();
   }
 
+  /** A01: crea la empresa con su primer administrador y deja la sesión abierta. */
+  async registrarEmpresa(datos: RegistroDeEmpresa): Promise<Usuario> {
+    await this.#api.post<RespuestaSesion>('/autenticacion/registro-empresa', datos);
+    return this.#identificar();
+  }
+
   async salir(): Promise<void> {
     try {
       await this.#api.post('/autenticacion/cerrar-sesiones');
     } finally {
       this.#usuario.set(null);
     }
+  }
+
+  /** Anonimiza la cuenta en el backend, que además cierra todas las sesiones. */
+  async eliminarCuenta(contrasena: string): Promise<void> {
+    await this.#api.borrar<void>('/autenticacion/cuenta', { contrasena });
+    this.#usuario.set(null);
   }
 
   /** La usa el interceptor cuando un token de acceso caduca a mitad de trabajo. */
@@ -90,5 +104,6 @@ export class Sesion {
 
 /** A dónde mandar a cada rol después de entrar. */
 export function inicioDe(rol: Rol): string {
+  if (rol === 'moderador') return '/moderacion';
   return rol === 'candidato' ? '/mis-pruebas' : '/panel';
 }

@@ -31,6 +31,13 @@ export const rutas: Routes = [
     loadComponent: () => import('./funciones/acceso/registro').then((m) => m.Registro),
   },
   {
+    path: 'registro-empresa',
+    title: titulo('Registrar empresa'),
+    canActivate: [guardiaInvitado],
+    loadComponent: () =>
+      import('./funciones/acceso/registro-empresa').then((m) => m.RegistroEmpresa),
+  },
+  {
     path: '',
     component: Marco,
     canActivate: [guardiaSesion],
@@ -67,6 +74,12 @@ export const rutas: Routes = [
               import('./funciones/vacantes/vacante-detalle').then((m) => m.VacanteDetalle),
           },
           {
+            path: ':id/auditoria',
+            title: titulo('Auditoría de la vacante'),
+            loadComponent: () =>
+              import('./funciones/reportes/auditoria-de-vacante').then((m) => m.AuditoriaDeVacante),
+          },
+          {
             path: ':id/reporte',
             title: titulo('Ranking'),
             loadComponent: () =>
@@ -79,6 +92,39 @@ export const rutas: Routes = [
               import('./funciones/reportes/reporte-candidato').then((m) => m.ReporteCandidato),
           },
         ],
+      },
+      {
+        path: 'moderacion',
+        canActivate: [guardiaRol('moderador', 'administrador')],
+        children: [
+          {
+            path: '',
+            title: titulo('Casos de moderación'),
+            canActivate: [guardiaRol('moderador')],
+            loadComponent: () =>
+              import('./funciones/moderacion/bandeja').then((m) => m.BandejaDeCasos),
+          },
+          {
+            path: 'metricas',
+            title: titulo('Métricas de moderación'),
+            loadComponent: () =>
+              import('./funciones/moderacion/metricas').then((m) => m.MetricasDeModeracion),
+          },
+          {
+            path: ':id',
+            title: titulo('Revisión de caso'),
+            canActivate: [guardiaRol('moderador')],
+            loadComponent: () =>
+              import('./funciones/moderacion/revision').then((m) => m.RevisionDeCaso),
+          },
+        ],
+      },
+      {
+        path: 'talento',
+        title: titulo('Banco de talento'),
+        canActivate: [guardiaRol('reclutador', 'administrador')],
+        loadComponent: () =>
+          import('./funciones/talento/banco-de-talento').then((m) => m.BancoDeTalento),
       },
       {
         path: 'ejercicios',
@@ -147,6 +193,18 @@ export const rutas: Routes = [
           import('./funciones/candidato/mis-resultados').then((m) => m.MisResultados),
       },
 
+      {
+        path: 'mentor',
+        title: titulo('Mentor IA'),
+        canActivate: [guardiaRol('candidato')],
+        loadComponent: () => import('./funciones/candidato/mentor').then((m) => m.Mentor),
+      },
+      {
+        path: 'mis-pagos',
+        title: titulo('Mis pagos'),
+        canActivate: [guardiaRol('candidato')],
+        loadComponent: () => import('./funciones/candidato/mis-pagos').then((m) => m.MisPagos),
+      },
       {
         path: 'mi-cuenta',
         title: titulo('Mi cuenta'),

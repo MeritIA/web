@@ -98,7 +98,10 @@ import { MarcoAcceso } from './marco-acceso';
           {{ crear.enviando() ? 'Creando cuenta…' : 'Crear cuenta' }}
         </button>
 
-        <p class="pie">¿Ya tienes cuenta? <a routerLink="/acceso">Entra</a>.</p>
+        <p class="pie">
+          ¿Ya tienes cuenta? <a routerLink="/acceso">Entra</a>. ¿Eres una empresa?
+          <a routerLink="/registro-empresa">Regístrala</a>.
+        </p>
       </form>
     </app-marco-acceso>
   `,
@@ -153,8 +156,9 @@ export class Registro {
   protected readonly permisos = [
     {
       tipo: 'biometria',
-      titulo: 'Verificación biométrica',
-      texto: 'Cámara solo durante los retos, para prevenir suplantación.',
+      titulo: 'Verificación con cámara',
+      texto:
+        'Una foto al entregar, para prevenir suplantación. Se conserva 90 días. Si no la autorizas, verificamos sin cámara.',
     },
     {
       tipo: 'calificacion_ia',
@@ -164,7 +168,7 @@ export class Registro {
     {
       tipo: 'perfil_publico',
       titulo: 'Perfil visible a otras empresas',
-      texto: 'Tu puntaje aparece en el banco de talento aunque no ganes esta vacante.',
+      texto: 'Tu puntaje aparece en el banco de talento aunque no ganes esta vacante. Es opcional.',
     },
   ] as const;
 

@@ -14,6 +14,7 @@ import { VacantesServicio } from '../../nucleo/api/vacantes.servicio';
 import { recursoPor } from '../../nucleo/estado/recurso';
 import { entorno } from '../../../entornos/entorno';
 import { PanelEjercicio } from './panel-ejercicio';
+import { VerificacionTecnica } from './verificacion-tecnica';
 
 /**
  * La prueba de un candidato: un ejercicio tras otro, con sus intentos.
@@ -27,7 +28,7 @@ import { PanelEjercicio } from './panel-ejercicio';
 @Component({
   selector: 'app-mi-prueba',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, EstadoRecurso, PanelEjercicio],
+  imports: [RouterLink, EstadoRecurso, PanelEjercicio, VerificacionTecnica],
   template: `
     <nav class="migas"><a routerLink="/mis-pruebas">Mis pruebas</a> <span>/ Prueba</span></nav>
 
@@ -49,6 +50,8 @@ import { PanelEjercicio } from './panel-ejercicio';
         </p>
       </header>
 
+      <app-verificacion-tecnica />
+
       <div class="pila pila--lg">
         @for (asociado of ordenados(); track asociado.id; let i = $index) {
           <app-panel-ejercicio
@@ -58,6 +61,8 @@ import { PanelEjercicio } from './panel-ejercicio';
             [titulo]="detalleDe(asociado.idEjercicio)?.titulo ?? 'Ejercicio ' + (i + 1)"
             [enunciado]="detalleDe(asociado.idEjercicio)?.enunciado ?? null"
             [criterios]="detalleDe(asociado.idEjercicio)?.criterios ?? []"
+            [duracionMinutos]="detalleDe(asociado.idEjercicio)?.duracionMinutos ?? null"
+            [adjuntos]="detalleDe(asociado.idEjercicio)?.adjuntos ?? []"
             [intentosPermitidos]="v.intentosPermitidos"
             [entregas]="entregasDe(asociado.idEjercicio)"
             [admiteEntregas]="v.estado === 'publicada'"

@@ -6,7 +6,7 @@
 // hay que tocar: es la razon de que no haya `any` en ningun servicio.
 // ---------------------------------------------------------------------------
 
-export type Rol = 'candidato' | 'reclutador' | 'administrador';
+export type Rol = 'candidato' | 'reclutador' | 'administrador' | 'moderador';
 export type EstadoVacante = 'borrador' | 'publicada' | 'cerrada';
 export type EstadoEntrega = 'recibida' | 'en_evaluacion' | 'evaluada' | 'fallida';
 export type Riesgo = 'ninguno' | 'bajo' | 'medio' | 'alto';
@@ -46,6 +46,13 @@ export interface Registro extends Credenciales {
 }
 
 // --- Empresas y usuarios ---------------------------------------------------
+/** Auto-registro de empresa (A01): la empresa y su primer administrador. */
+export interface RegistroDeEmpresa extends Registro {
+  nombreEmpresa: string;
+  sector: Sector;
+  nit: string;
+}
+
 export const SECTORES = [
   'financiero',
   'tecnologia',
@@ -112,6 +119,8 @@ export interface Vacante {
   titulo: string;
   descripcion: string;
   ubicacion: string | null;
+  modalidad?: Modalidad | null;
+  tecnologias?: string[];
   intentosPermitidos: number;
   estado: EstadoVacante;
   idReclutador: string;
@@ -126,16 +135,29 @@ export interface Vacante {
   actualizadaEn: string;
 }
 
+/** Valor de contrato: sin tilde. La pantalla pone la tilde al mostrarlo (`MODALIDAD`). */
+export type Modalidad = 'remoto' | 'hibrido' | 'presencial';
+
 export interface NuevaVacante {
   titulo: string;
   descripcion: string;
   ubicacion?: string;
+  modalidad?: Modalidad;
+  tecnologias?: string[];
   intentosPermitidos?: number;
   cierreEstimado?: string;
   finalistasAEvaluar?: number;
 }
 
-export type EdicionVacante = Partial<NuevaVacante>;
+/** Editar admite null para borrar lo opcional. */
+export type EdicionVacante = Partial<
+  Omit<NuevaVacante, 'ubicacion' | 'modalidad' | 'cierreEstimado' | 'finalistasAEvaluar'>
+> & {
+  ubicacion?: string | null;
+  modalidad?: Modalidad | null;
+  cierreEstimado?: string | null;
+  finalistasAEvaluar?: number | null;
+};
 
 /** Enunciado y rúbrica vigentes de un ejercicio, tal como los lee quien lo resuelve. */
 export interface EjercicioDeLaVacante {
@@ -144,7 +166,18 @@ export interface EjercicioDeLaVacante {
   numero: number;
   titulo: string;
   enunciado: string;
+  /** Minutos de la sesión cronometrada; null si no hay límite. */
+  duracionMinutos?: number | null;
+  adjuntos?: AdjuntoDeEjercicio[];
   criterios: Criterio[];
+}
+
+/** Mi ventana de tiempo en un ejercicio cronometrado. El reloj es del servidor. */
+export interface SesionDeEjercicio {
+  duracionMinutos: number | null;
+  iniciadaEn: string | null;
+  venceEn: string | null;
+  restanteSegundos: number | null;
 }
 
 // --- Ejercicios y rubrica ---------------------------------------------------
@@ -161,10 +194,19 @@ export interface CriterioGuardado extends Criterio {
   orden?: number;
 }
 
+/** Un archivo que acompaña el enunciado (dataset, esqueleto). */
+export interface AdjuntoDeEjercicio {
+  id: string;
+  nombre: string;
+  bytes: number;
+}
+
 export interface EjercicioVersion {
   id: string;
   numero: number;
   enunciado: string;
+  duracionMinutos?: number | null;
+  adjuntos?: AdjuntoDeEjercicio[];
   motivoDelCambio?: string | null;
   criterios: CriterioGuardado[];
   creadaEn: string;
@@ -186,11 +228,13 @@ export interface NuevoEjercicio {
   titulo: string;
   tecnologia?: string;
   enunciado: string;
+  duracionMinutos?: number;
   criterios: Criterio[];
 }
 
 export interface NuevaVersion {
   enunciado: string;
+  duracionMinutos?: number;
   criterios: Criterio[];
   motivoDelCambio?: string;
 }
@@ -217,6 +261,15 @@ export interface Entrega {
   archivoSha256: string;
   creadaEn: string;
   historial?: CambioDeEstado[];
+}
+
+/** Verificación de una entrega: foto de cámara o modalidad alterna (sin foto). */
+export interface VerificacionDeEntrega {
+  modalidad: 'camara' | 'alterna' | null;
+  creadaEn: string | null;
+  conservarHasta: string | null;
+  /** Enlace firmado de cinco minutos a la foto, si existe. */
+  enlace: string | null;
 }
 
 export interface EnlaceDeDescarga {
@@ -354,6 +407,22 @@ export interface RevelacionRegistrada {
   reveladaEn: string;
 }
 
+/** Cifras de uso de un ejercicio del banco (A10). Sin uso no aparece: se lee como cero. */
+export interface UsoDeEjercicio {
+  idEjercicio: string;
+  vacantes: number;
+  evaluaciones: number;
+  notaPromedio: number | null;
+}
+
+/** Una persona del banco de talento: alias y mejor nota, nunca su identidad. */
+export interface FilaDeTalento {
+  idCandidato: string;
+  alias: string;
+  mejorNota: number;
+  evaluaciones: number;
+}
+
 export interface PanelDeEmpresa {
   vacantes: { borradores: number; publicadas: number; cerradas: number };
   abiertas: {
@@ -431,24 +500,27 @@ export interface ResumenDeAvisos {
   omitido?: string;
 }
 
-// --- Explorar y postular (SIMULADO: el backend aún no lo ofrece) -----------
+// --- Explorar y postular -----------------------------------------------------
 export type EstadoPostulacion = 'en_revision' | 'aceptada' | 'rechazada';
 
+/** Una fila del catálogo (`GET /vacantes/abiertas`). */
 export interface VacanteAbierta {
   id: string;
   titulo: string;
   empresa: string;
   sector: Sector;
-  ubicacion: string;
-  modalidad: 'remoto' | 'híbrido' | 'presencial';
+  ubicacion: string | null;
+  modalidad: Modalidad | null;
   descripcion: string;
   tecnologias: string[];
   ejercicios: number;
   intentosPorEjercicio: number;
-  publicadaEn: string;
+  publicadaEn: string | null;
   cierreEstimado: string | null;
-  /** Vacante publicada de verdad en el backend: aceptar a alguien la invita de verdad. */
-  real?: boolean;
+  /** Estado de la postulación de quien pregunta, o null si no se postuló. */
+  miPostulacion: EstadoPostulacion | null;
+  /** Ya tiene acceso al reto (lo invitaron, se haya postulado o no). */
+  yaInvitado: boolean;
 }
 
 /** Quien se postuló a una vacante, visto por la empresa. Solo el identificador: el ranking es a ciegas. */
@@ -456,12 +528,19 @@ export interface Postulante {
   idCandidato: string;
   estado: EstadoPostulacion;
   creadaEn: string;
+  motivoDelRechazo?: string | null;
+  /** Cuándo decidió la empresa; null mientras sigue en revisión. */
+  decididaEn?: string | null;
 }
 
+/** La postulación propia (`POST /vacantes/:id/postular`, `GET /postulaciones/mias`). */
 export interface Postulacion {
   idVacante: string;
   estado: EstadoPostulacion;
   creadaEn: string;
+  /** Lo que la empresa escribió al rechazar: es lo que el candidato tiene derecho a leer. */
+  motivoDelRechazo?: string | null;
+  decididaEn?: string | null;
 }
 
 // --- Errores ----------------------------------------------------------------
@@ -474,4 +553,134 @@ export interface RespuestaError {
   ruta: string;
   referencia: string;
   errores?: { campo: string; problemas: string[] }[];
+}
+
+// --- Moderación ------------------------------------------------------------
+export type OrigenDeCaso = 'antifraude' | 'muestreo' | 'disputa';
+export type EstadoDeCaso = 'abierto' | 'restaurado' | 'confirmado';
+
+/** Una fila de la bandeja del moderador. Alias, nunca identidad. */
+export interface FilaDeCaso {
+  id: string;
+  alias: string;
+  origen: OrigenDeCaso;
+  estado: EstadoDeCaso;
+  creadoEn: string;
+  venceEn: string;
+  vencido: boolean;
+}
+
+export interface DetalleDeCaso {
+  caso: {
+    id: string;
+    alias: string;
+    origen: OrigenDeCaso;
+    estado: EstadoDeCaso;
+    creadoEn: string;
+    venceEn: string;
+    explicacionDeLaDisputa: string | null;
+    justificacion: string | null;
+    decididoEn: string | null;
+  };
+  evidencia: {
+    notaFinal: number;
+    riesgo: string;
+    puntajeInyeccion: number;
+    banderas: { codigo: string; archivo: string; ocurrencias: number }[];
+    descalificada: boolean;
+    criterios: { criterio: string; puntaje: number; escalaMaxima: number; evidencia: string }[];
+  };
+}
+
+export interface MiCaso {
+  id: string;
+  idVacante: string;
+  origen: OrigenDeCaso;
+  estado: EstadoDeCaso;
+  creadoEn: string;
+  decididoEn: string | null;
+  justificacion: string | null;
+  puedeDisputar: boolean;
+}
+
+export interface MetricasDeModeracion {
+  casos: {
+    total: number;
+    abiertos: number;
+    confirmados: number;
+    restaurados: number;
+    porOrigen: { antifraude: number; muestreo: number; disputa: number };
+  };
+  tasaDeFalsosPositivos: number | null;
+  coberturaDelMuestreo: number | null;
+  horasPromedioDeResolucion: number | null;
+  vencidosSinDecidir: number;
+  slaHoras: number;
+}
+
+// --- Auditoría de una vacante (A09) -----------------------------------------
+export interface AuditoriaDeVacante {
+  vacante: { id: string; titulo: string; estado: string };
+  generadoEn: string;
+  integridad: {
+    evaluaciones: number;
+    descalificadas: number;
+    riesgoAlto: number;
+    riesgoMedio: number;
+    entregasFallidas: number;
+    entregasEnProceso: number;
+  };
+  distribucion: {
+    candidatosEvaluados: number;
+    notaPromedio: number | null;
+    notaMediana: number | null;
+    notaMinima: number | null;
+    notaMaxima: number | null;
+    histograma: { desde: number; hasta: number; candidatos: number }[];
+  };
+  trazabilidad: {
+    identidadesReveladas: number;
+    revelaciones: { alias: string; idUsuario: string; reveladaEn: string }[];
+    contratados: number;
+  };
+  sesgo: { medible: false; motivo: string };
+}
+
+// --- Mentor IA ---------------------------------------------------------------
+export interface ContextoDelMentor {
+  totalEvaluaciones: number;
+  promedio: number;
+  perfil: { nombre: string; porcentaje: number; veces: number }[];
+  recientes: {
+    reto: string;
+    nota: number;
+    flojo?: { criterio: string; porcentaje: number; evidencia: string };
+  }[];
+}
+
+export interface TurnoDelMentor {
+  rol: 'candidato' | 'mentor';
+  texto: string;
+}
+
+export interface RespuestaDelMentor {
+  respuesta: string;
+  sugerencias: string[];
+}
+
+// --- Pagos (simulados en el navegador) ---------------------------------------
+export interface AbonoSimulado {
+  /** Una vez por reto: el mejor intento de cada ejercicio en cada vacante. */
+  clave: string;
+  idEvaluacion: string;
+  nota: number;
+  monto: number;
+  fecha: string;
+}
+
+export interface RetiroSimulado {
+  id: string;
+  monto: number;
+  destino: string;
+  fecha: string;
 }

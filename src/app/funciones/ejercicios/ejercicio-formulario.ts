@@ -49,6 +49,23 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
       }}</span>
       <h1>{{ versionando() ? 'Nueva versión del ejercicio' : 'Nuevo ejercicio' }}</h1>
       <p class="lectura ayuda">
+        <ui-campo
+          etiqueta="Tiempo límite (minutos)"
+          para="duracion"
+          opcional
+          ayuda="Si lo pones, el candidato inicia el ejercicio y tiene ese tiempo, medido por el servidor. Sin valor: sin límite."
+          [control]="formulario.controls.duracionMinutos"
+        >
+          <input
+            id="duracion"
+            type="number"
+            class="control"
+            formControlName="duracionMinutos"
+            min="1"
+            max="600"
+          />
+        </ui-campo>
+
         @if (versionando()) {
           Las calificaciones ya emitidas siguen mostrando el enunciado y los pesos con los que se
           calcularon. Corregir un ejercicio es versionarlo, nunca editarlo.
@@ -331,6 +348,7 @@ export class EjercicioFormulario {
     titulo: ['', [Validators.required, Validators.maxLength(160)]],
     tecnologia: [''],
     enunciado: ['', [Validators.required, Validators.minLength(30)]],
+    duracionMinutos: [null as number | null, [Validators.min(1), Validators.max(600)]],
     motivoDelCambio: [''],
     criterios: this.#fb.array([this.#grupoDeCriterio(CRITERIO_VACIO)], { validators: sumanCien }),
   });
@@ -383,6 +401,7 @@ export class EjercicioFormulario {
       await this.#servicio.nuevaVersion(this.id()!, {
         enunciado: valores.enunciado,
         criterios,
+        ...(valores.duracionMinutos ? { duracionMinutos: valores.duracionMinutos } : {}),
         ...(valores.motivoDelCambio ? { motivoDelCambio: valores.motivoDelCambio } : {}),
       });
       this.#avisos.exito('Nueva versión publicada. Las notas anteriores no cambian.');
@@ -394,6 +413,7 @@ export class EjercicioFormulario {
       titulo: valores.titulo,
       enunciado: valores.enunciado,
       criterios,
+      ...(valores.duracionMinutos ? { duracionMinutos: valores.duracionMinutos } : {}),
       ...(valores.tecnologia ? { tecnologia: valores.tecnologia } : {}),
     });
     this.#avisos.exito('Ejercicio creado con su versión 1.');

@@ -50,10 +50,22 @@ ayuda técnica.
 | Versionado de enunciado y rúbrica, con línea de tiempo de versiones | hecho |
 | Ciclo de vacante: borrador → publicada → cerrada, con confirmaciones | hecho |
 | Lista de comprobación de publicación (no se publica sin ejercicios) | hecho |
-| Invitación de candidatos por identificador | hecho |
-| Búsqueda de candidatos por correo al invitar | **pendiente de backend** (mientras tanto, el candidato copia su identificador desde «Mi cuenta») |
-| Explorar vacantes abiertas y postularse (**simulado en el navegador**: el backend no tiene catálogo ni postulaciones; el cambio es un solo servicio, `postulaciones.servicio.ts`) | simulado |
-| Postulantes de la vacante: aceptar (invita de verdad en el backend) o rechazar (**simulado**, mismo servicio) | simulado |
+| Invitación de candidatos por correo (o por identificador) | hecho |
+| Explorar vacantes abiertas y postularse, con modalidad, tecnologías y retirada de la postulación | hecho |
+| Postulantes de la vacante: aceptar (invita en la misma transacción) o rechazar con el motivo que lee el candidato | hecho |
+| Banco de talento: la empresa ve (con alias) a quien autorizó su perfil público e invita a una vacante propia | hecho |
+| Verificación de la entrega con foto de cámara (90 días de conservación) o modalidad alterna sin cámara; la empresa ve el estado y la foto | hecho |
+| Respuesta escrita en línea (se entrega como respuesta.md) | hecho |
+| «Descargar mis datos» y «Eliminar cuenta» (Ley 1581) | hecho |
+| Uso de cada ejercicio del banco: vacantes, evaluaciones y nota promedio | hecho |
+| Ejercicios con tiempo límite: la sesión se inicia y el servidor mide el plazo; verificación técnica de cámara, micrófono y conexión | hecho |
+| Archivos adjuntos al enunciado (dataset, esqueleto): la empresa los sube, el candidato invitado los descarga | hecho |
+| Auto-registro de empresa (A01): la empresa y su primer administrador, con NIT verificado por su dígito | hecho |
+| Moderación: bandeja, revisión con justificación, descalificación del ranking, disputa ante otro moderador y métricas; el candidato ve su caso | hecho |
+| Historial de estados de cada entrega, con momento y motivo | hecho |
+| Informe de auditoría de la vacante: integridad, distribución, rastro; declara que el sesgo no es medible | hecho |
+| Descarga de entregas con enlace firmado, para la empresa y para el propio candidato | hecho |
+| Edición de los datos de la vacante (título, descripción, ubicación, modalidad, tecnologías, cierre, finalistas) | hecho |
 | Panel de la empresa con avance por vacante, meta de finalistas y cierre estimado | hecho |
 
 **Demostración.** Crear un ejercicio con cuatro criterios, publicar una segunda
@@ -113,6 +125,8 @@ defender la elección, y que el candidato entienda su nota.
 | Ranking a ciegas por alias, con revelación de identidad auditada | hecho |
 | Registro de contratación y avisos de cierre a candidatos (con reenvío) | hecho |
 | Consola de administración: cola de evaluación y reintentos | hecho |
+| Mentor IA: conversación sobre las propias evaluaciones, con el resumen que ve la IA a la vista | hecho |
+| Pagos al candidato: **simulados en el navegador**; abono por reto, saldo acumulado y retiro desde 200.000 | simulado |
 | Manual básico de uso para el cliente piloto (HU-27) | pendiente |
 
 **Demostración.** Abrir el ranking de una vacante con varios candidatos, entrar
@@ -138,3 +152,7 @@ no el mismo código.
 2. `npm run verificar` en verde (build de producción sin errores).
 3. Revisión del flujo con alguien que no lo haya construido.
 4. Lo que no se terminó vuelve al backlog nombrado, no se da por hecho.
+
+## Fuera de alcance, decidido el 02/11/2026
+
+Pagos y cesión de derechos, recolección de datos demográficos (sesgo por grupo) y comparación biométrica o grabación no se construyen. Ver `backend/docs/matriz-pantallas.md` §5.1.

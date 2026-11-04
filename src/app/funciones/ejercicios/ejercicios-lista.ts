@@ -3,6 +3,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { RouterLink } from '@angular/router';
 import { Chip, EstadoRecurso } from '../../compartido/ui/basicos';
 import { Confirmaciones } from '../../compartido/ui/confirmacion';
+import { ReportesServicio } from '../../nucleo/api/reportes.servicio';
+import type { UsoDeEjercicio } from '../../nucleo/api/modelos';
 import { EjerciciosServicio } from '../../nucleo/api/ejercicios.servicio';
 import { accion, recurso } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
@@ -62,6 +64,18 @@ import { Avisos } from '../../nucleo/ui/avisos';
             {{ ejercicio.creadoEn | date: 'd MMM y' }}
           </p>
 
+          @if (usoDe(ejercicio.id); as uso) {
+            <p class="micro uso">
+              En {{ uso.vacantes }} {{ uso.vacantes === 1 ? 'vacante' : 'vacantes' }} ·
+              {{ uso.evaluaciones }} {{ uso.evaluaciones === 1 ? 'evaluación' : 'evaluaciones' }}
+              @if (uso.notaPromedio !== null) {
+                · promedio {{ uso.notaPromedio }}
+              }
+            </p>
+          } @else {
+            <p class="micro uso">Aún sin usar en ninguna vacante.</p>
+          }
+
           <div class="fila">
             <a [routerLink]="['/ejercicios', ejercicio.id]" class="btn btn--sm">Ver rúbrica</a>
             @if (ejercicio.activo) {
@@ -119,6 +133,13 @@ export class EjerciciosLista {
   readonly #confirmaciones = inject(Confirmaciones);
 
   protected readonly ejercicios = recurso(() => this.#servicio.listar());
+  readonly #reportes = inject(ReportesServicio);
+  /** Uso por ejercicio (A10). Un administrador no tiene empresa y recibe 400: sin cifras. */
+  protected readonly uso = recurso(() => this.#reportes.usoDeEjercicios().catch(() => []));
+
+  protected usoDe(id: string): UsoDeEjercicio | undefined {
+    return this.uso.datos()?.find((u) => u.idEjercicio === id);
+  }
   protected readonly busqueda = signal('');
 
   protected readonly visibles = computed(() => {

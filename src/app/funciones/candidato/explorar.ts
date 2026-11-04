@@ -1,8 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { POSTULACION } from '../../compartido/dominio';
-import { Chip, Estado, EstadoRecurso } from '../../compartido/ui/basicos';
+import { MODALIDAD, POSTULACION } from '../../compartido/dominio';
+import { Estado, EstadoRecurso } from '../../compartido/ui/basicos';
 import { Confirmaciones } from '../../compartido/ui/confirmacion';
 import type { Postulacion, VacanteAbierta } from '../../nucleo/api/modelos';
 import { PostulacionesServicio } from '../../nucleo/api/postulaciones.servicio';
@@ -14,14 +14,13 @@ type Vista = 'todas' | 'postuladas';
 /**
  * Explorar vacantes abiertas y postularse.
  *
- * Los datos son simulados (ver `PostulacionesServicio`): el aviso de arriba lo
- * dice a la vista para que nadie confunda esta pantalla con algo que ya llega
- * a una empresa real.
+ * Postularse no da acceso al reto: lo da la invitación, que la empresa crea al
+ * aceptar. Quien ya fue invitado por otra vía entra directo a su prueba.
  */
 @Component({
   selector: 'app-explorar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, RouterLink, Chip, Estado, EstadoRecurso],
+  imports: [DatePipe, RouterLink, Estado, EstadoRecurso],
   template: `
     <header class="pila pila--sm cabecera">
       <span class="micro">vacantes abiertas</span>
@@ -31,15 +30,6 @@ type Vista = 'todas' | 'postuladas';
         la prueba aparece en <a routerLink="/mis-pruebas">Mis pruebas</a>.
       </p>
     </header>
-
-    <aside class="simulado panel" role="note">
-      <ui-chip tono="aviso">Datos de demostración</ui-chip>
-      <p>
-        El catálogo y las postulaciones están simulados en tu navegador: todavía no existe el
-        servicio que las reciba. Las vacantes que una empresa publica en este mismo navegador
-        aparecen aquí; las demás son ejemplos.
-      </p>
-    </aside>
 
     <div class="herramientas">
       <div class="campo">
@@ -64,7 +54,7 @@ type Vista = 'todas' | 'postuladas';
         >
           <option value="">Todas</option>
           <option value="remoto">Remoto</option>
-          <option value="híbrido">Híbrido</option>
+          <option value="hibrido">Híbrido</option>
           <option value="presencial">Presencial</option>
         </select>
       </div>
@@ -117,7 +107,12 @@ type Vista = 'todas' | 'postuladas';
           </div>
 
           <h2>{{ vacante.titulo }}</h2>
-          <p class="micro">{{ vacante.ubicacion }}</p>
+          <p class="micro">
+            {{ vacante.ubicacion || 'Sin ubicación' }}
+            @if (vacante.modalidad; as modalidad) {
+              · {{ modalidades[modalidad] }}
+            }
+          </p>
 
           <p class="descripcion" [class.descripcion--abierta]="abierta() === vacante.id">
             {{ vacante.descripcion }}
@@ -148,17 +143,28 @@ type Vista = 'todas' | 'postuladas';
             </div>
           </dl>
 
+          @if (postulacionDe(vacante.id)?.motivoDelRechazo; as motivo) {
+            <p class="motivo" role="note">
+              <span class="micro"
+                >Lo que respondió la empresa
+                @if (postulacionDe(vacante.id)?.decididaEn; as cuando) {
+                  · {{ cuando | date: 'd MMM y' }}
+                }</span
+              ><br />{{ motivo }}
+            </p>
+          }
+
           <div class="fila fila--entre acciones">
             <button type="button" class="btn btn--sm btn--fantasma" (click)="alternar(vacante.id)">
               {{ abierta() === vacante.id ? 'Ver menos' : 'Ver más' }}
             </button>
 
-            @if (postulacionDe(vacante.id); as p) {
-              @if (p.estado === 'aceptada' && vacante.real) {
-                <a [routerLink]="['/mis-pruebas', vacante.id]" class="btn btn--primario">
-                  Hacer la prueba
-                </a>
-              } @else if (p.estado === 'en_revision') {
+            @if (vacante.yaInvitado) {
+              <a [routerLink]="['/mis-pruebas', vacante.id]" class="btn btn--primario">
+                Hacer la prueba
+              </a>
+            } @else if (postulacionDe(vacante.id); as p) {
+              @if (p.estado === 'en_revision') {
                 <button
                   type="button"
                   class="btn btn--sm"
@@ -197,15 +203,6 @@ type Vista = 'todas' | 'postuladas';
     .ayuda {
       color: var(--c-texto-suave);
       font-size: var(--t-menor);
-    }
-    .simulado {
-      display: flex;
-      gap: var(--e-3);
-      align-items: center;
-      margin-bottom: var(--e-5);
-      padding: var(--e-3) var(--e-4);
-      font-size: var(--t-menor);
-      color: var(--c-texto-suave);
     }
     .herramientas {
       display: flex;
@@ -265,6 +262,10 @@ type Vista = 'todas' | 'postuladas';
       font-family: var(--fuente-mono);
       font-weight: normal;
     }
+    .motivo {
+      font-size: var(--t-menor);
+      color: var(--c-texto-suave);
+    }
     .acciones {
       padding-top: var(--e-2);
     }
@@ -287,13 +288,14 @@ export class Explorar {
     const buscado = this.texto().trim().toLowerCase();
     const mias = new Set((this.postulaciones.datos() ?? []).map((p) => p.idVacante));
     return (this.abiertas.datos() ?? []).filter((v) => {
-      if (this.vista() === 'postuladas' && !mias.has(v.id)) return false;
+      if (this.vista() === 'postuladas' && !mias.has(v.id) && !v.yaInvitado) return false;
       if (this.modalidad() && v.modalidad !== this.modalidad()) return false;
       if (!buscado) return true;
       return [v.titulo, v.empresa, ...v.tecnologias].some((t) => t.toLowerCase().includes(buscado));
     });
   });
 
+  protected readonly modalidades = MODALIDAD;
   protected readonly estado = (p: Postulacion) => POSTULACION[p.estado];
 
   protected postulacionDe(idVacante: string): Postulacion | undefined {

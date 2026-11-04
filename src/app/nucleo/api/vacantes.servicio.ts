@@ -14,10 +14,21 @@ export class VacantesServicio {
   /** Reemplaza la lista completa. Solo mientras la vacante es borrador. */
   definirEjercicios = (id: string, idsDeEjercicios: string[]) =>
     this.#api.put<Vacante>(`/vacantes/${id}/ejercicios`, { idsDeEjercicios });
-  invitarCandidato = (id: string, idCandidato: string) =>
-    this.#api.post<Vacante>(`/vacantes/${id}/candidatos`, { idCandidato });
+  /** Acepta el correo del candidato o su identificador: el back resuelve el correo. */
+  invitarCandidato = (id: string, correoOIdentificador: string) =>
+    this.#api.post<Vacante>(
+      `/vacantes/${id}/candidatos`,
+      correoOIdentificador.includes('@')
+        ? { correo: correoOIdentificador }
+        : { idCandidato: correoOIdentificador },
+    );
   /** Lo que lee quien va a resolver el reto: enunciado y rúbrica vigentes. */
   ejercicios = (id: string) => this.#api.get<EjercicioDeLaVacante[]>(`/vacantes/${id}/ejercicios`);
+  /** Enlace firmado (cinco minutos) a un archivo adjunto del enunciado. */
+  enlaceDeAdjunto = (id: string, idEjercicio: string, idAdjunto: string) =>
+    this.#api.get<{ url: string; expiraEnSegundos: number }>(
+      `/vacantes/${id}/ejercicios/${idEjercicio}/adjuntos/${idAdjunto}`,
+    );
   /** Idempotente: volver a marcarlo no mueve la fecha, que es la que lee una auditoría. */
   contratar = (id: string, idCandidato: string) =>
     this.#api.post<unknown>(`/vacantes/${id}/candidatos/${idCandidato}/contratar`);

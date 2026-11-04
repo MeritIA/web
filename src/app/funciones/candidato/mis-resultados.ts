@@ -14,7 +14,9 @@ import { Desglose } from '../../compartido/ui/desglose';
 import { EntregasServicio } from '../../nucleo/api/entregas.servicio';
 import { EvaluacionesServicio } from '../../nucleo/api/evaluaciones.servicio';
 import type { MiPuesto } from '../../nucleo/api/modelos';
-import { recurso } from '../../nucleo/estado/recurso';
+import { ModeracionServicio } from '../../nucleo/api/moderacion.servicio';
+import { accion, recurso } from '../../nucleo/estado/recurso';
+import { Avisos } from '../../nucleo/ui/avisos';
 
 /**
  * Resultados del candidato, con el desglose que los explica (HU-22).
@@ -35,6 +37,70 @@ import { recurso } from '../../nucleo/estado/recurso';
         la parte de tu entrega que la justifica.
       </p>
     </header>
+
+    @if ((casos.datos()?.length ?? 0) > 0) {
+      <section class="revisiones panel" aria-labelledby="revisiones-titulo">
+        <h2 id="revisiones-titulo" class="micro">Revisión humana de tus evaluaciones</h2>
+        <ul>
+          @for (c of casos.datos() ?? []; track c.id) {
+            <li class="revision">
+              <p>
+                @switch (c.estado) {
+                  @case ('abierto') {
+                    <strong>En revisión.</strong> Una persona está revisando esta evaluación; te
+                    avisamos aquí cuando decida.
+                  }
+                  @case ('restaurado') {
+                    <strong>Restaurada.</strong> La revisión confirmó que tu evaluación es válida.
+                  }
+                  @case ('confirmado') {
+                    <strong>Descalificada.</strong> Esta evaluación no cuenta en el ranking.
+                  }
+                }
+              </p>
+              @if (c.justificacion) {
+                <p class="micro">Lo que escribió quien revisó: {{ c.justificacion }}</p>
+              }
+              @if (c.puedeDisputar) {
+                @if (disputando() === c.id) {
+                  <label class="campo__etiqueta" [attr.for]="'disputa-' + c.id">
+                    Explica por qué no estás de acuerdo (otra persona lo revisará)
+                  </label>
+                  <textarea
+                    class="control"
+                    rows="3"
+                    maxlength="1000"
+                    [id]="'disputa-' + c.id"
+                    [value]="explicacion()"
+                    (input)="explicacion.set($any($event.target).value)"
+                  ></textarea>
+                  @if (disputar.error(); as error) {
+                    <p class="campo__error" role="alert">{{ error }}</p>
+                  }
+                  <div class="fila">
+                    <button type="button" class="btn btn--sm" (click)="disputando.set(null)">
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn--sm btn--primario"
+                      [disabled]="explicacion().trim().length < 20 || disputar.enviando()"
+                      (click)="disputar.correr(c.id)"
+                    >
+                      Enviar disputa
+                    </button>
+                  </div>
+                } @else {
+                  <button type="button" class="btn btn--sm" (click)="empezarDisputa(c.id)">
+                    Disputar la decisión
+                  </button>
+                }
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
 
     @if (pendientes().length > 0) {
       <section class="pendientes panel" aria-live="polite">
@@ -160,6 +226,25 @@ export class MisResultados {
 
   protected readonly evaluaciones = recurso(() => this.#evaluaciones.mias());
   protected readonly entregas = recurso(() => this.#entregas.mias());
+  readonly #moderacion = inject(ModeracionServicio);
+  readonly #avisos = inject(Avisos);
+
+  protected readonly casos = recurso(() => this.#moderacion.misCasos());
+  protected readonly disputando = signal<string | null>(null);
+  protected readonly explicacion = signal('');
+
+  protected empezarDisputa(id: string): void {
+    this.explicacion.set('');
+    this.disputando.set(id);
+  }
+
+  protected readonly disputar = accion(async (id: string) => {
+    await this.#moderacion.disputar(id, this.explicacion().trim());
+    this.disputando.set(null);
+    await this.casos.recargar();
+    this.#avisos.exito('Disputa enviada. Otra persona la revisará en un máximo de 24 horas.');
+  });
+
   protected readonly abierta = signal<string | null>(null);
   protected readonly puestos = signal<Record<string, MiPuesto>>({});
   protected readonly estado = (clave: keyof typeof ENTREGA) => ENTREGA[clave];
