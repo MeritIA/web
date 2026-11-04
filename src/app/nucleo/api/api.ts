@@ -1,90 +1,89 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { catchError, type Observable, throwError } from 'rxjs';
-import type { ErrorDeApi } from './contrato';
+import { HttpClient, HttpEventType, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { firstValueFrom, type Observable } from 'rxjs';
+import { entorno } from '../../../entornos/entorno';
+import { comoErrorApi } from './errores';
+
+type Parametros = Record<string, string | number | boolean | undefined>;
 
 /**
- * Donde vive la API.
+ * Cliente HTTP del producto.
  *
- * En desarrollo, el backend corre en el 3000 y este servidor en el 4200. No es
- * un problema de CORS por descuido: el backend ya trae `http://localhost:4200`
- * en su lista blanca de origenes de desarrollo, y las cookies llegan porque
- * dos puertos del mismo `localhost` son el MISMO sitio para `SameSite=strict`.
- *
- * Para produccion esto se reemplaza por configuracion de build. Se deja como
- * una constante y no como un `environment.ts` todavia porque hoy solo hay un
- * entorno y un fichero por entorno vacio es un sitio donde esconder errores.
- */
-export const API = 'http://localhost:3000/api/v1';
-
-/** Un fallo de la API ya traducido a algo que una pantalla puede mostrar. */
-export class FalloDeApi extends Error {
-  constructor(
-    readonly estado: number,
-    mensaje: string,
-  ) {
-    super(mensaje);
-    this.name = 'FalloDeApi';
-  }
-
-  /** 401: no hay sesion, o se vencio. Lo trata el servicio de sesion. */
-  get esSinSesion(): boolean {
-    return this.estado === 401;
-  }
-}
-
-/**
- * El unico sitio del front que habla HTTP.
- *
- * DOS COSAS QUE HACE Y POR QUE
- *
- * 1. `withCredentials: true` en TODAS las peticiones. Sin esto el navegador no
- *    manda la cookie de sesion y todo responde 401 sin explicacion. Va aqui y
- *    no en cada llamada porque olvidarlo una vez da un fallo que parece de
- *    permisos y es de transporte.
- * 2. Traduce el error HTTP a `FalloDeApi` con el mensaje del backend. El
- *    backend siempre responde `{ mensaje }`, y ese texto esta escrito para que
- *    una persona lo lea —"Revocaste el permiso de calificacion por IA..."—, asi
- *    que la pantalla lo muestra en vez de inventarse uno generico.
+ * Devuelve promesas y no observables: ninguna pantalla de MeritIA necesita un
+ * flujo de varios valores, y las promesas se combinan con señales sin el ruido
+ * de las suscripciones. Lo que sí hace, y por eso existe esta capa, es dejar
+ * un único lugar donde se decide la URL base y la forma de los errores.
  */
 @Injectable({ providedIn: 'root' })
 export class Api {
-  private readonly http = inject(HttpClient);
+  readonly #http = inject(HttpClient);
 
-  get<T>(ruta: string): Observable<T> {
-    return this.http.get<T>(`${API}${ruta}`, { withCredentials: true }).pipe(catchError(traducir));
+  get<T>(ruta: string, parametros?: Parametros): Promise<T> {
+    return this.#pedir(this.#http.get<T>(this.#url(ruta), { params: this.#params(parametros) }));
   }
 
-  post<T>(ruta: string, cuerpo: unknown): Observable<T> {
-    return this.http
-      .post<T>(`${API}${ruta}`, cuerpo, { withCredentials: true })
-      .pipe(catchError(traducir));
+  post<T>(ruta: string, cuerpo?: unknown): Promise<T> {
+    return this.#pedir(this.#http.post<T>(this.#url(ruta), cuerpo ?? {}));
   }
 
-  put<T>(ruta: string, cuerpo: unknown): Observable<T> {
-    return this.http
-      .put<T>(`${API}${ruta}`, cuerpo, { withCredentials: true })
-      .pipe(catchError(traducir));
-  }
-}
-
-function traducir(error: unknown): Observable<never> {
-  if (!(error instanceof HttpErrorResponse)) {
-    return throwError(() => new FalloDeApi(0, 'Fallo inesperado.'));
+  patch<T>(ruta: string, cuerpo: unknown): Promise<T> {
+    return this.#pedir(this.#http.patch<T>(this.#url(ruta), cuerpo));
   }
 
-  // Estado 0 es el navegador diciendo "no llegue": servidor caido, CORS, o sin
-  // red. Decirlo asi evita media hora buscando un error de sesion que no hay.
-  if (error.status === 0) {
-    return throwError(
-      () =>
-        new FalloDeApi(
-          0,
-          'No se pudo contactar al servidor. Comprueba que el backend este arriba.',
-        ),
-    );
+  put<T>(ruta: string, cuerpo: unknown): Promise<T> {
+    return this.#pedir(this.#http.put<T>(this.#url(ruta), cuerpo));
   }
 
-  const cuerpo = error.error as ErrorDeApi | null;
-  return throwError(() => new FalloDeApi(error.status, cuerpo?.mensaje ?? error.statusText));
+  borrar<T>(ruta: string): Promise<T> {
+    return this.#pedir(this.#http.delete<T>(this.#url(ruta)));
+  }
+
+  /** Envío multipart. El progreso real lo expone `subirConProgreso`. */
+  subir<T>(ruta: string, formulario: FormData): Promise<T> {
+    return this.#pedir(this.#http.post<T>(this.#url(ruta), formulario));
+  }
+
+  /**
+   * Igual que `subir`, pero informando del avance: una carga de 25 MiB sin
+   * indicador deja a la persona sin saber si el sistema la escuchó.
+   */
+  subirConProgreso<T>(ruta: string, formulario: FormData, avance: (porcentaje: number) => void) {
+    return new Promise<T>((resolver, rechazar) => {
+      this.#http
+        .post<T>(this.#url(ruta), formulario, { reportProgress: true, observe: 'events' })
+        .subscribe({
+          next: (evento) => {
+            // Con el enum y no con 1 y 4: el lint con tipos lo caza, y un
+            // numero suelto no dice que evento es.
+            if (evento.type === HttpEventType.UploadProgress && evento.total) {
+              avance(Math.round((evento.loaded / evento.total) * 100));
+            } else if (evento.type === HttpEventType.Response) {
+              avance(100);
+              resolver(evento.body as T);
+            }
+          },
+          error: (causa: unknown) => rechazar(comoErrorApi(causa)),
+        });
+    });
+  }
+
+  #url(ruta: string): string {
+    return `${entorno.apiBase}${ruta}`;
+  }
+
+  #params(parametros?: Parametros): HttpParams {
+    let salida = new HttpParams();
+    for (const [clave, valor] of Object.entries(parametros ?? {})) {
+      if (valor !== undefined && valor !== '') salida = salida.set(clave, String(valor));
+    }
+    return salida;
+  }
+
+  async #pedir<T>(origen: Observable<T>): Promise<T> {
+    try {
+      return await firstValueFrom(origen);
+    } catch (causa) {
+      throw comoErrorApi(causa);
+    }
+  }
 }

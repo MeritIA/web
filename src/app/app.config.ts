@@ -1,26 +1,53 @@
 import { registerLocaleData } from '@angular/common';
-import localeEsCo from '@angular/common/locales/es-CO';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import localeEs from '@angular/common/locales/es-CO';
 import {
-  LOCALE_ID,
   type ApplicationConfig,
+  LOCALE_ID,
+  inject,
+  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
 } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { routes } from './app.routes';
+import {
+  provideRouter,
+  withComponentInputBinding,
+  withInMemoryScrolling,
+  withViewTransitions,
+} from '@angular/router';
+import { rutas } from './app.routes';
+import { avisarFallosGlobales, credenciales, renovarSesion } from './nucleo/http/interceptores';
+import { Sesion } from './nucleo/sesion/sesion';
+import { TemaServicio } from './nucleo/ui/tema';
 
-// Sin esto, las fechas salen en ingles: "28 Oct 2026" en vez de "28 oct 2026",
-// y el primer dia de la semana cambia. El producto es colombiano.
-registerLocaleData(localeEsCo);
+registerLocaleData(localeEs);
 
-export const appConfig: ApplicationConfig = {
+export const configuracion: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes, withComponentInputBinding()),
-    // `withFetch` en vez de XHR: es lo que la APK de Capacitor usa, y tener el
-    // mismo transporte en los dos sitios evita diferencias de cabeceras y de
-    // credenciales que solo aparecerian en el movil.
-    provideHttpClient(withFetch()),
+    provideZonelessChangeDetection(),
     { provide: LOCALE_ID, useValue: 'es-CO' },
+
+    provideRouter(
+      rutas,
+      withComponentInputBinding(),
+      // Al navegar se vuelve arriba; al volver atrás se recupera la posición.
+      withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
+      withViewTransitions({ skipInitialTransition: true }),
+    ),
+
+    // El orden importa: las credenciales primero, la renovación después, y el
+    // aviso al final, que es el que ve la persona.
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([credenciales, renovarSesion, avisarFallosGlobales]),
+    ),
+
+    // Antes del primer render se resuelve quién está dentro: así los guardias
+    // deciden con la verdad y no con un «todavía no sé».
+    provideAppInitializer(() => {
+      inject(TemaServicio);
+      return inject(Sesion).restaurar();
+    }),
   ],
 };
