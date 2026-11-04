@@ -197,7 +197,7 @@ export class VacanteFormulario {
     titulo: ['', [Validators.required, Validators.maxLength(160)]],
     descripcion: ['', [Validators.required, Validators.minLength(20)]],
     ubicacion: [''],
-    modalidad: ['' as Modalidad | ''],
+    modalidad: this.#fb.control<Modalidad | ''>(''),
     tecnologias: [''],
     cierreEstimado: [''],
     finalistasAEvaluar: [null as number | null, [Validators.min(1), Validators.max(1000)]],

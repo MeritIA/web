@@ -1,7 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { entorno } from '../../../entornos/entorno';
 
-type Resultado = { estado: 'ok' | 'falla' | 'pendiente'; detalle: string };
+interface Resultado {
+  estado: 'ok' | 'falla' | 'pendiente';
+  detalle: string;
+}
 
 /**
  * Verificación técnica antes de empezar (B15): cámara, micrófono y conexión.

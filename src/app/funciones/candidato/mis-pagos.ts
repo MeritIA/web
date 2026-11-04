@@ -1,7 +1,6 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { Campo } from '../../compartido/ui/campo';
 import { PagosServicio, UMBRAL_DE_RETIRO } from '../../nucleo/api/pagos.servicio';
 import { accion, recurso } from '../../nucleo/estado/recurso';
@@ -20,7 +19,7 @@ const METODOS = ['Nequi', 'Daviplata', 'Bancolombia'] as const;
 @Component({
   selector: 'app-mis-pagos',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CurrencyPipe, DatePipe, ReactiveFormsModule, RouterLink, Campo],
+  imports: [CurrencyPipe, DatePipe, ReactiveFormsModule, Campo],
   template: `
     <header class="pila pila--sm cabecera">
       <span class="micro">remuneración por reto · simulación</span>
@@ -185,11 +184,13 @@ export class MisPagos {
     numero: ['', [Validators.required, Validators.pattern(/^\d{7,20}$/)]],
   });
 
-  protected readonly retirar = accion(async () => {
+  protected readonly retirar = accion(() => {
     const { metodo, numero } = this.formulario.getRawValue();
     const retiro = this.pagos.retirar(`${metodo} ••••${numero.slice(-4)}`);
     this.formulario.reset({ metodo, numero: '' });
     this.#avisos.exito(`Retiro simulado de ${retiro.monto.toLocaleString('es-CO')} registrado.`);
+    // El retiro es simulado y síncrono; `accion` espera una promesa.
+    return Promise.resolve();
   });
 
   protected enviar(): void {
