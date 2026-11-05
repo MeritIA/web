@@ -40,6 +40,11 @@ export class Api {
     );
   }
 
+  /** Descarga un archivo del API como `Blob`, con la sesión (cookie o Bearer). */
+  descargar(ruta: string): Promise<Blob> {
+    return this.#pedir(this.#http.get(this.#url(ruta), { responseType: 'blob' }));
+  }
+
   /** Envío multipart. El progreso real lo expone `subirConProgreso`. */
   subir<T>(ruta: string, formulario: FormData): Promise<T> {
     return this.#pedir(this.#http.post<T>(this.#url(ruta), formulario));

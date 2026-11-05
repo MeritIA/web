@@ -49,23 +49,6 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
       }}</span>
       <h1>{{ versionando() ? 'Nueva versión del ejercicio' : 'Nuevo ejercicio' }}</h1>
       <p class="lectura ayuda">
-        <ui-campo
-          etiqueta="Tiempo límite (minutos)"
-          para="duracion"
-          opcional
-          ayuda="Si lo pones, el candidato inicia el ejercicio y tiene ese tiempo, medido por el servidor. Sin valor: sin límite."
-          [control]="formulario.controls.duracionMinutos"
-        >
-          <input
-            id="duracion"
-            type="number"
-            class="control"
-            formControlName="duracionMinutos"
-            min="1"
-            max="600"
-          />
-        </ui-campo>
-
         @if (versionando()) {
           Las calificaciones ya emitidas siguen mostrando el enunciado y los pesos con los que se
           calcularon. Corregir un ejercicio es versionarlo, nunca editarlo.
@@ -124,6 +107,23 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
           [control]="formulario.controls.enunciado"
         >
           <textarea id="enunciado" class="control" formControlName="enunciado" rows="10"></textarea>
+        </ui-campo>
+
+        <ui-campo
+          etiqueta="Tiempo límite (minutos)"
+          para="duracion"
+          opcional
+          ayuda="Si lo pones, el candidato inicia el ejercicio y tiene ese tiempo, medido por el servidor. Sin valor: sin límite."
+          [control]="formulario.controls.duracionMinutos"
+        >
+          <input
+            id="duracion"
+            type="number"
+            class="control"
+            formControlName="duracionMinutos"
+            min="1"
+            max="600"
+          />
         </ui-campo>
 
         @if (versionando()) {

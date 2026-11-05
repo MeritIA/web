@@ -454,3 +454,19 @@ textarea.control {
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%);
   pointer-events: none;
 }
+
+// Táctil: el dedo necesita más que el cursor. Se aplica por tipo de puntero y no
+// por ancho de pantalla, así una tableta con teclado y ratón no cambia.
+@media (pointer: coarse) {
+  .btn {
+    min-height: 44px;
+  }
+  .btn--sm {
+    min-height: 40px;
+  }
+  input:not([type='checkbox'], [type='radio']),
+  select,
+  textarea {
+    font-size: 16px; // por debajo de 16px el navegador móvil hace zoom al enfocar
+  }
+}

@@ -8,6 +8,7 @@ import { Confirmaciones } from '../../compartido/ui/confirmacion';
 import type { IdentidadRevelada, PromedioDeCriterio, Riesgo } from '../../nucleo/api/modelos';
 import { ReportesServicio } from '../../nucleo/api/reportes.servicio';
 import { accion, recursoPor } from '../../nucleo/estado/recurso';
+import { Archivos } from '../../nucleo/plataforma/archivos';
 
 /**
  * Ranking de una vacante (HU-20).
@@ -44,7 +45,14 @@ import { accion, recursoPor } from '../../nucleo/estado/recurso';
         </div>
         <div class="fila">
           <button type="button" class="btn btn--sm" (click)="reporte.recargar()">Actualizar</button>
-          <a class="btn btn--primario" [href]="urlCsv()" download>Exportar CSV</a>
+          <button
+            type="button"
+            class="btn btn--primario"
+            [disabled]="exportar.enviando()"
+            (click)="exportar.correr()"
+          >
+            Exportar CSV
+          </button>
         </div>
       </header>
 
@@ -342,13 +350,17 @@ export class ReporteVacante {
   readonly #servicio = inject(ReportesServicio);
 
   readonly #confirmaciones = inject(Confirmaciones);
+  readonly #archivos = inject(Archivos);
 
   protected readonly reporte = recursoPor(this.id, (id) => this.#servicio.deVacante(id));
   protected readonly revelaciones = recursoPor(this.id, (id) => this.#servicio.revelaciones(id));
   /** Identidades abiertas en esta sesión; el backend no vuelve a mandarlas en el ranking. */
   protected readonly reveladas = signal<Record<string, IdentidadRevelada>>({});
   protected readonly riesgo = (valor: Riesgo) => RIESGO[valor];
-  protected urlCsv = () => this.#servicio.urlDeExportacion(this.id());
+  protected readonly exportar = accion(async () => {
+    const csv = await this.#servicio.csvDeVacante(this.id());
+    await this.#archivos.guardar(`vacante-${this.id()}.csv`, csv, 'text/csv');
+  });
 
   protected async pedirRevelar(idCandidato: string, alias: string): Promise<void> {
     const confirmado = await this.#confirmaciones.pedir({

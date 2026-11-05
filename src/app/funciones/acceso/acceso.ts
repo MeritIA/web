@@ -103,7 +103,7 @@ export class Acceso {
 
   protected readonly entrar = accion(async () => {
     const usuario = await this.#sesion.entrar(this.formulario.getRawValue());
-    await this.#router.navigateByUrl(this.destino() ?? inicioDe(usuario.rol));
+    await this.#router.navigateByUrl(this.destino() ?? inicioDe(usuario.rol), { replaceUrl: true });
   });
 
   protected enviar(): void {

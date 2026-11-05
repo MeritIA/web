@@ -8,6 +8,7 @@
  */
 export const entorno = {
   produccion: false,
+  nativo: false,
   apiBase: '/api/v1',
   /** Cada cuanto se vuelve a preguntar por una entrega que sigue evaluandose. */
   sondeoEvaluacionMs: 5000,

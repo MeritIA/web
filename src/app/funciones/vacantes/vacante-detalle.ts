@@ -29,6 +29,7 @@ import {
 import { PostulacionesServicio } from '../../nucleo/api/postulaciones.servicio';
 import { VacantesServicio } from '../../nucleo/api/vacantes.servicio';
 import { accion, recurso, recursoPor } from '../../nucleo/estado/recurso';
+import { Archivos } from '../../nucleo/plataforma/archivos';
 import { Avisos } from '../../nucleo/ui/avisos';
 
 /**
@@ -669,6 +670,7 @@ export class VacanteDetalle {
   readonly #notificaciones = inject(NotificacionesServicio);
   readonly #postulaciones = inject(PostulacionesServicio);
   readonly #avisos = inject(Avisos);
+  readonly #archivos = inject(Archivos);
   readonly #confirmaciones = inject(Confirmaciones);
   readonly #fb = inject(FormBuilder).nonNullable;
 
@@ -757,7 +759,7 @@ export class VacanteDetalle {
 
   protected readonly descargar = accion(async (entrega: Entrega) => {
     const { url } = await this.#entregas.enlaceDeDescarga(entrega.id);
-    window.open(url, '_blank', 'noopener');
+    await this.#archivos.abrir(url);
   });
 
   protected readonly modalidades = MODALIDAD;

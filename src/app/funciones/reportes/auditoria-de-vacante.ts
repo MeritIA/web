@@ -4,6 +4,8 @@ import { RouterLink } from '@angular/router';
 import { EstadoRecurso } from '../../compartido/ui/basicos';
 import { ReportesServicio } from '../../nucleo/api/reportes.servicio';
 import { recursoPor } from '../../nucleo/estado/recurso';
+import { Archivos } from '../../nucleo/plataforma/archivos';
+import { Plataforma } from '../../nucleo/plataforma/plataforma';
 
 /**
  * Informe de auditoría de una vacante (A09).
@@ -37,9 +39,11 @@ import { recursoPor } from '../../nucleo/estado/recurso';
         <h1>{{ a.vacante.titulo }}</h1>
         <div class="fila no-imprimir">
           <button type="button" class="btn btn--sm" (click)="descargar()">Descargar (JSON)</button>
-          <button type="button" class="btn btn--sm" (click)="imprimir()">
-            Imprimir o guardar PDF
-          </button>
+          @if (!nativa()) {
+            <button type="button" class="btn btn--sm" (click)="imprimir()">
+              Imprimir o guardar PDF
+            </button>
+          }
         </div>
       </header>
 
@@ -172,6 +176,8 @@ import { recursoPor } from '../../nucleo/estado/recurso';
 export class AuditoriaDeVacante {
   readonly id = input.required<string>();
   readonly #reportes = inject(ReportesServicio);
+  readonly #archivos = inject(Archivos);
+  protected readonly nativa = inject(Plataforma).nativa;
 
   protected readonly informe = recursoPor(this.id, (id) => this.#reportes.auditoria(id));
 
@@ -180,17 +186,14 @@ export class AuditoriaDeVacante {
     return (valor / max) * 100;
   }
 
-  protected descargar(): void {
+  protected async descargar(): Promise<void> {
     const datos = this.informe.datos();
     if (!datos) return;
-    const url = URL.createObjectURL(
-      new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' }),
+    await this.#archivos.guardar(
+      `auditoria-${this.id()}.json`,
+      JSON.stringify(datos, null, 2),
+      'application/json',
     );
-    const enlace = document.createElement('a');
-    enlace.href = url;
-    enlace.download = `auditoria-${this.id()}.json`;
-    enlace.click();
-    URL.revokeObjectURL(url);
   }
 
   protected imprimir(): void {

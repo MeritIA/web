@@ -153,6 +153,14 @@ const INICIALES = [
     .sugerencias {
       flex-wrap: wrap;
     }
+    /* Una sugerencia es una frase: en pantallas estrechas debe poder partirse. */
+    .sugerencias .btn {
+      max-width: 100%;
+      height: auto;
+      padding-block: var(--e-2);
+      text-align: left;
+      white-space: normal;
+    }
     form.fila .control {
       flex: 1;
     }

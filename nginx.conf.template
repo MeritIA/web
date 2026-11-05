@@ -1,0 +1,53 @@
+# Plantilla: la imagen de nginx sustituye ${BACKEND_UPSTREAM} al arrancar. Solo
+# toca las variables de entorno definidas, asi que $host, $uri... quedan intactas.
+
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+    server_tokens off;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+    gzip_min_length 1024;
+
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Frame-Options "DENY" always;
+
+    # Sonda de vida del propio nginx; no toca al backend.
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    # La API, en el mismo origen que la web. El backend ve la IP real del
+    # cliente en X-Forwarded-For (ver TRUST_PROXY en el backend).
+    location /api/ {
+        proxy_pass http://${BACKEND_UPSTREAM};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection "";
+        # Entregas de hasta 25 MiB (LIMITES.archivoMaxBytes) mas el multipart.
+        client_max_body_size 30m;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+    }
+
+    # Archivos con hash en el nombre: inmutables.
+    location ~* \.(?:js|css|woff2?|svg|png|ico)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # SPA: cualquier ruta que no sea un archivo la resuelve el router de Angular.
+    location / {
+        add_header Cache-Control "no-cache";
+        try_files $uri /index.html;
+    }
+}

@@ -32,6 +32,42 @@ Requisitos: Node ≥ 20.19 (el backend ya fija su versión en `.nvmrc`).
 
 ---
 
+## App móvil (APK, Capacitor)
+
+La misma app Angular se empaqueta como APK con Capacitor; no hay un segundo código.
+Lo que cambia en la APK está aislado en `src/app/nucleo/plataforma/` y en
+`src/entornos/entorno.movil.ts`:
+
+| Aspecto | Web | APK |
+|---|---|---|
+| API | `/api/v1` (mismo origen, proxy) | URL absoluta (`API_MOVIL`) |
+| Sesión | cookie HttpOnly | `Authorization: Bearer`, tokens en el KeyStore (`@aparajita/capacitor-secure-storage`) |
+| Login/registro | `cliente` omitido | `cliente: 'apk'` (el backend devuelve los tokens en el cuerpo) |
+| Descargas y enlaces | ancla `download` / `window.open` | `Archivos`: navegador del sistema y hoja de compartir |
+| Navegación | barra superior | barra inferior (≤ 860 px), botón «atrás» de Android |
+
+```bash
+# Requisitos: JDK 21, Android SDK con platforms;android-36 y build-tools;36.0.0
+export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
+export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
+
+# Emulador: el backend del host se ve en 10.0.2.2 (valor por omisión)
+npm run movil:apk
+# Dispositivo real o producción: la URL debe ser absoluta y acabar en /api/v1
+API_MOVIL=https://api.meritia.app/api/v1 npm run movil:apk
+# -> android/app/build/outputs/apk/debug/app-debug.apk
+
+npm run movil:sync     # solo build + copiar a android/
+npm run movil:abrir    # abre Android Studio
+```
+
+En el backend, `ALLOWED_ORIGINS` debe incluir `https://localhost` (origen de la
+WebView). Con una API `http://` la APK permite tráfico en claro solo si `API_MOVIL`
+no es `https://`; en producción usa siempre HTTPS. Los iconos y el splash salen de
+`resources/` (`npx capacitor-assets generate --android`).
+
+---
+
 ## Cómo está organizado
 
 ```

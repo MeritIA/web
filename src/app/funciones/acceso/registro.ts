@@ -195,7 +195,7 @@ export class Registro {
       this.#avisos.info('No pudimos guardar tus permisos. Revísalos en «Mi cuenta».');
     }
     this.#avisos.exito('Cuenta creada. Ya puedes ver las pruebas a las que te inviten.');
-    await this.#router.navigateByUrl(inicioDe(usuario.rol));
+    await this.#router.navigateByUrl(inicioDe(usuario.rol), { replaceUrl: true });
   });
 
   protected enviar(): void {

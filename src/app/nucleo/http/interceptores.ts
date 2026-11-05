@@ -2,6 +2,8 @@ import { HttpErrorResponse, type HttpInterceptorFn } from '@angular/common/http'
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, from, switchMap, throwError } from 'rxjs';
+import { entorno } from '../../../entornos/entorno';
+import { AlmacenTokens } from '../plataforma/almacen-tokens';
 import { Sesion } from '../sesion/sesion';
 import { Avisos } from '../ui/avisos';
 
@@ -12,8 +14,19 @@ import { Avisos } from '../ui/avisos';
  * hay cabecera `Authorization` que poner: el token es deliberadamente
  * invisible para el JavaScript.
  */
-export const credenciales: HttpInterceptorFn = (peticion, siguiente) =>
-  siguiente(peticion.clone({ withCredentials: true }));
+export const credenciales: HttpInterceptorFn = (peticion, siguiente) => {
+  if (!entorno.nativo) return siguiente(peticion.clone({ withCredentials: true }));
+
+  // APK: sin cookies. El token sale del KeyStore y solo se adjunta a nuestra API
+  // (nunca a los enlaces firmados de almacenamiento, que llevan su propia firma).
+  const token = inject(AlmacenTokens).acceso();
+  const esNuestra = peticion.url.startsWith(entorno.apiBase);
+  return siguiente(
+    token && esNuestra
+      ? peticion.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+      : peticion,
+  );
+};
 
 const esDeAutenticacion = (url: string) => url.includes('/autenticacion/');
 
@@ -25,6 +38,7 @@ const esDeAutenticacion = (url: string) => url.includes('/autenticacion/');
 export const renovarSesion: HttpInterceptorFn = (peticion, siguiente) => {
   const sesion = inject(Sesion);
   const router = inject(Router);
+  const tokens = inject(AlmacenTokens);
 
   return siguiente(peticion).pipe(
     catchError((causa: unknown) => {
@@ -32,7 +46,15 @@ export const renovarSesion: HttpInterceptorFn = (peticion, siguiente) => {
       if (!es401 || esDeAutenticacion(peticion.url)) return throwError(() => causa);
 
       return from(sesion.renovar()).pipe(
-        switchMap(() => siguiente(peticion)),
+        switchMap(() => {
+          // En la APK la cabecera ya llevaba el token caducado: hay que cambiarla.
+          const nuevo = tokens.acceso();
+          return siguiente(
+            entorno.nativo && nuevo
+              ? peticion.clone({ setHeaders: { Authorization: `Bearer ${nuevo}` } })
+              : peticion,
+          );
+        }),
         catchError(() => {
           sesion.olvidar();
           void router.navigate(['/acceso'], { queryParams: { expirada: 1 } });

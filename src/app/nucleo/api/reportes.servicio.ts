@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { entorno } from '../../../entornos/entorno';
 import { Api } from './api';
 import type {
   AuditoriaDeVacante,
@@ -44,10 +43,10 @@ export class ReportesServicio {
     this.#api.get<ReporteDeCandidato>(`/reportes/vacantes/${idVacante}/candidatos/${idCandidato}`);
 
   /**
-   * El CSV lo sirve el backend ya neutralizado contra inyección de fórmulas,
-   * así que se deja que el navegador lo descargue con la cookie de sesión en
-   * vez de reconstruir el archivo aquí.
+   * El CSV lo sirve el backend ya neutralizado contra inyección de fórmulas;
+   * aquí solo se baja tal cual. Se pide por `Api` y no con un enlace directo
+   * porque en la APK la sesión es una cabecera, que un enlace no puede llevar.
    */
-  urlDeExportacion = (idVacante: string) =>
-    `${entorno.apiBase}/reportes/vacantes/${idVacante}/exportar`;
+  csvDeVacante = (idVacante: string) =>
+    this.#api.descargar(`/reportes/vacantes/${idVacante}/exportar`);
 }

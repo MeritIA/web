@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ROL } from '../compartido/dominio';
+import { Plataforma } from '../nucleo/plataforma/plataforma';
 import { Sesion } from '../nucleo/sesion/sesion';
 import { TemaServicio } from '../nucleo/ui/tema';
 
@@ -36,7 +37,7 @@ interface Enlace {
           </span>
         </a>
 
-        <nav class="nav" aria-label="Secciones">
+        <nav class="nav" [class.nav--oculta]="tecladoAbierto()" aria-label="Secciones">
           @for (enlace of enlaces(); track enlace.ruta) {
             <a
               class="nav__enlace"
@@ -177,18 +178,50 @@ interface Enlace {
       outline: none;
     }
 
+    /* Móvil: cabecera de una fila y navegación como barra inferior, al alcance del pulgar. */
     @media (max-width: 860px) {
+      .cinta {
+        /* Un filtro en el ancestro haría que la barra fija se midiera contra la cabecera. */
+        backdrop-filter: none;
+        padding-top: max(var(--e-2), env(safe-area-inset-top));
+        padding-right: max(var(--e-3), env(safe-area-inset-right));
+        padding-left: max(var(--e-3), env(safe-area-inset-left));
+      }
       .cinta__pastilla {
-        flex-wrap: wrap;
-        border-radius: var(--r-lg);
-        padding: var(--e-3);
+        padding: var(--e-2) var(--e-2) var(--e-2) var(--e-4);
+      }
+      .marca small,
+      .usuario .micro {
+        display: none;
       }
       .nav {
-        order: 3;
-        width: 100%;
+        position: fixed;
+        inset: auto 0 0;
+        z-index: var(--z-barra);
+        gap: 0;
+        padding: var(--e-1) max(var(--e-2), env(safe-area-inset-right))
+          calc(var(--e-1) + env(safe-area-inset-bottom)) max(var(--e-2), env(safe-area-inset-left));
+        border-top: 1px solid var(--c-borde);
+        background: color-mix(in srgb, var(--c-superficie) 94%, transparent);
+        backdrop-filter: blur(14px);
+        scroll-snap-type: x proximity;
       }
-      .marca small {
+      .nav--oculta {
         display: none;
+      }
+      .nav__enlace {
+        display: flex;
+        flex: 1 0 auto;
+        align-items: center;
+        justify-content: center;
+        min-width: 88px;
+        min-height: 48px;
+        scroll-snap-align: start;
+      }
+      .contenido {
+        padding-bottom: calc(var(--e-8) + 48px + env(safe-area-inset-bottom));
+        padding-right: max(var(--e-4), env(safe-area-inset-right));
+        padding-left: max(var(--e-4), env(safe-area-inset-left));
       }
     }
   `,
@@ -196,6 +229,8 @@ interface Enlace {
 export class Marco {
   protected readonly sesion = inject(Sesion);
   protected readonly tema = inject(TemaServicio);
+  readonly #plataforma = inject(Plataforma);
+  protected readonly tecladoAbierto = computed(() => this.#plataforma.tecladoAlto() > 0);
   readonly #router = inject(Router);
 
   protected readonly rol = computed(() => {

@@ -142,7 +142,7 @@ export class RegistroEmpresa {
   protected readonly registrar = accion(async () => {
     const usuario = await this.#sesion.registrarEmpresa(this.formulario.getRawValue());
     this.#avisos.exito('Empresa registrada. Ya puedes crear tu primer ejercicio.');
-    await this.#router.navigateByUrl(inicioDe(usuario.rol));
+    await this.#router.navigateByUrl(inicioDe(usuario.rol), { replaceUrl: true });
   });
 
   protected enviar(): void {

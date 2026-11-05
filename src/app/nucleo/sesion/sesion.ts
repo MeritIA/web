@@ -1,5 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Api } from '../api/api';
+import { AlmacenTokens } from '../plataforma/almacen-tokens';
+import { Plataforma } from '../plataforma/plataforma';
 import type {
   Credenciales,
   Registro,
@@ -20,6 +22,10 @@ import type {
 @Injectable({ providedIn: 'root' })
 export class Sesion {
   readonly #api = inject(Api);
+  readonly #plataforma = inject(Plataforma);
+  readonly #tokens = inject(AlmacenTokens);
+  /** Renovación en curso: varias 401 simultáneas comparten una sola llamada. */
+  #renovando: Promise<void> | null = null;
   readonly #usuario = signal<Usuario | null>(null);
   readonly #restaurada = signal(false);
 
@@ -43,7 +49,11 @@ export class Sesion {
   /** Se ejecuta una vez al arrancar la aplicación. */
   async restaurar(): Promise<void> {
     try {
-      this.#usuario.set(await this.#api.get<Usuario>('/autenticacion/yo'));
+      if (this.#plataforma.nativa()) {
+        await this.#tokens.cargar();
+        if (!this.#tokens.acceso()) return; // primera vez en el dispositivo
+      }
+      this.#usuario.set(await this.#preguntarQuienSoy());
     } catch {
       this.#usuario.set(null); // sin sesión: es un estado normal, no un fallo
     } finally {
@@ -51,19 +61,36 @@ export class Sesion {
     }
   }
 
+  /**
+   * `/yo` está bajo `/autenticacion/`, donde el interceptor no renueva (para no
+   * entrar en bucle), así que un token de acceso vencido al arrancar se
+   * renueva aquí (solo en la APK), una sola vez, antes de dar la sesión por perdida.
+   */
+  async #preguntarQuienSoy(): Promise<Usuario> {
+    try {
+      return await this.#api.get<Usuario>('/autenticacion/yo');
+    } catch (causa) {
+      // En web no hay token que mirar (cookie HttpOnly): renovar sería una
+      // petición perdida en cada visita anónima.
+      if (!this.#plataforma.nativa() || !this.#tokens.renovacion()) throw causa;
+      await this.renovar();
+      return this.#api.get<Usuario>('/autenticacion/yo');
+    }
+  }
+
   async entrar(credenciales: Credenciales): Promise<Usuario> {
-    await this.#api.post<RespuestaSesion>('/autenticacion/login', credenciales);
+    await this.#abrir('/autenticacion/login', credenciales);
     return this.#identificar();
   }
 
   async registrarse(datos: Registro): Promise<Usuario> {
-    await this.#api.post<RespuestaSesion>('/autenticacion/registro', datos);
+    await this.#abrir('/autenticacion/registro', datos);
     return this.#identificar();
   }
 
   /** A01: crea la empresa con su primer administrador y deja la sesión abierta. */
   async registrarEmpresa(datos: RegistroDeEmpresa): Promise<Usuario> {
-    await this.#api.post<RespuestaSesion>('/autenticacion/registro-empresa', datos);
+    await this.#abrir('/autenticacion/registro-empresa', datos);
     return this.#identificar();
   }
 
@@ -85,6 +112,7 @@ export class Sesion {
     } catch {
       // Se traga a propósito: ver arriba.
     } finally {
+      await this.#tokens.borrar();
       this.#usuario.set(null);
     }
   }
@@ -92,16 +120,52 @@ export class Sesion {
   /** Anonimiza la cuenta en el backend, que además cierra todas las sesiones. */
   async eliminarCuenta(contrasena: string): Promise<void> {
     await this.#api.borrar<void>('/autenticacion/cuenta', { contrasena });
+    await this.#tokens.borrar();
     this.#usuario.set(null);
   }
 
   /** La usa el interceptor cuando un token de acceso caduca a mitad de trabajo. */
-  async renovar(): Promise<void> {
-    await this.#api.post<RespuestaSesion>('/autenticacion/renovar');
+  renovar(): Promise<void> {
+    if (!this.#plataforma.nativa()) {
+      return this.#api.post<RespuestaSesion>('/autenticacion/renovar').then(() => undefined);
+    }
+    this.#renovando ??= this.#renovarNativa().finally(() => (this.#renovando = null));
+    return this.#renovando;
   }
 
   olvidar(): void {
+    void this.#tokens.borrar();
     this.#usuario.set(null);
+  }
+
+  /** Login y registro: en la APK piden los tokens en el cuerpo y los guardan. */
+  async #abrir(ruta: string, datos: object): Promise<void> {
+    if (!this.#plataforma.nativa()) {
+      await this.#api.post<RespuestaSesion>(ruta, datos);
+      return;
+    }
+    const respuesta = await this.#api.post<RespuestaSesion>(ruta, { ...datos, cliente: 'apk' });
+    await this.#guardar(respuesta);
+  }
+
+  async #renovarNativa(): Promise<void> {
+    const renovacion = this.#tokens.renovacion();
+    if (!renovacion) throw new Error('Sin token de renovación');
+    const respuesta = await this.#api.post<RespuestaSesion>('/autenticacion/renovar', {
+      tokenDeRenovacion: renovacion,
+      cliente: 'apk',
+    });
+    await this.#guardar(respuesta);
+  }
+
+  async #guardar(respuesta: RespuestaSesion): Promise<void> {
+    if (!respuesta.tokenDeAcceso || !respuesta.tokenDeRenovacion) {
+      throw new Error('El servidor no entregó los tokens de la sesión');
+    }
+    await this.#tokens.guardar({
+      acceso: respuesta.tokenDeAcceso,
+      renovacion: respuesta.tokenDeRenovacion,
+    });
   }
 
   /**

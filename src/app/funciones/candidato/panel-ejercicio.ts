@@ -22,6 +22,7 @@ import {
   type Entrega,
 } from '../../nucleo/api/modelos';
 import { accion, recursoPor } from '../../nucleo/estado/recurso';
+import { Archivos } from '../../nucleo/plataforma/archivos';
 import { Avisos } from '../../nucleo/ui/avisos';
 
 /**
@@ -368,11 +369,12 @@ export class PanelEjercicio {
 
   readonly #servicio = inject(EntregasServicio);
   readonly #avisos = inject(Avisos);
+  readonly #archivos = inject(Archivos);
 
   /** El backend entrega un enlace firmado y de corta vida: se pide al pulsar, no antes. */
   protected readonly descargar = accion(async (entrega: Entrega) => {
     const { url } = await this.#servicio.enlaceDeDescarga(entrega.id);
-    window.open(url, '_blank', 'noopener');
+    await this.#archivos.abrir(url);
   });
 
   readonly #vacantes = inject(VacantesServicio);
@@ -382,7 +384,7 @@ export class PanelEjercicio {
       this.idEjercicio(),
       a.id,
     );
-    window.open(url, '_blank', 'noopener');
+    await this.#archivos.abrir(url);
   });
 
   /** Mi sesión cronometrada. Solo se pide si el ejercicio tiene límite. */

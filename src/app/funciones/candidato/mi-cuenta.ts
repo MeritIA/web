@@ -9,6 +9,7 @@ import { ConsentimientosServicio } from '../../nucleo/api/consentimientos.servic
 import type { Permiso } from '../../nucleo/api/modelos';
 import { accion, recurso } from '../../nucleo/estado/recurso';
 import { Sesion } from '../../nucleo/sesion/sesion';
+import { Archivos } from '../../nucleo/plataforma/archivos';
 import { Avisos } from '../../nucleo/ui/avisos';
 
 /**
@@ -206,6 +207,7 @@ export class MiCuenta {
   protected readonly sesion = inject(Sesion);
   readonly #servicio = inject(ConsentimientosServicio);
   readonly #avisos = inject(Avisos);
+  readonly #archivos = inject(Archivos);
   readonly #reportes = inject(ReportesServicio);
   readonly #confirmaciones = inject(Confirmaciones);
   readonly #router = inject(Router);
@@ -215,14 +217,11 @@ export class MiCuenta {
 
   protected readonly descargar = accion(async () => {
     const datos = await this.#reportes.misDatos();
-    const enlace = document.createElement('a');
-    const url = URL.createObjectURL(
-      new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' }),
+    await this.#archivos.guardar(
+      'mis-datos-meritia.json',
+      JSON.stringify(datos, null, 2),
+      'application/json',
     );
-    enlace.href = url;
-    enlace.download = 'mis-datos-meritia.json';
-    enlace.click();
-    URL.revokeObjectURL(url);
     this.#avisos.exito('Descargaste una copia de tus datos.');
   });
 

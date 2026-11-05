@@ -1,4 +1,4 @@
-import { registerLocaleData } from '@angular/common';
+import { Location, registerLocaleData } from '@angular/common';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import localeEs from '@angular/common/locales/es-CO';
 import {
@@ -17,6 +17,7 @@ import {
 } from '@angular/router';
 import { rutas } from './app.routes';
 import { avisarFallosGlobales, credenciales, renovarSesion } from './nucleo/http/interceptores';
+import { Plataforma } from './nucleo/plataforma/plataforma';
 import { Sesion } from './nucleo/sesion/sesion';
 import { TemaServicio } from './nucleo/ui/tema';
 
@@ -46,7 +47,11 @@ export const configuracion: ApplicationConfig = {
     // Antes del primer render se resuelve quién está dentro: así los guardias
     // deciden con la verdad y no con un «todavía no sé».
     provideAppInitializer(() => {
+      const ubicacion = inject(Location);
+      const plataforma = inject(Plataforma);
       inject(TemaServicio);
+      // Sin esperar: el arranque no debe depender de que el puente nativo conteste.
+      void plataforma.iniciar(() => ubicacion.back());
       return inject(Sesion).restaurar();
     }),
   ],

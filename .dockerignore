@@ -1,0 +1,7 @@
+node_modules
+dist
+android
+.angular
+e2e
+.git
+*.md
