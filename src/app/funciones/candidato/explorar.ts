@@ -8,6 +8,8 @@ import type { Postulacion, VacanteAbierta } from '../../nucleo/api/modelos';
 import { PostulacionesServicio } from '../../nucleo/api/postulaciones.servicio';
 import { accion, recurso } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 
 type Vista = 'todas' | 'postuladas';
 
@@ -20,7 +22,7 @@ type Vista = 'todas' | 'postuladas';
 @Component({
   selector: 'app-explorar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, RouterLink, Estado, EstadoRecurso],
+  imports: [ButtonDirective, InputText, DatePipe, RouterLink, Estado, EstadoRecurso],
   template: `
     <header class="pila pila--sm cabecera">
       <span class="micro">vacantes abiertas</span>
@@ -37,7 +39,7 @@ type Vista = 'todas' | 'postuladas';
         <input
           id="buscar"
           type="search"
-          class="control"
+          pInputText
           placeholder="Cargo, empresa o tecnología"
           [value]="texto()"
           (input)="texto.set($any($event.target).value)"
@@ -48,7 +50,7 @@ type Vista = 'todas' | 'postuladas';
         <label class="campo__etiqueta" for="modalidad">Modalidad</label>
         <select
           id="modalidad"
-          class="control"
+          pInputText
           [value]="modalidad()"
           (change)="modalidad.set($any($event.target).value)"
         >
@@ -62,7 +64,9 @@ type Vista = 'todas' | 'postuladas';
       <div class="fila pestanas" role="group" aria-label="Qué vacantes ver">
         <button
           type="button"
-          class="btn btn--sm"
+          pButton
+          severity="secondary"
+          size="small"
           [class.btn--primario]="vista() === 'todas'"
           [attr.aria-pressed]="vista() === 'todas'"
           (click)="vista.set('todas')"
@@ -71,7 +75,9 @@ type Vista = 'todas' | 'postuladas';
         </button>
         <button
           type="button"
-          class="btn btn--sm"
+          pButton
+          severity="secondary"
+          size="small"
           [class.btn--primario]="vista() === 'postuladas'"
           [attr.aria-pressed]="vista() === 'postuladas'"
           (click)="vista.set('postuladas')"
@@ -155,19 +161,26 @@ type Vista = 'todas' | 'postuladas';
           }
 
           <div class="fila fila--entre acciones">
-            <button type="button" class="btn btn--sm btn--fantasma" (click)="alternar(vacante.id)">
+            <button
+              type="button"
+              pButton
+              [text]="true"
+              severity="secondary"
+              size="small"
+              (click)="alternar(vacante.id)"
+            >
               {{ abierta() === vacante.id ? 'Ver menos' : 'Ver más' }}
             </button>
 
             @if (vacante.yaInvitado) {
-              <a [routerLink]="['/mis-pruebas', vacante.id]" class="btn btn--primario">
-                Hacer la prueba
-              </a>
+              <a [routerLink]="['/mis-pruebas', vacante.id]" pButton> Hacer la prueba </a>
             } @else if (postulacionDe(vacante.id); as p) {
               @if (p.estado === 'en_revision') {
                 <button
                   type="button"
-                  class="btn btn--sm"
+                  pButton
+                  severity="secondary"
+                  size="small"
                   [disabled]="retirar.enviando()"
                   (click)="pedirRetirar(vacante)"
                 >
@@ -177,7 +190,7 @@ type Vista = 'todas' | 'postuladas';
             } @else {
               <button
                 type="button"
-                class="btn btn--primario"
+                pButton
                 [disabled]="postular.enviando()"
                 (click)="postular.correr(vacante)"
               >

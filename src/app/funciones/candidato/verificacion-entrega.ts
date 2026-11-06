@@ -12,6 +12,7 @@ import {
 import { EntregasServicio } from '../../nucleo/api/entregas.servicio';
 import { accion, recursoPor } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
 
 /**
  * Verificación de una entrega.
@@ -25,7 +26,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
 @Component({
   selector: 'app-verificacion-entrega',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe],
+  imports: [ButtonDirective, DatePipe],
   template: `
     @if (estado.datos(); as v) {
       @if (v.modalidad === 'camara') {
@@ -47,12 +48,15 @@ import { Avisos } from '../../nucleo/ui/avisos';
       } @else {
         <div class="fila acciones">
           @if (!camaraAbierta()) {
-            <button type="button" class="btn btn--sm" (click)="abrirCamara()">
+            <button type="button" pButton severity="secondary" size="small" (click)="abrirCamara()">
               Verificar con cámara
             </button>
             <button
               type="button"
-              class="btn btn--sm btn--fantasma"
+              pButton
+              [text]="true"
+              severity="secondary"
+              size="small"
               [disabled]="enviar.enviando()"
               (click)="enviar.correr('alterna')"
             >
@@ -70,13 +74,22 @@ import { Avisos } from '../../nucleo/ui/avisos';
               <div class="fila">
                 <button
                   type="button"
-                  class="btn btn--sm btn--primario"
+                  pButton
+                  size="small"
                   [disabled]="enviar.enviando()"
                   (click)="enviar.correr('camara')"
                 >
                   {{ enviar.enviando() ? 'Enviando…' : 'Tomar foto y verificar' }}
                 </button>
-                <button type="button" class="btn btn--sm" (click)="cerrarCamara()">Cancelar</button>
+                <button
+                  type="button"
+                  pButton
+                  severity="secondary"
+                  size="small"
+                  (click)="cerrarCamara()"
+                >
+                  Cancelar
+                </button>
               </div>
             </div>
           }

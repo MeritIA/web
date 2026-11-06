@@ -6,6 +6,7 @@ import { Chip, Estado, EstadoRecurso } from '../../compartido/ui/basicos';
 import { EntregasServicio } from '../../nucleo/api/entregas.servicio';
 import { VacantesServicio } from '../../nucleo/api/vacantes.servicio';
 import { recurso } from '../../nucleo/estado/recurso';
+import { ButtonDirective } from 'primeng/button';
 
 /**
  * Lo primero que ve un candidato: qué tiene pendiente y qué ya envió.
@@ -16,7 +17,7 @@ import { recurso } from '../../nucleo/estado/recurso';
 @Component({
   selector: 'app-mis-pruebas',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, Chip, Estado, EstadoRecurso],
+  imports: [ButtonDirective, RouterLink, DatePipe, Chip, Estado, EstadoRecurso],
   template: `
     <header class="pila pila--sm cabecera">
       <span class="micro">pruebas asignadas</span>
@@ -35,7 +36,7 @@ import { recurso } from '../../nucleo/estado/recurso';
       textoVacio="Cuando una empresa te invite a su proceso, la prueba aparecerá aquí automáticamente."
       (reintentar)="vacantes.recargar()"
     >
-      <a accion-vacio routerLink="/explorar" class="btn btn--primario">Explorar vacantes</a>
+      <a accion-vacio routerLink="/explorar" pButton>Explorar vacantes</a>
     </ui-recurso>
 
     <div class="rejilla rejilla--ancha">
@@ -77,7 +78,7 @@ import { recurso } from '../../nucleo/estado/recurso';
             <p class="micro">Abierta desde {{ vacante.publicadaEn | date: 'd MMM y' }}</p>
           }
 
-          <a [routerLink]="['/mis-pruebas', vacante.id]" class="btn btn--primario">
+          <a [routerLink]="['/mis-pruebas', vacante.id]" pButton>
             {{ enviadas(vacante.id) > 0 ? 'Ver y entregar' : 'Empezar' }}
           </a>
         </article>

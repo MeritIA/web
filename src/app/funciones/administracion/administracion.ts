@@ -9,6 +9,8 @@ import { SECTORES, type Sector } from '../../nucleo/api/modelos';
 import { EvaluacionesServicio } from '../../nucleo/api/evaluaciones.servicio';
 import { accion, recurso } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 
 /**
  * Consola del administrador: salud de la cola, empresas y altas de personal.
@@ -19,7 +21,16 @@ import { Avisos } from '../../nucleo/ui/avisos';
 @Component({
   selector: 'app-administracion',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, Chip, EstadoRecurso, Panel, Campo],
+  imports: [
+    ButtonDirective,
+    InputText,
+    ReactiveFormsModule,
+    DatePipe,
+    Chip,
+    EstadoRecurso,
+    Panel,
+    Campo,
+  ],
   template: `
     <header class="pila pila--sm cabecera">
       <span class="micro">plataforma</span>
@@ -34,7 +45,9 @@ import { Avisos } from '../../nucleo/ui/avisos';
             {{ m.workerActivo ? 'Worker activo' : 'Worker detenido' }}
           </ui-chip>
         }
-        <button type="button" class="btn btn--sm" (click)="cola.recargar()">Actualizar</button>
+        <button type="button" pButton severity="secondary" size="small" (click)="cola.recargar()">
+          Actualizar
+        </button>
       </div>
 
       <ui-recurso
@@ -78,14 +91,16 @@ import { Avisos } from '../../nucleo/ui/avisos';
             <input
               id="idEntrega"
               type="text"
-              class="control"
+              pInputText
               formControlName="idEntrega"
               placeholder="UUID de la entrega fallida"
             />
           </ui-campo>
           <button
             type="submit"
-            class="btn btn--sm"
+            pButton
+            severity="secondary"
+            size="small"
             [disabled]="reintento.invalid || reintentar.enviando()"
           >
             {{ reintentar.enviando() ? 'Encolando…' : 'Reintentar' }}
@@ -136,10 +151,10 @@ import { Avisos } from '../../nucleo/ui/avisos';
             para="nombreEmpresa"
             [control]="nuevaEmpresa.controls.nombre"
           >
-            <input id="nombreEmpresa" type="text" class="control" formControlName="nombre" />
+            <input id="nombreEmpresa" type="text" pInputText formControlName="nombre" />
           </ui-campo>
           <ui-campo etiqueta="Sector" para="sectorEmpresa" [control]="nuevaEmpresa.controls.sector">
-            <select id="sectorEmpresa" class="control" formControlName="sector">
+            <select id="sectorEmpresa" pInputText formControlName="sector">
               @for (sector of sectores; track sector) {
                 <option [value]="sector">{{ sector }}</option>
               }
@@ -152,14 +167,16 @@ import { Avisos } from '../../nucleo/ui/avisos';
             ayuda="Con dígito de verificación, p. ej. 890903938-8. Único entre empresas."
             [control]="nuevaEmpresa.controls.nit"
           >
-            <input id="nitEmpresa" type="text" class="control" formControlName="nit" />
+            <input id="nitEmpresa" type="text" pInputText formControlName="nit" />
           </ui-campo>
           @if (crearEmpresa.error(); as error) {
             <p class="campo__error" role="alert">{{ error }}</p>
           }
           <button
             type="submit"
-            class="btn btn--sm"
+            pButton
+            severity="secondary"
+            size="small"
             [disabled]="nuevaEmpresa.invalid || crearEmpresa.enviando()"
           >
             {{ crearEmpresa.enviando() ? 'Creando…' : 'Crear empresa' }}
@@ -171,7 +188,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
       <ui-panel antetitulo="acceso" titulo="Alta de personal">
         <form class="pila" [formGroup]="nuevoUsuario" (ngSubmit)="crearUsuario.correr()">
           <ui-campo etiqueta="Empresa" para="idEmpresa" [control]="nuevoUsuario.controls.idEmpresa">
-            <select id="idEmpresa" class="control" formControlName="idEmpresa">
+            <select id="idEmpresa" pInputText formControlName="idEmpresa">
               <option value="">Selecciona una empresa…</option>
               @for (empresa of empresas.datos() ?? []; track empresa.id) {
                 <option [value]="empresa.id">{{ empresa.nombre }}</option>
@@ -184,16 +201,11 @@ import { Avisos } from '../../nucleo/ui/avisos';
             para="nombreUsuario"
             [control]="nuevoUsuario.controls.nombreCompleto"
           >
-            <input
-              id="nombreUsuario"
-              type="text"
-              class="control"
-              formControlName="nombreCompleto"
-            />
+            <input id="nombreUsuario" type="text" pInputText formControlName="nombreCompleto" />
           </ui-campo>
 
           <ui-campo etiqueta="Correo" para="correoUsuario" [control]="nuevoUsuario.controls.correo">
-            <input id="correoUsuario" type="email" class="control" formControlName="correo" />
+            <input id="correoUsuario" type="email" pInputText formControlName="correo" />
           </ui-campo>
 
           <ui-campo
@@ -205,14 +217,14 @@ import { Avisos } from '../../nucleo/ui/avisos';
             <input
               id="contrasenaUsuario"
               type="password"
-              class="control"
+              pInputText
               formControlName="contrasena"
               autocomplete="new-password"
             />
           </ui-campo>
 
           <ui-campo etiqueta="Rol" para="rolUsuario" [control]="nuevoUsuario.controls.rol">
-            <select id="rolUsuario" class="control" formControlName="rol">
+            <select id="rolUsuario" pInputText formControlName="rol">
               <option value="reclutador">Reclutador</option>
               <option value="administrador">Administrador</option>
             </select>
@@ -223,7 +235,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
           }
           <button
             type="submit"
-            class="btn btn--primario"
+            pButton
             [disabled]="nuevoUsuario.invalid || crearUsuario.enviando()"
           >
             {{ crearUsuario.enviando() ? 'Creando…' : 'Crear cuenta' }}
@@ -243,20 +255,20 @@ import { Avisos } from '../../nucleo/ui/avisos';
         novalidate
       >
         <input
-          class="control"
+          pInputText
           formControlName="nombreCompleto"
           placeholder="Nombre completo"
           aria-label="Nombre del moderador"
         />
         <input
-          class="control"
+          pInputText
           type="email"
           formControlName="correo"
           placeholder="correo@meritia.co"
           aria-label="Correo del moderador"
         />
         <input
-          class="control"
+          pInputText
           type="password"
           formControlName="contrasena"
           placeholder="Contraseña (mínimo 12)"
@@ -268,7 +280,9 @@ import { Avisos } from '../../nucleo/ui/avisos';
         }
         <button
           type="submit"
-          class="btn btn--sm"
+          pButton
+          severity="secondary"
+          size="small"
           [disabled]="nuevoModerador.invalid || crearModerador.enviando()"
         >
           Crear moderador

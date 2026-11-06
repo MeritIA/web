@@ -6,6 +6,8 @@ import { MentorServicio } from '../../nucleo/api/mentor.servicio';
 import type { TurnoDelMentor } from '../../nucleo/api/modelos';
 import { accion, recurso } from '../../nucleo/estado/recurso';
 import { Sesion } from '../../nucleo/sesion/sesion';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 
 const INICIALES = [
   '¿En qué criterio debo mejorar primero?',
@@ -24,7 +26,7 @@ const INICIALES = [
 @Component({
   selector: 'app-mentor',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, EstadoRecurso],
+  imports: [ButtonDirective, InputText, ReactiveFormsModule, RouterLink, EstadoRecurso],
   template: `
     <header class="pila pila--sm cabecera">
       <span class="micro">acompañamiento</span>
@@ -46,7 +48,7 @@ const INICIALES = [
       @if (c.totalEvaluaciones === 0) {
         <section class="panel pila">
           <p>Aún no tienes evaluaciones, así que el mentor no tiene con qué aconsejarte.</p>
-          <a routerLink="/mis-pruebas" class="btn btn--primario">Ir a mis pruebas</a>
+          <a routerLink="/mis-pruebas" pButton>Ir a mis pruebas</a>
         </section>
       } @else {
         <details class="panel saben">
@@ -90,7 +92,9 @@ const INICIALES = [
             @for (s of sugerencias(); track s) {
               <button
                 type="button"
-                class="btn btn--sm"
+                pButton
+                severity="secondary"
+                size="small"
                 [disabled]="preguntar.enviando()"
                 (click)="enviar(s)"
               >
@@ -103,23 +107,26 @@ const INICIALES = [
             <input
               id="pregunta"
               aria-label="Tu pregunta"
-              class="control"
+              pInputText
               type="text"
               maxlength="500"
               formControlName="pregunta"
               placeholder="Escribe tu pregunta…"
               autocomplete="off"
             />
-            <button
-              type="submit"
-              class="btn btn--primario"
-              [disabled]="preguntar.enviando() || formulario.invalid"
-            >
+            <button type="submit" pButton [disabled]="preguntar.enviando() || formulario.invalid">
               Preguntar
             </button>
           </form>
           @if (turnos().length > 0) {
-            <button type="button" class="btn btn--sm btn--fantasma" (click)="reiniciar()">
+            <button
+              type="button"
+              pButton
+              [text]="true"
+              severity="secondary"
+              size="small"
+              (click)="reiniciar()"
+            >
               Empezar de nuevo
             </button>
           }

@@ -4,6 +4,7 @@ import { ENTREGA } from '../../compartido/dominio';
 import { EntregasServicio } from '../../nucleo/api/entregas.servicio';
 import type { CambioDeEstado } from '../../nucleo/api/modelos';
 import { accion } from '../../nucleo/estado/recurso';
+import { ButtonDirective } from 'primeng/button';
 
 /**
  * El camino de una entrega: de `recibida` a `evaluada`, con el momento y el
@@ -13,9 +14,16 @@ import { accion } from '../../nucleo/estado/recurso';
 @Component({
   selector: 'app-historial-de-entrega',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe],
+  imports: [ButtonDirective, DatePipe],
   template: `
-    <button type="button" class="btn btn--sm btn--fantasma" (click)="alternar()">
+    <button
+      type="button"
+      pButton
+      [text]="true"
+      severity="secondary"
+      size="small"
+      (click)="alternar()"
+    >
       {{ abierto() ? 'Ocultar historial' : 'Ver historial' }}
     </button>
     @if (abierto()) {

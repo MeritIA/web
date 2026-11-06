@@ -11,6 +11,8 @@ import { accion, recurso } from '../../nucleo/estado/recurso';
 import { Sesion } from '../../nucleo/sesion/sesion';
 import { Archivos } from '../../nucleo/plataforma/archivos';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 
 /**
  * Mi cuenta: quién soy para la plataforma y qué permito hacer con mis datos.
@@ -21,7 +23,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
 @Component({
   selector: 'app-mi-cuenta',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, EstadoRecurso, Panel, ReactiveFormsModule],
+  imports: [ButtonDirective, InputText, DatePipe, EstadoRecurso, Panel, ReactiveFormsModule],
   template: `
     <header class="pila pila--sm cabecera">
       <span class="micro">cuenta y privacidad</span>
@@ -35,7 +37,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
       </p>
       <div class="identificador">
         <code>{{ sesion.usuario()?.id }}</code>
-        <button type="button" class="btn btn--sm" (click)="copiar()">
+        <button type="button" pButton severity="secondary" size="small" (click)="copiar()">
           {{ copiado() ? 'Copiado' : 'Copiar' }}
         </button>
       </div>
@@ -96,7 +98,9 @@ import { Avisos } from '../../nucleo/ui/avisos';
       <div class="fila">
         <button
           type="button"
-          class="btn btn--sm"
+          pButton
+          severity="secondary"
+          size="small"
           [disabled]="descargar.enviando()"
           (click)="descargar.correr()"
         >
@@ -114,7 +118,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
         <input
           id="contrasena-borrado"
           type="password"
-          class="control"
+          pInputText
           formControlName="contrasena"
           autocomplete="current-password"
         />
@@ -128,7 +132,9 @@ import { Avisos } from '../../nucleo/ui/avisos';
         }
         <button
           type="submit"
-          class="btn btn--sm btn--peligro"
+          pButton
+          severity="danger"
+          size="small"
           [disabled]="borrado.invalid || eliminar.enviando()"
         >
           Eliminar mi cuenta

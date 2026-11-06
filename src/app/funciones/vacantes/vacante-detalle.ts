@@ -31,6 +31,10 @@ import { VacantesServicio } from '../../nucleo/api/vacantes.servicio';
 import { accion, recurso, recursoPor } from '../../nucleo/estado/recurso';
 import { Archivos } from '../../nucleo/plataforma/archivos';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
+import { Textarea } from 'primeng/textarea';
+import { TableModule } from 'primeng/table';
 
 /**
  * Centro de mando de una vacante.
@@ -44,6 +48,10 @@ import { Avisos } from '../../nucleo/ui/avisos';
   selector: 'app-vacante-detalle',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    TableModule,
+    ButtonDirective,
+    InputText,
+    Textarea,
     RouterLink,
     DatePipe,
     ReactiveFormsModule,
@@ -103,13 +111,17 @@ import { Avisos } from '../../nucleo/ui/avisos';
 
         <div class="fila">
           @if (v.estado !== 'borrador') {
-            <a [routerLink]="['/vacantes', v.id, 'reporte']" class="btn">Ver ranking</a>
-            <a [routerLink]="['/vacantes', v.id, 'auditoria']" class="btn">Auditoría</a>
+            <a [routerLink]="['/vacantes', v.id, 'reporte']" pButton severity="secondary"
+              >Ver ranking</a
+            >
+            <a [routerLink]="['/vacantes', v.id, 'auditoria']" pButton severity="secondary"
+              >Auditoría</a
+            >
           }
           @if (v.estado === 'borrador') {
             <button
               type="button"
-              class="btn btn--primario"
+              pButton
               [disabled]="!puedePublicar() || publicar.enviando()"
               [title]="puedePublicar() ? '' : 'Asocia al menos un ejercicio para poder publicar'"
               (click)="pedirPublicar()"
@@ -118,10 +130,10 @@ import { Avisos } from '../../nucleo/ui/avisos';
             </button>
           }
           @if (v.estado !== 'cerrada') {
-            <button type="button" class="btn" (click)="alternarEdicion(v)">
+            <button type="button" pButton severity="secondary" (click)="alternarEdicion(v)">
               {{ editando() ? 'Cancelar edición' : 'Editar datos' }}
             </button>
-            <button type="button" class="btn btn--peligro" (click)="pedirCerrar()">Cerrar</button>
+            <button type="button" pButton severity="danger" (click)="pedirCerrar()">Cerrar</button>
           }
         </div>
       </header>
@@ -129,7 +141,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
       @if (editando() && v.estado !== 'cerrada') {
         <form class="edicion panel" [formGroup]="edicion" (ngSubmit)="guardarEdicion()" novalidate>
           <ui-campo etiqueta="Título" para="e-titulo" [control]="edicion.controls.titulo">
-            <input id="e-titulo" class="control" formControlName="titulo" maxlength="160" />
+            <input id="e-titulo" pInputText formControlName="titulo" maxlength="160" />
           </ui-campo>
           <ui-campo
             etiqueta="Descripción"
@@ -138,17 +150,17 @@ import { Avisos } from '../../nucleo/ui/avisos';
           >
             <textarea
               id="e-descripcion"
-              class="control"
+              pTextarea
               formControlName="descripcion"
               rows="5"
             ></textarea>
           </ui-campo>
           <div class="dos">
             <ui-campo etiqueta="Ubicación" para="e-ubicacion" opcional>
-              <input id="e-ubicacion" class="control" formControlName="ubicacion" maxlength="120" />
+              <input id="e-ubicacion" pInputText formControlName="ubicacion" maxlength="120" />
             </ui-campo>
             <ui-campo etiqueta="Modalidad" para="e-modalidad" opcional>
-              <select id="e-modalidad" class="control" formControlName="modalidad">
+              <select id="e-modalidad" pInputText formControlName="modalidad">
                 <option value="">Sin definir</option>
                 @for (m of opcionesModalidad; track m) {
                   <option [value]="m">{{ modalidades[m] }}</option>
@@ -162,11 +174,11 @@ import { Avisos } from '../../nucleo/ui/avisos';
             opcional
             ayuda="Separadas por coma. Hasta 10."
           >
-            <input id="e-tecnologias" class="control" formControlName="tecnologias" />
+            <input id="e-tecnologias" pInputText formControlName="tecnologias" />
           </ui-campo>
           <div class="dos">
             <ui-campo etiqueta="Cierre estimado" para="e-cierre" opcional>
-              <input id="e-cierre" type="date" class="control" formControlName="cierreEstimado" />
+              <input id="e-cierre" type="date" pInputText formControlName="cierreEstimado" />
             </ui-campo>
             <ui-campo
               etiqueta="Finalistas a evaluar"
@@ -177,7 +189,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
               <input
                 id="e-finalistas"
                 type="number"
-                class="control"
+                pInputText
                 formControlName="finalistasAEvaluar"
                 min="1"
                 max="1000"
@@ -194,7 +206,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
               <input
                 id="e-intentos"
                 type="number"
-                class="control"
+                pInputText
                 formControlName="intentosPermitidos"
                 [min]="limites.intentosMin"
                 [max]="limites.intentosMax"
@@ -205,7 +217,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
             <p class="campo__error" role="alert">{{ error }}</p>
           }
           <div class="fila">
-            <button type="submit" class="btn btn--primario" [disabled]="guardar.enviando()">
+            <button type="submit" pButton [disabled]="guardar.enviando()">
               {{ guardar.enviando() ? 'Guardando…' : 'Guardar cambios' }}
             </button>
           </div>
@@ -276,7 +288,9 @@ import { Avisos } from '../../nucleo/ui/avisos';
               }
               <button
                 type="button"
-                class="btn btn--sm"
+                pButton
+                severity="secondary"
+                size="small"
                 [disabled]="guardarEjercicios.enviando() || !cambiaronEjercicios()"
                 (click)="guardarEjercicios.correr()"
               >
@@ -317,7 +331,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
                 <input
                   id="destinatario"
                   type="text"
-                  class="control"
+                  pInputText
                   formControlName="destinatario"
                   placeholder="persona@correo.com"
                 />
@@ -327,7 +341,9 @@ import { Avisos } from '../../nucleo/ui/avisos';
               }
               <button
                 type="submit"
-                class="btn btn--sm"
+                pButton
+                severity="secondary"
+                size="small"
                 [disabled]="invitacion.invalid || invitar.enviando()"
               >
                 {{ invitar.enviando() ? 'Invitando…' : 'Invitar' }}
@@ -361,7 +377,9 @@ import { Avisos } from '../../nucleo/ui/avisos';
                     <span class="fila">
                       <button
                         type="button"
-                        class="btn btn--sm"
+                        pButton
+                        severity="secondary"
+                        size="small"
                         [disabled]="decidir.enviando()"
                         (click)="empezarRechazo(postulante.idCandidato)"
                       >
@@ -369,7 +387,8 @@ import { Avisos } from '../../nucleo/ui/avisos';
                       </button>
                       <button
                         type="button"
-                        class="btn btn--sm btn--primario"
+                        pButton
+                        size="small"
                         [disabled]="decidir.enviando()"
                         (click)="decidir.correr(postulante, 'aceptada')"
                       >
@@ -393,19 +412,27 @@ import { Avisos } from '../../nucleo/ui/avisos';
                     >
                       <textarea
                         id="motivo"
-                        class="control"
+                        pTextarea
                         rows="3"
                         maxlength="500"
                         [formControl]="motivo"
                       ></textarea>
                     </ui-campo>
                     <span class="fila">
-                      <button type="button" class="btn btn--sm" (click)="rechazando.set(null)">
+                      <button
+                        type="button"
+                        pButton
+                        severity="secondary"
+                        size="small"
+                        (click)="rechazando.set(null)"
+                      >
                         Cancelar
                       </button>
                       <button
                         type="button"
-                        class="btn btn--sm btn--peligro"
+                        pButton
+                        severity="danger"
+                        size="small"
                         [disabled]="decidir.enviando()"
                         (click)="confirmarRechazo(postulante)"
                       >
@@ -425,7 +452,14 @@ import { Avisos } from '../../nucleo/ui/avisos';
 
       <!-- ---------------------------------------------------- Entregas -->
       <ui-panel antetitulo="actividad" titulo="Entregas recibidas" plano>
-        <button acciones type="button" class="btn btn--sm" (click)="entregas.recargar()">
+        <button
+          acciones
+          type="button"
+          pButton
+          severity="secondary"
+          size="small"
+          (click)="entregas.recargar()"
+        >
           Actualizar
         </button>
 
@@ -440,12 +474,17 @@ import { Avisos } from '../../nucleo/ui/avisos';
 
         @if ((entregas.datos()?.length ?? 0) > 0) {
           <div class="tabla-scroll">
-            <table class="tabla">
-              <caption class="solo-lectores">
-                Entregas recibidas en esta vacante
-              </caption>
-              <thead>
-                <tr>
+            <p-table
+              [value]="entregas.datos() ?? []"
+              [scrollable]="true"
+              [tableStyle]="{ 'min-width': '40rem' }"
+              styleClass="p-datatable-sm"
+            >
+              <ng-template #caption
+                ><span class="solo-lectores">Entregas recibidas en esta vacante</span></ng-template
+              >
+              <ng-template #header
+                ><tr>
                   <th scope="col">Candidato</th>
                   <th scope="col">Ejercicio</th>
                   <th scope="col">Intento</th>
@@ -453,37 +492,38 @@ import { Avisos } from '../../nucleo/ui/avisos';
                   <th scope="col">Recibida</th>
                   <th scope="col">Verificación</th>
                   <th scope="col">Archivo</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (entrega of entregas.datos() ?? []; track entrega.id) {
-                  <tr>
-                    <td>
-                      <a [routerLink]="['/vacantes', v.id, 'candidatos', entrega.idCandidato]"
-                        >#{{ entrega.idCandidato | corto }}</a
-                      >
-                    </td>
-                    <td>{{ nombreDeEjercicio(entrega.idEjercicio) }}</td>
-                    <td class="tabla__num">{{ entrega.numeroIntento }}</td>
-                    <td><ui-estado [p]="estadoEntrega(entrega.estado)" /></td>
-                    <td>{{ entrega.creadaEn | date: 'd MMM, HH:mm' }}</td>
-                    <td>
-                      <app-verificacion-entrega [idEntrega]="entrega.id" [soloLectura]="true" />
-                    </td>
-                    <td>
-                      <button
-                        type="button"
-                        class="btn btn--sm btn--fantasma"
-                        [disabled]="descargar.enviando()"
-                        (click)="descargar.correr(entrega)"
-                      >
-                        Descargar
-                      </button>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+                </tr></ng-template
+              >
+              <ng-template #body let-entrega
+                ><tr>
+                  <td>
+                    <a [routerLink]="['/vacantes', v.id, 'candidatos', entrega.idCandidato]"
+                      >#{{ entrega.idCandidato | corto }}</a
+                    >
+                  </td>
+                  <td>{{ nombreDeEjercicio(entrega.idEjercicio) }}</td>
+                  <td class="tabla__num">{{ entrega.numeroIntento }}</td>
+                  <td><ui-estado [p]="estadoEntrega(entrega.estado)" /></td>
+                  <td>{{ entrega.creadaEn | date: 'd MMM, HH:mm' }}</td>
+                  <td>
+                    <app-verificacion-entrega [idEntrega]="entrega.id" [soloLectura]="true" />
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      pButton
+                      [text]="true"
+                      severity="secondary"
+                      size="small"
+                      [disabled]="descargar.enviando()"
+                      (click)="descargar.correr(entrega)"
+                    >
+                      Descargar
+                    </button>
+                  </td>
+                </tr></ng-template
+              >
+            </p-table>
           </div>
         }
       </ui-panel>
@@ -494,7 +534,9 @@ import { Avisos } from '../../nucleo/ui/avisos';
           <button
             acciones
             type="button"
-            class="btn btn--sm"
+            pButton
+            severity="secondary"
+            size="small"
             [disabled]="reenviar.enviando()"
             (click)="reenviar.correr()"
           >

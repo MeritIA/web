@@ -6,20 +6,21 @@ import { Estado, EstadoRecurso } from '../../compartido/ui/basicos';
 import type { EstadoVacante } from '../../nucleo/api/modelos';
 import { VacantesServicio } from '../../nucleo/api/vacantes.servicio';
 import { recurso } from '../../nucleo/estado/recurso';
+import { ButtonDirective } from 'primeng/button';
 
 type Filtro = EstadoVacante | 'todas';
 
 @Component({
   selector: 'app-vacantes-lista',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, Estado, EstadoRecurso],
+  imports: [ButtonDirective, RouterLink, DatePipe, Estado, EstadoRecurso],
   template: `
     <header class="cabecera">
       <div class="pila pila--sm">
         <span class="micro">procesos de selección</span>
         <h1>Vacantes</h1>
       </div>
-      <a routerLink="/vacantes/nueva" class="btn btn--primario">Nueva vacante</a>
+      <a routerLink="/vacantes/nueva" pButton>Nueva vacante</a>
     </header>
 
     @if (vacantes.datos(); as todas) {
@@ -27,7 +28,9 @@ type Filtro = EstadoVacante | 'todas';
         @for (opcion of filtros; track opcion.valor) {
           <button
             type="button"
-            class="btn btn--sm"
+            pButton
+            severity="secondary"
+            size="small"
             [class.btn--primario]="filtro() === opcion.valor"
             [attr.aria-pressed]="filtro() === opcion.valor"
             (click)="filtro.set(opcion.valor)"
@@ -46,7 +49,7 @@ type Filtro = EstadoVacante | 'todas';
       textoVacio="Una vacante agrupa los ejercicios que resolverá un candidato. Se crea en borrador y no es visible para nadie hasta que la publicas."
       (reintentar)="vacantes.recargar()"
     >
-      <a accion-vacio routerLink="/vacantes/nueva" class="btn btn--primario">Crear la primera</a>
+      <a accion-vacio routerLink="/vacantes/nueva" pButton>Crear la primera</a>
     </ui-recurso>
 
     <div class="rejilla rejilla--ancha">
@@ -82,9 +85,15 @@ type Filtro = EstadoVacante | 'todas';
           </dl>
 
           <div class="fila">
-            <a [routerLink]="['/vacantes', vacante.id]" class="btn btn--sm">Gestionar</a>
+            <a [routerLink]="['/vacantes', vacante.id]" pButton severity="secondary" size="small"
+              >Gestionar</a
+            >
             @if (vacante.estado !== 'borrador') {
-              <a [routerLink]="['/vacantes', vacante.id, 'reporte']" class="btn btn--sm"
+              <a
+                [routerLink]="['/vacantes', vacante.id, 'reporte']"
+                pButton
+                severity="secondary"
+                size="small"
                 >Ver ranking</a
               >
             }

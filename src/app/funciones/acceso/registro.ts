@@ -7,6 +7,8 @@ import { accion } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
 import { Sesion, inicioDe } from '../../nucleo/sesion/sesion';
 import { MarcoAcceso } from './marco-acceso';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 
 /**
  * Registro público. Crea siempre un candidato: el rol no se elige desde aquí
@@ -16,7 +18,7 @@ import { MarcoAcceso } from './marco-acceso';
 @Component({
   selector: 'app-registro',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MarcoAcceso, ReactiveFormsModule, RouterLink, Campo],
+  imports: [ButtonDirective, InputText, MarcoAcceso, ReactiveFormsModule, RouterLink, Campo],
   template: `
     <app-marco-acceso>
       <form class="panel pila" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
@@ -33,7 +35,7 @@ import { MarcoAcceso } from './marco-acceso';
           <input
             id="nombre"
             type="text"
-            class="control"
+            pInputText
             formControlName="nombreCompleto"
             autocomplete="name"
           />
@@ -43,7 +45,7 @@ import { MarcoAcceso } from './marco-acceso';
           <input
             id="correo"
             type="email"
-            class="control"
+            pInputText
             formControlName="correo"
             autocomplete="username"
             inputmode="email"
@@ -59,7 +61,7 @@ import { MarcoAcceso } from './marco-acceso';
           <input
             id="contrasena"
             type="password"
-            class="control"
+            pInputText
             formControlName="contrasena"
             autocomplete="new-password"
           />
@@ -92,7 +94,8 @@ import { MarcoAcceso } from './marco-acceso';
 
         <button
           type="submit"
-          class="btn btn--primario btn--bloque"
+          pButton
+          [fluid]="true"
           [disabled]="crear.enviando() || !formulario.controls.consiente.value"
         >
           {{ crear.enviando() ? 'Creando cuenta…' : 'Crear cuenta' }}

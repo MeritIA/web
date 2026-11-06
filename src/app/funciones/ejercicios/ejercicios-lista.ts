@@ -8,18 +8,20 @@ import type { UsoDeEjercicio } from '../../nucleo/api/modelos';
 import { EjerciciosServicio } from '../../nucleo/api/ejercicios.servicio';
 import { accion, recurso } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-ejercicios-lista',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, Chip, EstadoRecurso],
+  imports: [ButtonDirective, InputText, RouterLink, DatePipe, Chip, EstadoRecurso],
   template: `
     <header class="cabecera">
       <div class="pila pila--sm">
         <span class="micro">pruebas técnicas reutilizables</span>
         <h1>Banco de ejercicios</h1>
       </div>
-      <a routerLink="/ejercicios/nuevo" class="btn btn--primario">Nuevo ejercicio</a>
+      <a routerLink="/ejercicios/nuevo" pButton>Nuevo ejercicio</a>
     </header>
 
     <div class="buscador">
@@ -27,7 +29,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
       <input
         id="buscar"
         type="search"
-        class="control"
+        pInputText
         placeholder="Buscar por título o tecnología…"
         [value]="busqueda()"
         (input)="busqueda.set($any($event.target).value)"
@@ -42,7 +44,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
       textoVacio="Un ejercicio se crea una vez y se reutiliza en todas las vacantes que lo necesiten."
       (reintentar)="ejercicios.recargar()"
     >
-      <a accion-vacio routerLink="/ejercicios/nuevo" class="btn btn--primario">Crear ejercicio</a>
+      <a accion-vacio routerLink="/ejercicios/nuevo" pButton>Crear ejercicio</a>
     </ui-recurso>
 
     <div class="rejilla">
@@ -77,14 +79,27 @@ import { Avisos } from '../../nucleo/ui/avisos';
           }
 
           <div class="fila">
-            <a [routerLink]="['/ejercicios', ejercicio.id]" class="btn btn--sm">Ver rúbrica</a>
+            <a
+              [routerLink]="['/ejercicios', ejercicio.id]"
+              pButton
+              severity="secondary"
+              size="small"
+              >Ver rúbrica</a
+            >
             @if (ejercicio.activo) {
-              <a [routerLink]="['/ejercicios', ejercicio.id, 'version']" class="btn btn--sm"
+              <a
+                [routerLink]="['/ejercicios', ejercicio.id, 'version']"
+                pButton
+                severity="secondary"
+                size="small"
                 >Versionar</a
               >
               <button
                 type="button"
-                class="btn btn--sm btn--fantasma"
+                pButton
+                [text]="true"
+                severity="secondary"
+                size="small"
                 (click)="pedirRetirar(ejercicio.id, ejercicio.titulo)"
               >
                 Retirar

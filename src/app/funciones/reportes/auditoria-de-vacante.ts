@@ -6,6 +6,7 @@ import { ReportesServicio } from '../../nucleo/api/reportes.servicio';
 import { recursoPor } from '../../nucleo/estado/recurso';
 import { Archivos } from '../../nucleo/plataforma/archivos';
 import { Plataforma } from '../../nucleo/plataforma/plataforma';
+import { ButtonDirective } from 'primeng/button';
 
 /**
  * Informe de auditoría de una vacante (A09).
@@ -17,7 +18,7 @@ import { Plataforma } from '../../nucleo/plataforma/plataforma';
 @Component({
   selector: 'app-auditoria-de-vacante',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, RouterLink, EstadoRecurso],
+  imports: [ButtonDirective, DatePipe, RouterLink, EstadoRecurso],
   template: `
     <nav class="migas no-imprimir">
       <a routerLink="/vacantes">Vacantes</a> <a [routerLink]="['/vacantes', id()]">/ Detalle</a>
@@ -38,9 +39,11 @@ import { Plataforma } from '../../nucleo/plataforma/plataforma';
         >
         <h1>{{ a.vacante.titulo }}</h1>
         <div class="fila no-imprimir">
-          <button type="button" class="btn btn--sm" (click)="descargar()">Descargar (JSON)</button>
+          <button type="button" pButton severity="secondary" size="small" (click)="descargar()">
+            Descargar (JSON)
+          </button>
           @if (!nativa()) {
-            <button type="button" class="btn btn--sm" (click)="imprimir()">
+            <button type="button" pButton severity="secondary" size="small" (click)="imprimir()">
               Imprimir o guardar PDF
             </button>
           }

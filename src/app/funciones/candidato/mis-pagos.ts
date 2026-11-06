@@ -5,6 +5,8 @@ import { Campo } from '../../compartido/ui/campo';
 import { PagosServicio, UMBRAL_DE_RETIRO } from '../../nucleo/api/pagos.servicio';
 import { accion, recurso } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 
 const METODOS = ['Nequi', 'Daviplata', 'Bancolombia'] as const;
 
@@ -19,7 +21,7 @@ const METODOS = ['Nequi', 'Daviplata', 'Bancolombia'] as const;
 @Component({
   selector: 'app-mis-pagos',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CurrencyPipe, DatePipe, ReactiveFormsModule, Campo],
+  imports: [ButtonDirective, InputText, CurrencyPipe, DatePipe, ReactiveFormsModule, Campo],
   template: `
     <header class="pila pila--sm cabecera">
       <span class="micro">remuneración por reto · simulación</span>
@@ -69,7 +71,7 @@ const METODOS = ['Nequi', 'Daviplata', 'Bancolombia'] as const;
       <form class="panel pila" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
         <h2>Retirar</h2>
         <ui-campo etiqueta="Dónde recibirlo" para="metodo" [control]="formulario.controls.metodo">
-          <select id="metodo" class="control" formControlName="metodo">
+          <select id="metodo" pInputText formControlName="metodo">
             @for (m of metodos; track m) {
               <option [value]="m">{{ m }}</option>
             }
@@ -82,13 +84,13 @@ const METODOS = ['Nequi', 'Daviplata', 'Bancolombia'] as const;
         >
           <input
             id="numero"
-            class="control"
+            pInputText
             formControlName="numero"
             inputmode="numeric"
             autocomplete="off"
           />
         </ui-campo>
-        <button type="submit" class="btn btn--primario" [disabled]="retirar.enviando()">
+        <button type="submit" pButton [disabled]="retirar.enviando()">
           Retirar {{ pagos.saldo() | currency: 'COP' : 'symbol-narrow' : '1.0-0' : 'es-CO' }}
         </button>
       </form>

@@ -5,6 +5,8 @@ import { EstadoRecurso } from '../../compartido/ui/basicos';
 import type { EstadoDeCaso, OrigenDeCaso } from '../../nucleo/api/modelos';
 import { ModeracionServicio } from '../../nucleo/api/moderacion.servicio';
 import { recursoPor } from '../../nucleo/estado/recurso';
+import { ButtonDirective } from 'primeng/button';
+import { TableModule } from 'primeng/table';
 
 export const ORIGEN: Record<OrigenDeCaso, string> = {
   antifraude: 'Marca antifraude',
@@ -19,7 +21,7 @@ export const ORIGEN: Record<OrigenDeCaso, string> = {
 @Component({
   selector: 'app-bandeja-de-casos',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, RouterLink, EstadoRecurso],
+  imports: [TableModule, ButtonDirective, DatePipe, RouterLink, EstadoRecurso],
   template: `
     <header class="pila pila--sm cabecera">
       <span class="micro">revisión humana</span>
@@ -34,7 +36,9 @@ export const ORIGEN: Record<OrigenDeCaso, string> = {
       @for (e of estados; track e.valor) {
         <button
           type="button"
-          class="btn btn--sm"
+          pButton
+          severity="secondary"
+          size="small"
           [class.btn--primario]="estado() === e.valor"
           [attr.aria-pressed]="estado() === e.valor"
           (click)="estado.set(e.valor)"
@@ -55,32 +59,35 @@ export const ORIGEN: Record<OrigenDeCaso, string> = {
 
     @if ((casos.datos()?.length ?? 0) > 0) {
       <div class="tabla-scroll">
-        <table class="tabla">
-          <thead>
-            <tr>
+        <p-table
+          [value]="casos.datos() ?? []"
+          [scrollable]="true"
+          [tableStyle]="{ 'min-width': '40rem' }"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template #header
+            ><tr>
               <th scope="col">Candidato</th>
               <th scope="col">Origen</th>
               <th scope="col">Vence</th>
               <th scope="col"><span>Acción</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (c of casos.datos() ?? []; track c.id) {
-              <tr>
-                <td>{{ c.alias }}</td>
-                <td>{{ origenes[c.origen] }}</td>
-                <td [class.vencido]="c.vencido">
-                  {{ c.venceEn | date: 'd MMM, HH:mm' }}{{ c.vencido ? ' · vencido' : '' }}
-                </td>
-                <td>
-                  <a [routerLink]="['/moderacion', c.id]" class="btn btn--sm">
-                    {{ estado() === 'abierto' ? 'Revisar' : 'Ver' }}
-                  </a>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+            </tr></ng-template
+          >
+          <ng-template #body let-c
+            ><tr>
+              <td>{{ c.alias }}</td>
+              <td>{{ origen(c.origen) }}</td>
+              <td [class.vencido]="c.vencido">
+                {{ c.venceEn | date: 'd MMM, HH:mm' }}{{ c.vencido ? ' · vencido' : '' }}
+              </td>
+              <td>
+                <a [routerLink]="['/moderacion', c.id]" pButton severity="secondary" size="small">
+                  {{ estado() === 'abierto' ? 'Revisar' : 'Ver' }}
+                </a>
+              </td>
+            </tr></ng-template
+          >
+        </p-table>
       </div>
     }
   `,
@@ -107,7 +114,7 @@ export const ORIGEN: Record<OrigenDeCaso, string> = {
 export class BandejaDeCasos {
   readonly #servicio = inject(ModeracionServicio);
 
-  protected readonly origenes = ORIGEN;
+  protected readonly origen = (o: OrigenDeCaso) => ORIGEN[o];
   protected readonly estados: { valor: EstadoDeCaso; texto: string }[] = [
     { valor: 'abierto', texto: 'Abiertos' },
     { valor: 'confirmado', texto: 'Confirmados' },

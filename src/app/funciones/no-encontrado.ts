@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Sesion, inicioDe } from '../nucleo/sesion/sesion';
+import { ButtonDirective } from 'primeng/button';
 
 @Component({
   selector: 'app-no-encontrado',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [ButtonDirective, RouterLink],
   template: `
     <div class="escena malla">
       <span class="micro">error 404</span>
@@ -14,7 +15,7 @@ import { Sesion, inicioDe } from '../nucleo/sesion/sesion';
         O existe y no es tuya. MeritIA responde lo mismo en ambos casos: distinguirlos permitiría
         averiguar qué hay dentro probando direcciones.
       </p>
-      <a [routerLink]="destino()" class="btn btn--primario">Volver a lo mío</a>
+      <a [routerLink]="destino()" pButton>Volver a lo mío</a>
     </div>
   `,
   styles: `

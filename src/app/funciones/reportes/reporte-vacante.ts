@@ -9,6 +9,8 @@ import type { IdentidadRevelada, PromedioDeCriterio, Riesgo } from '../../nucleo
 import { ReportesServicio } from '../../nucleo/api/reportes.servicio';
 import { accion, recursoPor } from '../../nucleo/estado/recurso';
 import { Archivos } from '../../nucleo/plataforma/archivos';
+import { ButtonDirective } from 'primeng/button';
+import { TableModule } from 'primeng/table';
 
 /**
  * Ranking de una vacante (HU-20).
@@ -21,7 +23,17 @@ import { Archivos } from '../../nucleo/plataforma/archivos';
 @Component({
   selector: 'app-reporte-vacante',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, NotaPipe, Estado, EstadoRecurso, Nota, Panel],
+  imports: [
+    TableModule,
+    ButtonDirective,
+    RouterLink,
+    DatePipe,
+    NotaPipe,
+    Estado,
+    EstadoRecurso,
+    Nota,
+    Panel,
+  ],
   template: `
     <nav class="migas">
       <a routerLink="/vacantes">Vacantes</a>
@@ -44,10 +56,18 @@ import { Archivos } from '../../nucleo/plataforma/archivos';
           <p class="micro">Generado {{ r.generadoEn | date: 'd MMM y, HH:mm' }}</p>
         </div>
         <div class="fila">
-          <button type="button" class="btn btn--sm" (click)="reporte.recargar()">Actualizar</button>
           <button
             type="button"
-            class="btn btn--primario"
+            pButton
+            severity="secondary"
+            size="small"
+            (click)="reporte.recargar()"
+          >
+            Actualizar
+          </button>
+          <button
+            type="button"
+            pButton
             [disabled]="exportar.enviando()"
             (click)="exportar.correr()"
           >
@@ -134,12 +154,19 @@ import { Archivos } from '../../nucleo/plataforma/archivos';
 
           @if (r.ranking.length > 0) {
             <div class="tabla-scroll">
-              <table class="tabla">
-                <caption class="solo-lectores">
-                  Ranking de candidatos por nota del mejor intento
-                </caption>
-                <thead>
-                  <tr>
+              <p-table
+                [value]="r.ranking"
+                [scrollable]="true"
+                [tableStyle]="{ 'min-width': '40rem' }"
+                styleClass="p-datatable-sm"
+              >
+                <ng-template #caption
+                  ><span class="solo-lectores"
+                    >Ranking de candidatos por nota del mejor intento</span
+                  ></ng-template
+                >
+                <ng-template #header
+                  ><tr>
                     <th scope="col">#</th>
                     <th scope="col">Candidato</th>
                     <th scope="col">Punto fuerte</th>
@@ -147,57 +174,60 @@ import { Archivos } from '../../nucleo/plataforma/archivos';
                     <th scope="col" class="tabla__num">Intentos</th>
                     <th scope="col">Integridad</th>
                     <th scope="col"><span class="solo-lectores">Acciones</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (fila of r.ranking; track fila.idCandidato) {
-                    <tr [class.podio]="fila.posicion <= 3">
-                      <td class="posicion">{{ fila.posicion }}</td>
-                      <td>
-                        @if (reveladas()[fila.idCandidato]; as identidad) {
-                          <strong>{{ identidad.nombre }}</strong>
-                          <p class="micro">{{ identidad.correo }} · {{ fila.alias }}</p>
-                        } @else {
-                          <strong>{{ fila.alias }}</strong>
-                          <p class="micro">identidad oculta</p>
-                        }
-                      </td>
-                      <td>
-                        @if (fila.habilidadDestacada; as h) {
-                          <span class="fuerte">{{ h.criterio }}</span>
-                          <p class="micro">{{ h.porcentajeLogrado | nota }}% logrado</p>
-                        } @else {
-                          <span class="micro">—</span>
-                        }
-                      </td>
-                      <td class="tabla__num celda-nota">
-                        <ui-nota [valor]="fila.notaFinal" />
-                      </td>
-                      <td class="tabla__num">{{ fila.intentosEvaluados }}</td>
-                      <td><ui-estado [p]="riesgo(fila.riesgoInyeccion)" /></td>
-                      <td>
-                        <div class="acciones">
-                          @if (!reveladas()[fila.idCandidato]) {
-                            <button
-                              type="button"
-                              class="btn btn--sm btn--fantasma"
-                              [disabled]="revelar.enviando()"
-                              (click)="pedirRevelar(fila.idCandidato, fila.alias)"
-                            >
-                              Revelar
-                            </button>
-                          }
-                          <a
-                            class="btn btn--sm"
-                            [routerLink]="['/vacantes', id(), 'candidatos', fila.idCandidato]"
-                            >Detalle</a
+                  </tr></ng-template
+                >
+                <ng-template #body let-fila
+                  ><tr [class.podio]="fila.posicion <= 3">
+                    <td class="posicion">{{ fila.posicion }}</td>
+                    <td>
+                      @if (reveladas()[fila.idCandidato]; as identidad) {
+                        <strong>{{ identidad.nombre }}</strong>
+                        <p class="micro">{{ identidad.correo }} · {{ fila.alias }}</p>
+                      } @else {
+                        <strong>{{ fila.alias }}</strong>
+                        <p class="micro">identidad oculta</p>
+                      }
+                    </td>
+                    <td>
+                      @if (fila.habilidadDestacada; as h) {
+                        <span class="fuerte">{{ h.criterio }}</span>
+                        <p class="micro">{{ h.porcentajeLogrado | nota }}% logrado</p>
+                      } @else {
+                        <span class="micro">—</span>
+                      }
+                    </td>
+                    <td class="tabla__num celda-nota">
+                      <ui-nota [valor]="fila.notaFinal" />
+                    </td>
+                    <td class="tabla__num">{{ fila.intentosEvaluados }}</td>
+                    <td><ui-estado [p]="riesgo(fila.riesgoInyeccion)" /></td>
+                    <td>
+                      <div class="acciones">
+                        @if (!reveladas()[fila.idCandidato]) {
+                          <button
+                            type="button"
+                            pButton
+                            [text]="true"
+                            severity="secondary"
+                            size="small"
+                            [disabled]="revelar.enviando()"
+                            (click)="pedirRevelar(fila.idCandidato, fila.alias)"
                           >
-                        </div>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
+                            Revelar
+                          </button>
+                        }
+                        <a
+                          pButton
+                          severity="secondary"
+                          size="small"
+                          [routerLink]="['/vacantes', id(), 'candidatos', fila.idCandidato]"
+                          >Detalle</a
+                        >
+                      </div>
+                    </td>
+                  </tr></ng-template
+                >
+              </p-table>
             </div>
           }
         </ui-panel>

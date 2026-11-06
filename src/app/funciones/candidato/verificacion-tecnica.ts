@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { entorno } from '../../../entornos/entorno';
+import { ButtonDirective } from 'primeng/button';
 
 interface Resultado {
   estado: 'ok' | 'falla' | 'pendiente';
@@ -17,6 +18,7 @@ interface Resultado {
 @Component({
   selector: 'app-verificacion-tecnica',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ButtonDirective],
   template: `
     <section class="panel tecnica" aria-labelledby="tecnica-titulo">
       <h2 id="tecnica-titulo" class="micro">Verificación técnica</h2>
@@ -30,7 +32,14 @@ interface Resultado {
           </li>
         }
       </ul>
-      <button type="button" class="btn btn--sm" [disabled]="corriendo()" (click)="comprobar()">
+      <button
+        type="button"
+        pButton
+        severity="secondary"
+        size="small"
+        [disabled]="corriendo()"
+        (click)="comprobar()"
+      >
         {{ corriendo() ? 'Comprobando…' : 'Comprobar mi equipo' }}
       </button>
     </section>

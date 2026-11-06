@@ -24,6 +24,8 @@ import {
 import { accion, recursoPor } from '../../nucleo/estado/recurso';
 import { Archivos } from '../../nucleo/plataforma/archivos';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
+import { Textarea } from 'primeng/textarea';
 
 /**
  * Un ejercicio de la prueba, con sus intentos y su zona de entrega.
@@ -35,7 +37,15 @@ import { Avisos } from '../../nucleo/ui/avisos';
 @Component({
   selector: 'app-panel-ejercicio',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BytesPipe, DesdePipe, Estado, VerificacionEntrega, HistorialDeEntrega],
+  imports: [
+    ButtonDirective,
+    Textarea,
+    BytesPipe,
+    DesdePipe,
+    Estado,
+    VerificacionEntrega,
+    HistorialDeEntrega,
+  ],
   template: `
     <article class="panel ejercicio">
       <header class="fila fila--entre">
@@ -95,7 +105,10 @@ import { Avisos } from '../../nucleo/ui/avisos';
               <app-historial-de-entrega [idEntrega]="entrega.id" />
               <button
                 type="button"
-                class="btn btn--sm btn--fantasma"
+                pButton
+                [text]="true"
+                severity="secondary"
+                size="small"
                 [disabled]="descargar.enviando()"
                 (click)="descargar.correr(entrega)"
               >
@@ -116,7 +129,10 @@ import { Avisos } from '../../nucleo/ui/avisos';
                 {{ a.nombre }} <span class="micro">· {{ a.bytes | bytes }}</span>
                 <button
                   type="button"
-                  class="btn btn--sm btn--fantasma"
+                  pButton
+                  [text]="true"
+                  severity="secondary"
+                  size="small"
                   [disabled]="descargarAdjunto.enviando()"
                   (click)="descargarAdjunto.correr(a)"
                 >
@@ -137,7 +153,8 @@ import { Avisos } from '../../nucleo/ui/avisos';
             </p>
             <button
               type="button"
-              class="btn btn--sm btn--primario"
+              pButton
+              size="small"
               [disabled]="iniciar.enviando()"
               (click)="iniciar.correr()"
             >
@@ -188,7 +205,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
               Tu respuesta (se entrega como respuesta.md)
             </label>
             <textarea
-              class="control"
+              pTextarea
               rows="10"
               [id]="'texto-' + idEjercicio()"
               [value]="texto()"
@@ -208,13 +225,21 @@ import { Avisos } from '../../nucleo/ui/avisos';
                 {{ archivo() ? 'Cambiar archivo' : 'Elegir archivo' }}
               </label>
             }
-            <button type="button" class="btn btn--sm btn--fantasma" (click)="alternarTexto()">
+            <button
+              type="button"
+              pButton
+              [text]="true"
+              severity="secondary"
+              size="small"
+              (click)="alternarTexto()"
+            >
               {{ escribiendo() ? 'Mejor subir un archivo' : 'Escribir la respuesta aquí' }}
             </button>
             @if (archivo()) {
               <button
                 type="button"
-                class="btn btn--sm btn--primario"
+                pButton
+                size="small"
                 [disabled]="enviar.enviando()"
                 (click)="enviar.correr()"
               >

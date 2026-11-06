@@ -1,0 +1,123 @@
+// Puente entre PrimeNG y los tokens de MeritIA. PrimeNG lee sus propias
+// variables `--p-*`; aqui se apuntan a las nuestras para que un unico cambio de
+// token (o de tema) recolore tambien los componentes de la libreria.
+:root {
+  --p-content-background: var(--c-superficie);
+  --p-content-border-color: var(--c-borde);
+  --p-text-color: var(--c-texto);
+  --p-text-muted-color: var(--c-texto-suave);
+  --p-form-field-background: var(--c-superficie-alta);
+  --p-form-field-border-color: var(--c-borde-fuerte);
+  --p-form-field-color: var(--c-texto);
+  --p-form-field-placeholder-color: var(--c-texto-tenue);
+  --p-form-field-border-radius: var(--r-md);
+  --p-overlay-modal-background: var(--c-superficie-alta);
+  --p-overlay-modal-border-color: var(--c-borde-fuerte);
+  --p-overlay-select-background: var(--c-superficie-alta);
+  --p-button-border-radius: var(--r-pill);
+  --p-card-border-radius: var(--r-lg);
+  --p-card-shadow: none;
+}
+
+// Boton: pildora con degradado y elevacion suave al pasar el puntero.
+.p-button {
+  font-weight: var(--peso-medio);
+  letter-spacing: 0.01em;
+  transition:
+    transform var(--mov) var(--curva),
+    box-shadow var(--mov) var(--curva),
+    background var(--mov) var(--curva);
+
+  &:not(.p-button-text, .p-button-outlined, .p-button-secondary, .p-button-danger) {
+    background: linear-gradient(135deg, var(--p-primary-color), var(--p-primary-hover-color));
+    border-color: transparent;
+    box-shadow: 0 8px 22px -12px var(--p-primary-color);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .p-button:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px -12px var(--p-primary-color);
+  }
+}
+
+// Tactil: objetivos de 44px y 16px en campos para evitar el zoom de iOS.
+@media (pointer: coarse) {
+  .p-button {
+    min-height: 44px;
+  }
+  .p-button-sm {
+    min-height: 40px;
+  }
+  .p-inputtext,
+  .p-textarea,
+  .p-select-label {
+    font-size: 16px;
+  }
+}
+
+// Ancho completo de los campos dentro de formularios.
+.p-inputtext,
+.p-textarea {
+  width: 100%;
+}
+
+// --- Capa visual: mas presencia, mismos tokens -----------------------------
+// Aurora de fondo fija: dos halos del color de marca. `fixed` + `pointer-events`
+// nulos la hacen gratis para el layout y el scroll.
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      60rem 36rem at 12% -8%,
+      color-mix(in srgb, var(--c-acento) 16%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      48rem 30rem at 108% 8%,
+      color-mix(in srgb, var(--c-info) 12%, transparent),
+      transparent 70%
+    );
+}
+
+// Titulares con degradado de marca (solo en pantallas de portada y paneles).
+.titular-vivo,
+.discurso h1 {
+  background: linear-gradient(120deg, var(--c-texto) 30%, var(--c-acento) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+// Ritmo vertical: mas aire entre bloques en escritorio, justo en movil.
+.contenido {
+  --separacion: var(--e-6);
+}
+.contenido > * + * {
+  margin-top: var(--separacion);
+}
+@media (max-width: 640px) {
+  .contenido {
+    --separacion: var(--e-5);
+  }
+  .rejilla,
+  .columnas {
+    gap: var(--e-3);
+  }
+  .p-datatable .p-datatable-tbody > tr > td,
+  .p-datatable .p-datatable-thead > tr > th {
+    padding: var(--e-3);
+  }
+}
+
+// Respeta a quien pide menos movimiento.
+@media (prefers-reduced-motion: reduce) {
+  .p-button {
+    transition: none;
+  }
+}

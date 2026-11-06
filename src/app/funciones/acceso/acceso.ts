@@ -5,11 +5,13 @@ import { Campo } from '../../compartido/ui/campo';
 import { accion } from '../../nucleo/estado/recurso';
 import { Sesion, inicioDe } from '../../nucleo/sesion/sesion';
 import { MarcoAcceso } from './marco-acceso';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-acceso',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MarcoAcceso, ReactiveFormsModule, RouterLink, Campo],
+  imports: [ButtonDirective, InputText, MarcoAcceso, ReactiveFormsModule, RouterLink, Campo],
   template: `
     <app-marco-acceso>
       <form class="panel pila" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
@@ -28,7 +30,7 @@ import { MarcoAcceso } from './marco-acceso';
           <input
             id="correo"
             type="email"
-            class="control"
+            pInputText
             formControlName="correo"
             autocomplete="username"
             inputmode="email"
@@ -46,7 +48,7 @@ import { MarcoAcceso } from './marco-acceso';
           <input
             id="contrasena"
             type="password"
-            class="control"
+            pInputText
             formControlName="contrasena"
             autocomplete="current-password"
             [attr.aria-invalid]="
@@ -59,7 +61,7 @@ import { MarcoAcceso } from './marco-acceso';
           <p class="campo__error" role="alert"><span aria-hidden="true">▲</span> {{ error }}</p>
         }
 
-        <button type="submit" class="btn btn--primario btn--bloque" [disabled]="entrar.enviando()">
+        <button type="submit" pButton [fluid]="true" [disabled]="entrar.enviando()">
           {{ entrar.enviando() ? 'Entrando…' : 'Entrar' }}
         </button>
 

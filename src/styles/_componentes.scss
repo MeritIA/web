@@ -470,3 +470,30 @@ textarea.control {
     font-size: 16px; // por debajo de 16px el navegador móvil hace zoom al enfocar
   }
 }
+
+// --- Efectos -----------------------------------------------------------
+// Aparicion al entrar en pantalla (directiva `appAparecer`).
+.aparecer {
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition:
+    opacity var(--mov-lento) var(--curva) var(--aparecer-retraso, 0ms),
+    transform var(--mov-lento) var(--curva) var(--aparecer-retraso, 0ms);
+}
+
+.aparecer--visto {
+  opacity: 1;
+  transform: none;
+}
+
+// Foco de luz que sigue al cursor sobre los paneles. Solo con raton: en tactil
+// no hay hover y el degradado no aportaria nada.
+@media (hover: hover) and (pointer: fine) {
+  .panel {
+    transition: border-color var(--mov-lento) var(--curva);
+
+    &:hover {
+      border-color: var(--c-borde-fuerte);
+    }
+  }
+}

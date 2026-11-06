@@ -4,6 +4,7 @@ import { ROL } from '../compartido/dominio';
 import { Plataforma } from '../nucleo/plataforma/plataforma';
 import { Sesion } from '../nucleo/sesion/sesion';
 import { TemaServicio } from '../nucleo/ui/tema';
+import { ButtonDirective } from 'primeng/button';
 
 interface Enlace {
   ruta: string;
@@ -20,7 +21,7 @@ interface Enlace {
 @Component({
   selector: 'app-marco',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [ButtonDirective, RouterOutlet, RouterLink, RouterLinkActive],
   template: `
     <a class="saltar" href="#principal">Saltar al contenido</a>
 
@@ -52,19 +53,27 @@ interface Enlace {
         <div class="fila">
           <button
             type="button"
-            class="btn btn--sm btn--fantasma"
+            pButton
+            [text]="true"
+            severity="secondary"
+            size="small"
             (click)="tema.alternar()"
             [attr.aria-label]="
               tema.actual() === 'oscuro' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'
             "
           >
-            {{ tema.actual() === 'oscuro' ? '◐' : '◑' }}
+            <i
+              [class]="tema.actual() === 'oscuro' ? 'pi pi-sun' : 'pi pi-moon'"
+              aria-hidden="true"
+            ></i>
           </button>
 
           @if (sesion.usuario(); as usuario) {
             <div class="usuario">
               <span class="micro">{{ rol() }}</span>
-              <button type="button" class="btn btn--sm" (click)="salir()">Salir</button>
+              <button type="button" pButton severity="secondary" size="small" (click)="salir()">
+                <i class="pi pi-sign-out" aria-hidden="true"></i> Salir
+              </button>
             </div>
           }
         </div>

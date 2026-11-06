@@ -8,6 +8,8 @@ import { ModeracionServicio } from '../../nucleo/api/moderacion.servicio';
 import { accion, recursoPor } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
 import { ORIGEN } from './bandeja';
+import { ButtonDirective } from 'primeng/button';
+import { Textarea } from 'primeng/textarea';
 
 /**
  * Revisión de un caso (C26): la evidencia, y una decisión binaria con
@@ -16,7 +18,15 @@ import { ORIGEN } from './bandeja';
 @Component({
   selector: 'app-revision-de-caso',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, RouterLink, ReactiveFormsModule, EstadoRecurso, Campo],
+  imports: [
+    ButtonDirective,
+    Textarea,
+    DatePipe,
+    RouterLink,
+    ReactiveFormsModule,
+    EstadoRecurso,
+    Campo,
+  ],
   template: `
     <nav class="migas"><a routerLink="/moderacion">Casos</a> <span>/ Revisión</span></nav>
 
@@ -89,7 +99,7 @@ import { ORIGEN } from './bandeja';
           >
             <textarea
               id="justificacion"
-              class="control"
+              pTextarea
               rows="4"
               maxlength="1000"
               formControlName="justificacion"
@@ -101,7 +111,8 @@ import { ORIGEN } from './bandeja';
           <div class="fila">
             <button
               type="button"
-              class="btn"
+              pButton
+              severity="secondary"
               [disabled]="formulario.invalid || decidir.enviando()"
               (click)="decidir.correr('restaurar')"
             >
@@ -109,7 +120,8 @@ import { ORIGEN } from './bandeja';
             </button>
             <button
               type="button"
-              class="btn btn--peligro"
+              pButton
+              severity="danger"
               [disabled]="formulario.invalid || decidir.enviando()"
               (click)="decidir.correr('confirmar')"
             >

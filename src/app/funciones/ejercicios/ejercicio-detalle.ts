@@ -5,6 +5,8 @@ import { Chip, EstadoRecurso, Panel } from '../../compartido/ui/basicos';
 import { EjerciciosServicio } from '../../nucleo/api/ejercicios.servicio';
 import { accion, recursoPor } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
+import { TableModule } from 'primeng/table';
 
 /**
  * Historia completa de un ejercicio.
@@ -16,7 +18,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
 @Component({
   selector: 'app-ejercicio-detalle',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, Chip, EstadoRecurso, Panel],
+  imports: [TableModule, ButtonDirective, RouterLink, DatePipe, Chip, EstadoRecurso, Panel],
   template: `
     <nav class="migas"><a routerLink="/ejercicios">Ejercicios</a> <span>/ Detalle</span></nav>
 
@@ -39,9 +41,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
           <h1>{{ e.titulo }}</h1>
         </div>
         @if (e.activo) {
-          <a [routerLink]="['/ejercicios', e.id, 'version']" class="btn btn--primario"
-            >Nueva versión</a
-          >
+          <a [routerLink]="['/ejercicios', e.id, 'version']" pButton>Nueva versión</a>
         }
       </header>
 
@@ -51,7 +51,9 @@ import { Avisos } from '../../nucleo/ui/avisos';
             <button
               type="button"
               role="tab"
-              class="btn btn--sm"
+              pButton
+              severity="secondary"
+              size="small"
               [class.btn--primario]="indice() === $index"
               [attr.aria-selected]="indice() === $index"
               (click)="indice.set($index)"
@@ -105,33 +107,35 @@ import { Avisos } from '../../nucleo/ui/avisos';
 
             <ui-panel antetitulo="rúbrica" titulo="Criterios y pesos" plano>
               <div class="tabla-scroll">
-                <table class="tabla">
-                  <caption class="solo-lectores">
-                    Criterios de la versión
-                    {{
-                      version.numero
-                    }}
-                  </caption>
-                  <thead>
-                    <tr>
+                <p-table
+                  [value]="version.criterios"
+                  [scrollable]="true"
+                  [tableStyle]="{ 'min-width': '40rem' }"
+                  styleClass="p-datatable-sm"
+                >
+                  <ng-template #caption
+                    ><span class="solo-lectores"
+                      >Criterios de la versión {{ version.numero }}</span
+                    ></ng-template
+                  >
+                  <ng-template #header
+                    ><tr>
                       <th scope="col">Criterio</th>
                       <th scope="col" class="tabla__num">Peso</th>
                       <th scope="col" class="tabla__num">Escala</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (criterio of version.criterios; track criterio.id) {
-                      <tr>
-                        <td>
-                          <strong>{{ criterio.nombre }}</strong>
-                          <p class="descripcion">{{ criterio.descripcion }}</p>
-                        </td>
-                        <td class="tabla__num">{{ criterio.peso }}%</td>
-                        <td class="tabla__num">{{ criterio.escalaMaxima }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
+                    </tr></ng-template
+                  >
+                  <ng-template #body let-criterio
+                    ><tr>
+                      <td>
+                        <strong>{{ criterio.nombre }}</strong>
+                        <p class="descripcion">{{ criterio.descripcion }}</p>
+                      </td>
+                      <td class="tabla__num">{{ criterio.peso }}%</td>
+                      <td class="tabla__num">{{ criterio.escalaMaxima }}</td>
+                    </tr></ng-template
+                  >
+                </p-table>
               </div>
             </ui-panel>
           </div>

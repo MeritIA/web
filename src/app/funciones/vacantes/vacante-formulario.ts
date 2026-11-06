@@ -7,6 +7,9 @@ import { LIMITES, type Modalidad } from '../../nucleo/api/modelos';
 import { VacantesServicio } from '../../nucleo/api/vacantes.servicio';
 import { accion } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
+import { Textarea } from 'primeng/textarea';
 
 /**
  * Alta de vacante. Nace siempre en borrador: el estado no es un campo del
@@ -16,7 +19,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
 @Component({
   selector: 'app-vacante-formulario',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, Campo],
+  imports: [ButtonDirective, InputText, Textarea, ReactiveFormsModule, RouterLink, Campo],
   template: `
     <nav class="migas"><a routerLink="/vacantes">Vacantes</a> <span>/ Nueva</span></nav>
 
@@ -34,7 +37,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
         <input
           id="titulo"
           type="text"
-          class="control"
+          pInputText
           formControlName="titulo"
           maxlength="160"
           placeholder="Desarrollador backend · Node"
@@ -47,12 +50,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
         ayuda="Qué hace el equipo y qué se espera de la persona. Lo lee el candidato invitado."
         [control]="formulario.controls.descripcion"
       >
-        <textarea
-          id="descripcion"
-          class="control"
-          formControlName="descripcion"
-          rows="6"
-        ></textarea>
+        <textarea id="descripcion" pTextarea formControlName="descripcion" rows="6"></textarea>
       </ui-campo>
 
       <div class="dos">
@@ -65,7 +63,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
           <input
             id="ubicacion"
             type="text"
-            class="control"
+            pInputText
             formControlName="ubicacion"
             maxlength="120"
             placeholder="Bogotá"
@@ -73,7 +71,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
         </ui-campo>
 
         <ui-campo etiqueta="Modalidad" para="modalidad" opcional>
-          <select id="modalidad" class="control" formControlName="modalidad">
+          <select id="modalidad" pInputText formControlName="modalidad">
             <option value="">Sin definir</option>
             @for (m of opciones; track m) {
               <option [value]="m">{{ modalidades[m] }}</option>
@@ -91,7 +89,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
         <input
           id="tecnologias"
           type="text"
-          class="control"
+          pInputText
           formControlName="tecnologias"
           placeholder="Node.js, TypeScript, PostgreSQL"
         />
@@ -107,7 +105,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
           <input
             id="intentos"
             type="number"
-            class="control"
+            pInputText
             formControlName="intentosPermitidos"
             [min]="limites.intentosMin"
             [max]="limites.intentosMax"
@@ -123,7 +121,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
           ayuda="Informativo: llegada la fecha no se cierra nada solo."
           [control]="formulario.controls.cierreEstimado"
         >
-          <input id="cierre" type="date" class="control" formControlName="cierreEstimado" />
+          <input id="cierre" type="date" pInputText formControlName="cierreEstimado" />
         </ui-campo>
 
         <ui-campo
@@ -136,7 +134,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
           <input
             id="finalistas"
             type="number"
-            class="control"
+            pInputText
             formControlName="finalistasAEvaluar"
             min="1"
             max="1000"
@@ -149,8 +147,8 @@ import { Avisos } from '../../nucleo/ui/avisos';
       }
 
       <div class="fila fila--entre">
-        <a routerLink="/vacantes" class="btn btn--fantasma">Cancelar</a>
-        <button type="submit" class="btn btn--primario" [disabled]="crear.enviando()">
+        <a routerLink="/vacantes" pButton [text]="true" severity="secondary">Cancelar</a>
+        <button type="submit" pButton [disabled]="crear.enviando()">
           {{ crear.enviando() ? 'Creando…' : 'Crear borrador' }}
         </button>
       </div>

@@ -11,6 +11,7 @@ import { VacantesServicio } from '../../nucleo/api/vacantes.servicio';
 import { Avisos } from '../../nucleo/ui/avisos';
 import { ReportesServicio } from '../../nucleo/api/reportes.servicio';
 import { accion, recursoPor } from '../../nucleo/estado/recurso';
+import { ButtonDirective } from 'primeng/button';
 
 /**
  * Un candidato dentro de una vacante (HU-21).
@@ -22,7 +23,17 @@ import { accion, recursoPor } from '../../nucleo/estado/recurso';
 @Component({
   selector: 'app-reporte-candidato',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, CortoPipe, Estado, EstadoRecurso, Nota, Panel, Desglose],
+  imports: [
+    ButtonDirective,
+    RouterLink,
+    DatePipe,
+    CortoPipe,
+    Estado,
+    EstadoRecurso,
+    Nota,
+    Panel,
+    Desglose,
+  ],
   template: `
     <nav class="migas">
       <a routerLink="/vacantes">Vacantes</a>
@@ -67,7 +78,8 @@ import { accion, recursoPor } from '../../nucleo/estado/recurso';
           @if (!identidad()) {
             <button
               type="button"
-              class="btn"
+              pButton
+              severity="secondary"
               [disabled]="revelar.enviando()"
               (click)="pedirRevelar()"
             >
@@ -79,7 +91,7 @@ import { accion, recursoPor } from '../../nucleo/estado/recurso';
           } @else {
             <button
               type="button"
-              class="btn btn--primario"
+              pButton
               [disabled]="contratar.enviando()"
               (click)="pedirContratar()"
             >

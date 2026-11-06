@@ -13,6 +13,9 @@ import { EjerciciosServicio } from '../../nucleo/api/ejercicios.servicio';
 import { LIMITES, type Criterio } from '../../nucleo/api/modelos';
 import { accion, recursoPor } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
+import { Textarea } from 'primeng/textarea';
 
 /** La regla que hace comparables las notas entre ejercicios. */
 const sumanCien = (control: AbstractControl): ValidationErrors | null => {
@@ -36,7 +39,7 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
 @Component({
   selector: 'app-ejercicio-formulario',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, Campo],
+  imports: [ButtonDirective, InputText, Textarea, ReactiveFormsModule, RouterLink, Campo],
   template: `
     <nav class="migas">
       <a routerLink="/ejercicios">Ejercicios</a>
@@ -73,7 +76,7 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
               <input
                 id="titulo"
                 type="text"
-                class="control"
+                pInputText
                 formControlName="titulo"
                 maxlength="160"
                 placeholder="API REST con control de concurrencia"
@@ -88,7 +91,7 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
               <input
                 id="tecnologia"
                 type="text"
-                class="control"
+                pInputText
                 formControlName="tecnologia"
                 maxlength="80"
                 placeholder="Node · PostgreSQL"
@@ -106,7 +109,7 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
           ayuda="Sé concreto en el entregable y en las restricciones: la IA califica contra la rúbrica, no adivina intenciones."
           [control]="formulario.controls.enunciado"
         >
-          <textarea id="enunciado" class="control" formControlName="enunciado" rows="10"></textarea>
+          <textarea id="enunciado" pTextarea formControlName="enunciado" rows="10"></textarea>
         </ui-campo>
 
         <ui-campo
@@ -119,7 +122,7 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
           <input
             id="duracion"
             type="number"
-            class="control"
+            pInputText
             formControlName="duracionMinutos"
             min="1"
             max="600"
@@ -134,7 +137,7 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
             ayuda="Queda en el historial del ejercicio."
             [control]="formulario.controls.motivoDelCambio"
           >
-            <input id="motivo" type="text" class="control" formControlName="motivoDelCambio" />
+            <input id="motivo" type="text" pInputText formControlName="motivoDelCambio" />
           </ui-campo>
         }
       </section>
@@ -154,7 +157,13 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
             >
               Pesos: {{ suma() }} / 100
             </span>
-            <button type="button" class="btn btn--sm" (click)="anadirCriterio()">
+            <button
+              type="button"
+              pButton
+              severity="secondary"
+              size="small"
+              (click)="anadirCriterio()"
+            >
               Añadir criterio
             </button>
           </div>
@@ -181,7 +190,7 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
                   <input
                     [id]="'criterio-' + i"
                     type="text"
-                    class="control"
+                    pInputText
                     formControlName="nombre"
                     placeholder="Corrección funcional"
                   />
@@ -190,7 +199,7 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
                   <input
                     [id]="'peso-' + i"
                     type="number"
-                    class="control"
+                    pInputText
                     formControlName="peso"
                     min="1"
                     max="100"
@@ -204,7 +213,7 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
                   <input
                     [id]="'escala-' + i"
                     type="number"
-                    class="control"
+                    pInputText
                     formControlName="escalaMaxima"
                     min="1"
                     max="100"
@@ -212,7 +221,10 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
                 </ui-campo>
                 <button
                   type="button"
-                  class="btn btn--sm quitar"
+                  pButton
+                  severity="secondary"
+                  size="small"
+                  class="quitar"
                   [disabled]="criterios.length === 1"
                   (click)="quitarCriterio(i)"
                   [attr.aria-label]="'Quitar criterio ' + (i + 1)"
@@ -229,7 +241,7 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
               >
                 <textarea
                   [id]="'descripcion-' + i"
-                  class="control"
+                  pTextarea
                   formControlName="descripcion"
                   rows="2"
                 ></textarea>
@@ -251,8 +263,8 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
       }
 
       <div class="fila fila--entre">
-        <a routerLink="/ejercicios" class="btn btn--fantasma">Cancelar</a>
-        <button type="submit" class="btn btn--primario" [disabled]="guardar.enviando()">
+        <a routerLink="/ejercicios" pButton [text]="true" severity="secondary">Cancelar</a>
+        <button type="submit" pButton [disabled]="guardar.enviando()">
           {{
             guardar.enviando()
               ? 'Guardando…'

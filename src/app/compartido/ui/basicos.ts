@@ -9,23 +9,61 @@ import {
 import type { Presentacion, Tono } from '../dominio';
 import { tonoDeNota } from '../dominio';
 import { NotaPipe } from '../formato';
+import { CardModule } from 'primeng/card';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { SkeletonModule } from 'primeng/skeleton';
+import { TagModule } from 'primeng/tag';
+import { ButtonDirective } from 'primeng/button';
 
 /** Etiqueta de estado. El color lo decide el dominio, no la pantalla. */
+const SEVERIDAD_TAG = {
+  neutro: 'secondary',
+  exito: 'success',
+  aviso: 'warn',
+  peligro: 'danger',
+  info: 'info',
+} as const;
+
 @Component({
   selector: 'ui-chip',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<span class="chip {{ clases() }}" [title]="ayuda() ?? ''"><ng-content /></span>`,
+  imports: [TagModule],
+  template: `
+    <p-tag [severity]="severidad()" [rounded]="true" [title]="ayuda() ?? ''">
+      <span class="chip-contenido">
+        @if (vivo()) {
+          <span class="punto" aria-hidden="true"></span>
+        }
+        <ng-content />
+      </span>
+    </p-tag>
+  `,
+  styles: `
+    .chip-contenido {
+      display: inline-flex;
+      gap: var(--e-2);
+      align-items: center;
+    }
+    .punto {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentcolor;
+      animation: pulso 1.6s ease-in-out infinite;
+    }
+    @keyframes pulso {
+      50% {
+        opacity: 0.25;
+      }
+    }
+  `,
 })
 export class Chip {
   readonly tono = input<Tono>('neutro');
   readonly vivo = input(false, { transform: booleanAttribute });
   readonly ayuda = input<string | undefined>(undefined);
 
-  protected readonly clases = computed(() =>
-    [this.tono() === 'neutro' ? '' : `chip--${this.tono()}`, this.vivo() ? 'chip--vivo' : '']
-      .filter(Boolean)
-      .join(' '),
-  );
+  protected readonly severidad = computed(() => SEVERIDAD_TAG[this.tono()]);
 }
 
 /** El mismo chip, alimentado por una entrada del catálogo de `dominio.ts`. */
@@ -47,34 +85,69 @@ export class Estado {
 @Component({
   selector: 'ui-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CardModule],
   template: `
-    <section class="panel" [class.panel--plano]="plano()">
+    <p-card [class.panel--plano]="plano()">
       @if (titulo() || antetitulo()) {
-        <header class="panel__cab" [class.panel__cab--interior]="plano()">
-          <div class="pila pila--sm">
-            @if (antetitulo()) {
-              <span class="micro">{{ antetitulo() }}</span>
-            }
-            @if (titulo()) {
-              <h2>{{ titulo() }}</h2>
-            }
-          </div>
-          <div class="fila"><ng-content select="[acciones]" /></div>
-        </header>
+        <ng-template #header>
+          <header class="panel__cab" [class.panel__cab--interior]="plano()">
+            <div class="pila pila--sm">
+              @if (antetitulo()) {
+                <span class="micro">{{ antetitulo() }}</span>
+              }
+              @if (titulo()) {
+                <h2>{{ titulo() }}</h2>
+              }
+            </div>
+            <div class="fila"><ng-content select="[acciones]" /></div>
+          </header>
+        </ng-template>
       }
       <ng-content />
-    </section>
+    </p-card>
   `,
   styles: `
     :host {
       display: block;
     }
-    .panel__cab--interior {
+    :host ::ng-deep .p-card {
+      border: 1px solid var(--c-borde);
+      transition:
+        border-color var(--mov) var(--curva),
+        transform var(--mov) var(--curva);
+    }
+    :host ::ng-deep .p-card-body {
+      padding: var(--e-5);
+      gap: 0;
+    }
+    :host ::ng-deep .panel--plano .p-card-body {
+      padding: 0;
+    }
+    :host ::ng-deep .p-card-caption {
+      gap: 0;
+    }
+    .panel__cab {
+      margin: 0;
       padding: var(--e-5) var(--e-5) 0;
+    }
+    .panel__cab--interior {
       margin-bottom: var(--e-4);
     }
     h2 {
       font-size: var(--t-3);
+    }
+    @media (max-width: 640px) {
+      :host ::ng-deep .p-card-body {
+        padding: var(--e-4);
+      }
+      .panel__cab {
+        padding: var(--e-4) var(--e-4) 0;
+      }
+    }
+    @media (hover: hover) and (pointer: fine) {
+      :host ::ng-deep .p-card:hover {
+        border-color: var(--c-borde-fuerte);
+      }
     }
   `,
 })
@@ -89,10 +162,11 @@ export class Panel {
 @Component({
   selector: 'ui-carga',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SkeletonModule],
   template: `
     <div class="pila" aria-hidden="true">
       @for (fila of filas(); track $index) {
-        <div class="esqueleto" [style.height.px]="alto()" [style.width.%]="fila"></div>
+        <p-skeleton [height]="alto() + 'px'" [width]="fila + '%'" borderRadius="10px" />
       }
     </div>
   `,
@@ -160,13 +234,15 @@ export class Vacio {
 @Component({
   selector: 'ui-recurso',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Carga, Vacio],
+  imports: [Carga, Vacio, ButtonDirective],
   template: `
     @if (cargando()) {
       <ui-carga [cantidad]="filas()" />
     } @else if (error()) {
       <ui-vacio antetitulo="no se pudo cargar" titulo="Algo se interpuso" [texto]="error()!">
-        <button type="button" class="btn" (click)="reintentar.emit()">Reintentar</button>
+        <button type="button" pButton severity="secondary" (click)="reintentar.emit()">
+          Reintentar
+        </button>
       </ui-vacio>
     } @else if (vacio()) {
       <ui-vacio [titulo]="tituloVacio()" [texto]="textoVacio()">
@@ -189,26 +265,18 @@ export class EstadoRecurso {
 @Component({
   selector: 'ui-nota',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NotaPipe],
+  imports: [NotaPipe, ProgressBarModule],
   template: `
     <div class="nota" [class.nota--grande]="grande()">
       <p class="valor" [style.color]="'var(--c-' + color() + ')'">
         {{ valor() | nota }}<span class="sobre">/100</span>
       </p>
-      <div
-        class="barra"
-        role="meter"
-        [attr.aria-valuenow]="valor()"
-        aria-valuemin="0"
-        aria-valuemax="100"
+      <p-progressbar
+        [value]="valor()"
+        [showValue]="false"
+        [style]="{ height: '6px', '--p-progressbar-value-background': 'var(--c-' + color() + ')' }"
         [attr.aria-label]="etiqueta()"
-      >
-        <div
-          class="barra__relleno"
-          [style.width.%]="valor()"
-          [style.background]="'var(--c-' + color() + ')'"
-        ></div>
-      </div>
+      />
     </div>
   `,
   styles: `

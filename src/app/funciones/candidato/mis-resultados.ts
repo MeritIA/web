@@ -17,6 +17,8 @@ import type { MiPuesto } from '../../nucleo/api/modelos';
 import { ModeracionServicio } from '../../nucleo/api/moderacion.servicio';
 import { accion, recurso } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
+import { Textarea } from 'primeng/textarea';
 
 /**
  * Resultados del candidato, con el desglose que los explica (HU-22).
@@ -27,7 +29,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
 @Component({
   selector: 'app-mis-resultados',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, Estado, EstadoRecurso, Nota, Desglose],
+  imports: [ButtonDirective, Textarea, RouterLink, DatePipe, Estado, EstadoRecurso, Nota, Desglose],
   template: `
     <header class="pila pila--sm cabecera">
       <span class="micro">calificaciones recibidas</span>
@@ -67,7 +69,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
                     Explica por qué no estás de acuerdo (otra persona lo revisará)
                   </label>
                   <textarea
-                    class="control"
+                    pTextarea
                     rows="3"
                     maxlength="1000"
                     [id]="'disputa-' + c.id"
@@ -78,12 +80,19 @@ import { Avisos } from '../../nucleo/ui/avisos';
                     <p class="campo__error" role="alert">{{ error }}</p>
                   }
                   <div class="fila">
-                    <button type="button" class="btn btn--sm" (click)="disputando.set(null)">
+                    <button
+                      type="button"
+                      pButton
+                      severity="secondary"
+                      size="small"
+                      (click)="disputando.set(null)"
+                    >
                       Cancelar
                     </button>
                     <button
                       type="button"
-                      class="btn btn--sm btn--primario"
+                      pButton
+                      size="small"
                       [disabled]="explicacion().trim().length < 20 || disputar.enviando()"
                       (click)="disputar.correr(c.id)"
                     >
@@ -91,7 +100,13 @@ import { Avisos } from '../../nucleo/ui/avisos';
                     </button>
                   </div>
                 } @else {
-                  <button type="button" class="btn btn--sm" (click)="empezarDisputa(c.id)">
+                  <button
+                    type="button"
+                    pButton
+                    severity="secondary"
+                    size="small"
+                    (click)="empezarDisputa(c.id)"
+                  >
                     Disputar la decisión
                   </button>
                 }
@@ -124,7 +139,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
       textoVacio="En cuanto se califique una entrega la verás aquí, con el detalle por criterio."
       (reintentar)="evaluaciones.recargar()"
     >
-      <a accion-vacio routerLink="/mis-pruebas" class="btn btn--primario">Ver mis pruebas</a>
+      <a accion-vacio routerLink="/mis-pruebas" pButton>Ver mis pruebas</a>
     </ui-recurso>
 
     <div class="pila">
@@ -156,7 +171,9 @@ import { Avisos } from '../../nucleo/ui/avisos';
 
           <button
             type="button"
-            class="btn btn--sm"
+            pButton
+            severity="secondary"
+            size="small"
             [attr.aria-expanded]="abierta() === evaluacion.id"
             [attr.aria-controls]="'desglose-' + evaluacion.id"
             (click)="alternar(evaluacion.id)"

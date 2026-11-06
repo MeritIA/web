@@ -15,6 +15,9 @@ import {
   withInMemoryScrolling,
   withViewTransitions,
 } from '@angular/router';
+import { providePrimeNG } from 'primeng/config';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { PresetMeritIA } from './nucleo/ui/tema-primeng';
 import { rutas } from './app.routes';
 import { avisarFallosGlobales, credenciales, renovarSesion } from './nucleo/http/interceptores';
 import { Plataforma } from './nucleo/plataforma/plataforma';
@@ -28,6 +31,27 @@ export const configuracion: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     { provide: LOCALE_ID, useValue: 'es-CO' },
+
+    // PrimeNG: el modo oscuro lo decide `<html data-tema="oscuro">`, no el sistema.
+    // `cssLayer` hace que los estilos propios (sin capa) siempre ganen a los del tema.
+    providePrimeNG({
+      ripple: true,
+      theme: {
+        preset: PresetMeritIA,
+        options: {
+          darkModeSelector: ':root[data-tema="oscuro"]',
+          cssLayer: { name: 'primeng', order: 'primeng' },
+        },
+      },
+      translation: {
+        accept: 'Aceptar',
+        reject: 'Cancelar',
+        clear: 'Limpiar',
+        today: 'Hoy',
+      },
+    }),
+    MessageService,
+    ConfirmationService,
 
     provideRouter(
       rutas,

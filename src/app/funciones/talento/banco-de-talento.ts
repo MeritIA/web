@@ -5,6 +5,9 @@ import type { FilaDeTalento } from '../../nucleo/api/modelos';
 import { VacantesServicio } from '../../nucleo/api/vacantes.servicio';
 import { accion, recurso } from '../../nucleo/estado/recurso';
 import { Avisos } from '../../nucleo/ui/avisos';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
+import { TableModule } from 'primeng/table';
 
 /**
  * Personas que autorizaron mostrar su perfil, de cualquier empresa.
@@ -16,7 +19,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
 @Component({
   selector: 'app-banco-de-talento',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [EstadoRecurso],
+  imports: [TableModule, ButtonDirective, InputText, EstadoRecurso],
   template: `
     <header class="pila pila--sm cabecera">
       <span class="micro">personas que lo autorizaron</span>
@@ -32,7 +35,7 @@ import { Avisos } from '../../nucleo/ui/avisos';
       <label class="campo__etiqueta" for="vacante">Invitar a la vacante</label>
       <select
         id="vacante"
-        class="control"
+        pInputText
         [value]="destino()"
         (change)="destino.set($any($event.target).value)"
       >
@@ -54,36 +57,40 @@ import { Avisos } from '../../nucleo/ui/avisos';
 
     @if ((talento.datos()?.length ?? 0) > 0) {
       <div class="tabla-scroll">
-        <table class="tabla">
-          <thead>
-            <tr>
+        <p-table
+          [value]="talento.datos() ?? []"
+          [scrollable]="true"
+          [tableStyle]="{ 'min-width': '40rem' }"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template #header
+            ><tr>
               <th scope="col">Candidato</th>
               <th scope="col">Mejor nota</th>
               <th scope="col">Evaluaciones</th>
               <th scope="col"><span>Acción</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (fila of talento.datos() ?? []; track fila.idCandidato) {
-              <tr>
-                <td>{{ fila.alias }}</td>
-                <td class="tabla__num">{{ fila.mejorNota }}</td>
-                <td class="tabla__num">{{ fila.evaluaciones }}</td>
-                <td>
-                  <button
-                    type="button"
-                    class="btn btn--sm btn--primario"
-                    [disabled]="!destino() || invitar.enviando()"
-                    [title]="destino() ? '' : 'Elige primero una vacante'"
-                    (click)="invitar.correr(fila)"
-                  >
-                    Invitar
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+            </tr></ng-template
+          >
+          <ng-template #body let-fila
+            ><tr>
+              <td>{{ fila.alias }}</td>
+              <td class="tabla__num">{{ fila.mejorNota }}</td>
+              <td class="tabla__num">{{ fila.evaluaciones }}</td>
+              <td>
+                <button
+                  type="button"
+                  pButton
+                  size="small"
+                  [disabled]="!destino() || invitar.enviando()"
+                  [title]="destino() ? '' : 'Elige primero una vacante'"
+                  (click)="invitar.correr(fila)"
+                >
+                  Invitar
+                </button>
+              </td>
+            </tr></ng-template
+          >
+        </p-table>
       </div>
     }
 

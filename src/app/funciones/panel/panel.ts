@@ -6,6 +6,7 @@ import type { PanelDeEmpresa } from '../../nucleo/api/modelos';
 import { ReportesServicio } from '../../nucleo/api/reportes.servicio';
 import { recurso } from '../../nucleo/estado/recurso';
 import { Sesion } from '../../nucleo/sesion/sesion';
+import { ButtonDirective } from 'primeng/button';
 
 /**
  * Inicio de la empresa (A02): lo que está pasando ahora en sus procesos.
@@ -17,7 +18,7 @@ import { Sesion } from '../../nucleo/sesion/sesion';
 @Component({
   selector: 'app-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, EstadoRecurso, PanelUi],
+  imports: [ButtonDirective, RouterLink, DatePipe, EstadoRecurso, PanelUi],
   template: `
     <header class="cabecera">
       <div class="pila pila--sm">
@@ -25,8 +26,10 @@ import { Sesion } from '../../nucleo/sesion/sesion';
         <h1>Panel</h1>
       </div>
       <div class="fila">
-        <button type="button" class="btn btn--sm" (click)="panel.recargar()">Actualizar</button>
-        <a routerLink="/vacantes/nueva" class="btn btn--primario">Nueva vacante</a>
+        <button type="button" pButton severity="secondary" size="small" (click)="panel.recargar()">
+          Actualizar
+        </button>
+        <a routerLink="/vacantes/nueva" pButton>Nueva vacante</a>
       </div>
     </header>
 

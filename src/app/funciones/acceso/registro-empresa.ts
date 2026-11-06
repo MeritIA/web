@@ -7,6 +7,8 @@ import { accion } from '../../nucleo/estado/recurso';
 import { Sesion, inicioDe } from '../../nucleo/sesion/sesion';
 import { Avisos } from '../../nucleo/ui/avisos';
 import { MarcoAcceso } from './marco-acceso';
+import { ButtonDirective } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 
 /**
  * Auto-registro de una empresa (A01).
@@ -18,7 +20,7 @@ import { MarcoAcceso } from './marco-acceso';
 @Component({
   selector: 'app-registro-empresa',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MarcoAcceso, ReactiveFormsModule, RouterLink, Campo],
+  imports: [ButtonDirective, InputText, MarcoAcceso, ReactiveFormsModule, RouterLink, Campo],
   template: `
     <app-marco-acceso>
       <form class="panel pila" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
@@ -35,14 +37,14 @@ import { MarcoAcceso } from './marco-acceso';
           <input
             id="nombreEmpresa"
             type="text"
-            class="control"
+            pInputText
             formControlName="nombreEmpresa"
             autocomplete="organization"
           />
         </ui-campo>
 
         <ui-campo etiqueta="Sector" para="sector" [control]="formulario.controls.sector">
-          <select id="sector" class="control" formControlName="sector">
+          <select id="sector" pInputText formControlName="sector">
             @for (sector of sectores; track sector) {
               <option [value]="sector">{{ sector }}</option>
             }
@@ -55,7 +57,7 @@ import { MarcoAcceso } from './marco-acceso';
           ayuda="Con dígito de verificación, por ejemplo 890903938-8."
           [control]="formulario.controls.nit"
         >
-          <input id="nit" type="text" class="control" formControlName="nit" inputmode="numeric" />
+          <input id="nit" type="text" pInputText formControlName="nit" inputmode="numeric" />
         </ui-campo>
 
         <ui-campo
@@ -66,7 +68,7 @@ import { MarcoAcceso } from './marco-acceso';
           <input
             id="nombre"
             type="text"
-            class="control"
+            pInputText
             formControlName="nombreCompleto"
             autocomplete="name"
           />
@@ -76,7 +78,7 @@ import { MarcoAcceso } from './marco-acceso';
           <input
             id="correo"
             type="email"
-            class="control"
+            pInputText
             formControlName="correo"
             autocomplete="username"
             inputmode="email"
@@ -92,7 +94,7 @@ import { MarcoAcceso } from './marco-acceso';
           <input
             id="contrasena"
             type="password"
-            class="control"
+            pInputText
             formControlName="contrasena"
             autocomplete="new-password"
           />
@@ -102,11 +104,7 @@ import { MarcoAcceso } from './marco-acceso';
           <p class="campo__error" role="alert"><span aria-hidden="true">▲</span> {{ error }}</p>
         }
 
-        <button
-          type="submit"
-          class="btn btn--primario btn--bloque"
-          [disabled]="registrar.enviando()"
-        >
+        <button type="submit" pButton [fluid]="true" [disabled]="registrar.enviando()">
           {{ registrar.enviando() ? 'Registrando…' : 'Registrar empresa' }}
         </button>
 
