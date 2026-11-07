@@ -20,7 +20,7 @@ import { TableModule } from 'primeng/table';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TableModule, ButtonDirective, RouterLink, DatePipe, Chip, EstadoRecurso, Panel],
   template: `
-    <nav class="migas"><a routerLink="/ejercicios">Ejercicios</a> <span>/ Detalle</span></nav>
+    <nav class="migas"><a routerLink="/ejercicios">Ejercicios</a> <span>Detalle</span></nav>
 
     <ui-recurso
       [cargando]="ejercicio.cargando()"

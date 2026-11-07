@@ -28,7 +28,7 @@ import { Textarea } from 'primeng/textarea';
     Campo,
   ],
   template: `
-    <nav class="migas"><a routerLink="/moderacion">Casos</a> <span>/ Revisión</span></nav>
+    <nav class="migas"><a routerLink="/moderacion">Casos</a> <span>Revisión</span></nav>
 
     <ui-recurso
       [cargando]="detalle.cargando()"

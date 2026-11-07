@@ -37,8 +37,8 @@ import { TableModule } from 'primeng/table';
   template: `
     <nav class="migas">
       <a routerLink="/vacantes">Vacantes</a>
-      <a [routerLink]="['/vacantes', id()]">Detalle</a>
-      <span>/ Ranking</span>
+      <a [routerLink]="['/vacantes', id()]">Vacante</a>
+      <span>Ranking</span>
     </nav>
 
     <ui-recurso

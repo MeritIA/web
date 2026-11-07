@@ -21,8 +21,8 @@ import { ButtonDirective } from 'primeng/button';
   imports: [ButtonDirective, DatePipe, RouterLink, EstadoRecurso],
   template: `
     <nav class="migas no-imprimir">
-      <a routerLink="/vacantes">Vacantes</a> <a [routerLink]="['/vacantes', id()]">/ Detalle</a>
-      <span>/ Auditoría</span>
+      <a routerLink="/vacantes">Vacantes</a> <a [routerLink]="['/vacantes', id()]">Vacante</a>
+      <span>Auditoría</span>
     </nav>
 
     <ui-recurso

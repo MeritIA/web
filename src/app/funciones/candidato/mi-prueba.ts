@@ -30,7 +30,7 @@ import { VerificacionTecnica } from './verificacion-tecnica';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, EstadoRecurso, PanelEjercicio, VerificacionTecnica],
   template: `
-    <nav class="migas"><a routerLink="/mis-pruebas">Mis pruebas</a> <span>/ Prueba</span></nav>
+    <nav class="migas"><a routerLink="/mis-pruebas">Mis pruebas</a> <span>Prueba</span></nav>
 
     <ui-recurso
       [cargando]="vacante.cargando()"

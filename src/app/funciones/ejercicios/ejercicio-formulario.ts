@@ -43,7 +43,7 @@ const CRITERIO_VACIO: Criterio = { nombre: '', descripcion: '', peso: 0, escalaM
   template: `
     <nav class="migas">
       <a routerLink="/ejercicios">Ejercicios</a>
-      <span>/ {{ versionando() ? 'Nueva versión' : 'Nuevo' }}</span>
+      <span>{{ versionando() ? 'Nueva versión' : 'Nuevo' }}</span>
     </nav>
 
     <header class="pila pila--sm">

@@ -379,6 +379,13 @@ textarea.control {
   color: var(--c-texto-tenue);
 }
 
+// El separador lo pone la hoja de estilos, no cada pantalla a mano.
+.migas > * + *::before {
+  content: '/';
+  margin-right: var(--e-2);
+  color: var(--c-texto-tenue);
+}
+
 .separador {
   height: 1px;
   background: var(--c-borde);

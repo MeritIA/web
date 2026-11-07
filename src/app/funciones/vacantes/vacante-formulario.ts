@@ -21,7 +21,7 @@ import { Textarea } from 'primeng/textarea';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ButtonDirective, InputText, Textarea, ReactiveFormsModule, RouterLink, Campo],
   template: `
-    <nav class="migas"><a routerLink="/vacantes">Vacantes</a> <span>/ Nueva</span></nav>
+    <nav class="migas"><a routerLink="/vacantes">Vacantes</a> <span>Nueva</span></nav>
 
     <header class="pila pila--sm">
       <span class="micro">paso 1 de 3 · se crea en borrador</span>

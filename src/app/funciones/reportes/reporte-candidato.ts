@@ -38,7 +38,7 @@ import { ButtonDirective } from 'primeng/button';
     <nav class="migas">
       <a routerLink="/vacantes">Vacantes</a>
       <a [routerLink]="['/vacantes', id(), 'reporte']">Ranking</a>
-      <span>/ Candidato</span>
+      <span>Candidato</span>
     </nav>
 
     <ui-recurso
