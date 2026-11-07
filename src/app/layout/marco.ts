@@ -9,6 +9,9 @@ import { ButtonDirective } from 'primeng/button';
 interface Enlace {
   ruta: string;
   texto: string;
+  /** Etiqueta breve para la barra inferior del móvil. */
+  corto?: string;
+  icono: string;
 }
 
 /**
@@ -45,8 +48,13 @@ interface Enlace {
               [routerLink]="enlace.ruta"
               routerLinkActive="nav__enlace--activo"
               [routerLinkActiveOptions]="{ exact: false }"
-              >{{ enlace.texto }}</a
             >
+              <i [class]="'pi nav__icono ' + enlace.icono" aria-hidden="true"></i>
+              <span class="nav__texto--largo">{{ enlace.texto }}</span>
+              <span class="nav__texto--corto" aria-hidden="true">{{
+                enlace.corto ?? enlace.texto
+              }}</span>
+            </a>
           }
         </nav>
 
@@ -162,6 +170,10 @@ interface Enlace {
         color var(--mov) var(--curva),
         background var(--mov) var(--curva);
     }
+    .nav__icono,
+    .nav__texto--corto {
+      display: none;
+    }
     .nav__enlace:hover {
       color: var(--c-texto);
       background: var(--c-neutro-tenue);
@@ -220,12 +232,34 @@ interface Enlace {
       }
       .nav__enlace {
         display: flex;
-        flex: 1 0 auto;
+        flex: 1 1 0;
+        flex-direction: column;
+        gap: 2px;
         align-items: center;
         justify-content: center;
-        min-width: 88px;
-        min-height: 48px;
+        min-width: 60px;
+        min-height: 56px;
+        padding: var(--e-2) var(--e-1);
+        letter-spacing: 0.02em;
+        text-transform: none;
+        font-family: var(--fuente-texto);
+        font-size: 0.68rem;
         scroll-snap-align: start;
+      }
+      .nav__icono {
+        display: block;
+        font-size: 1.2rem;
+      }
+      .nav__texto--largo {
+        display: none;
+      }
+      .nav__texto--corto {
+        display: block;
+      }
+      .nav__enlace--activo {
+        color: var(--c-acento);
+        box-shadow: none;
+        background: var(--c-acento-tenue);
       }
       .contenido {
         padding-bottom: calc(var(--e-8) + 48px + env(safe-area-inset-bottom));
@@ -258,31 +292,41 @@ export class Marco {
   protected readonly enlaces = computed<Enlace[]>(() => {
     if (this.sesion.esCandidato()) {
       return [
-        { ruta: '/explorar', texto: 'Explorar' },
-        { ruta: '/mis-pruebas', texto: 'Mis pruebas' },
-        { ruta: '/mis-resultados', texto: 'Mis resultados' },
-        { ruta: '/mentor', texto: 'Mentor' },
-        { ruta: '/mis-pagos', texto: 'Pagos' },
-        { ruta: '/mi-cuenta', texto: 'Mi cuenta' },
+        { ruta: '/explorar', texto: 'Explorar', icono: 'pi-compass' },
+        { ruta: '/mis-pruebas', texto: 'Mis pruebas', corto: 'Pruebas', icono: 'pi-list-check' },
+        {
+          ruta: '/mis-resultados',
+          texto: 'Mis resultados',
+          corto: 'Resultados',
+          icono: 'pi-chart-bar',
+        },
+        { ruta: '/mentor', texto: 'Mentor', icono: 'pi-comments' },
+        { ruta: '/mis-pagos', texto: 'Pagos', icono: 'pi-wallet' },
+        { ruta: '/mi-cuenta', texto: 'Mi cuenta', corto: 'Cuenta', icono: 'pi-user' },
       ];
     }
     if (this.sesion.esModerador()) {
       return [
-        { ruta: '/moderacion', texto: 'Casos' },
-        { ruta: '/moderacion/metricas', texto: 'Métricas' },
+        { ruta: '/moderacion', texto: 'Casos', icono: 'pi-inbox' },
+        { ruta: '/moderacion/metricas', texto: 'Métricas', icono: 'pi-chart-line' },
       ];
     }
     const base: Enlace[] = [
-      { ruta: '/panel', texto: 'Panel' },
-      { ruta: '/vacantes', texto: 'Vacantes' },
-      { ruta: '/ejercicios', texto: 'Ejercicios' },
-      { ruta: '/talento', texto: 'Talento' },
+      { ruta: '/panel', texto: 'Panel', icono: 'pi-home' },
+      { ruta: '/vacantes', texto: 'Vacantes', icono: 'pi-briefcase' },
+      { ruta: '/ejercicios', texto: 'Ejercicios', corto: 'Retos', icono: 'pi-code' },
+      { ruta: '/talento', texto: 'Talento', icono: 'pi-users' },
     ];
     return this.sesion.esAdministrador()
       ? [
           ...base,
-          { ruta: '/moderacion/metricas', texto: 'Moderación' },
-          { ruta: '/administracion', texto: 'Administración' },
+          {
+            ruta: '/moderacion/metricas',
+            texto: 'Moderación',
+            corto: 'Moderar',
+            icono: 'pi-shield',
+          },
+          { ruta: '/administracion', texto: 'Administración', corto: 'Admin', icono: 'pi-cog' },
         ]
       : base;
   });
