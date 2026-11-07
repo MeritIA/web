@@ -143,6 +143,15 @@ import { ButtonDirective } from 'primeng/button';
       gap: var(--e-2);
       padding: var(--e-4);
     }
+    /* Móvil: dos cifras por fila en vez de una tarjeta a todo el ancho por cifra. */
+    @media (max-width: 560px) {
+      .cifras {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .cifra {
+        padding: var(--e-3);
+      }
+    }
     .valor {
       font-family: var(--fuente-display);
       font-size: var(--t-1);
