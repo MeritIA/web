@@ -119,6 +119,22 @@ import { ButtonDirective } from 'primeng/button';
         display: none;
       }
     }
+    /* Móvil: el formulario es lo que la persona vino a usar, así que sube. El orbe y la bajada
+       siguen en pantallas amplias, donde sobra espacio. */
+    @media (max-width: 600px) {
+      .escena {
+        align-items: start;
+        gap: var(--e-5);
+        padding-top: var(--e-7);
+      }
+      .orbe,
+      .bajada {
+        display: none;
+      }
+      h1 {
+        font-size: clamp(1.9rem, 8.5vw, 2.4rem);
+      }
+    }
   `,
 })
 export class MarcoAcceso {
