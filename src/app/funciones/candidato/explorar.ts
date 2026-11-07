@@ -54,7 +54,7 @@ type Vista = 'todas' | 'postuladas';
           [value]="modalidad()"
           (change)="modalidad.set($any($event.target).value)"
         >
-          <option value="">Todas</option>
+          <option value="">Cualquiera</option>
           <option value="remoto">Remoto</option>
           <option value="hibrido">Híbrido</option>
           <option value="presencial">Presencial</option>
@@ -136,7 +136,7 @@ type Vista = 'todas' | 'postuladas';
               <dd>{{ vacante.ejercicios }}</dd>
             </div>
             <div>
-              <dt class="micro">Intentos c/u</dt>
+              <dt class="micro" title="Intentos por ejercicio">Intentos</dt>
               <dd>{{ vacante.intentosPorEjercicio }}</dd>
             </div>
             <div>
@@ -230,6 +230,19 @@ type Vista = 'todas' | 'postuladas';
     .pestanas {
       margin-left: auto;
     }
+    @media (max-width: 560px) {
+      .herramientas .campo,
+      .herramientas .campo select {
+        flex: 1 1 100%;
+        width: 100%;
+      }
+      .pestanas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+        margin-left: 0;
+      }
+    }
     .tarjeta {
       display: grid;
       gap: var(--e-3);
@@ -258,8 +271,9 @@ type Vista = 'todas' | 'postuladas';
       list-style: none;
     }
     .cifras {
-      display: flex;
-      gap: var(--e-5);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+      gap: var(--e-4);
       margin: 0;
       padding-top: var(--e-3);
       border-top: 1px solid var(--c-borde);

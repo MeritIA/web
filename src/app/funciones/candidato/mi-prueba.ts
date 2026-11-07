@@ -45,8 +45,9 @@ import { VerificacionTecnica } from './verificacion-tecnica';
         <h1>{{ v.titulo }}</h1>
         <p class="descripcion lectura">{{ v.descripcion }}</p>
         <p class="micro">
-          {{ v.ejercicios?.length ?? 0 }} ejercicios · {{ v.intentosPermitidos }} intentos por
-          ejercicio
+          {{ v.ejercicios?.length ?? 0 }}
+          {{ v.ejercicios?.length === 1 ? 'ejercicio' : 'ejercicios' }} · {{ v.intentosPermitidos }}
+          {{ v.intentosPermitidos === 1 ? 'intento' : 'intentos' }} por ejercicio
         </p>
       </header>
 
