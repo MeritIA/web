@@ -1,5 +1,8 @@
 import { execSync } from 'node:child_process';
 import { existsSync, writeFileSync } from 'node:fs';
+import { cargarEnv } from './cargar-env.mjs';
+
+cargarEnv();
 
 const orden = process.argv[2] ?? 'build';
 const api = (process.env.API_MOVIL ?? 'http://10.0.2.2:3000/api/v1').replace(/\/$/, '');

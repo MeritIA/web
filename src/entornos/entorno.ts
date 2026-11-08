@@ -2,7 +2,7 @@
  * Configuracion por entorno.
  *
  * `apiBase` es relativa a proposito: en desarrollo `ng serve` la reenvia al
- * backend con `proxy.conf.json`, y en produccion la sirve el mismo proxy que
+ * backend con `proxy.conf.mjs`, y en produccion la sirve el mismo proxy que
  * sirve la aplicacion. Asi el navegador nunca hace una peticion entre origenes
  * distintos y la cookie HttpOnly de sesion viaja sin depender de CORS.
  */

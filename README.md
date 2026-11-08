@@ -15,13 +15,23 @@ npm install
 npm start          # http://localhost:4200
 ```
 
-`ng serve` usa `proxy.conf.json`, que reenvía `/api` a `http://127.0.0.1:3000`.
+`ng serve` usa `proxy.conf.mjs`, que reenvía `/api` a `http://127.0.0.1:3000`.
 Esto no es un detalle de comodidad: el backend entrega la sesión en una **cookie
 HttpOnly** y, al servir la web y la API bajo el mismo origen, la cookie viaja
 sola y no hace falta CORS ni guardar ningún token en JavaScript.
 
-Para apuntar a otro backend se cambia el `target` de `proxy.conf.json` (en
-desarrollo) o la configuración del proxy que sirva el build (en producción).
+### Variables de entorno
+
+Copia `.env.example` a `.env` (no se versiona) y ajusta:
+
+| Variable | Dónde se usa | Por defecto |
+|---|---|---|
+| `BACKEND_URL` | `npm start`: destino del proxy `/api` (reinicia `ng serve` al cambiarla) | `http://127.0.0.1:3000` |
+| `BACKEND_SEGURO` | `npm start`: `false` para HTTPS autofirmado | `true` |
+| `API_MOVIL` | `npm run movil:*`: URL absoluta del backend, termina en `/api/v1` | `http://10.0.2.2:3000/api/v1` |
+| `BACKEND_UPSTREAM` | Contenedor Docker (nginx), en tiempo de ejecución | `backend-api:3000` |
+
+Las variables ya definidas en el shell ganan sobre el `.env`.
 
 ```bash
 npm run build      # build de producción en dist/
