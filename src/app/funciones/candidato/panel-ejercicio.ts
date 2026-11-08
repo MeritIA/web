@@ -275,8 +275,10 @@ import { Textarea } from 'primeng/textarea';
   styles: `
     :host {
       display: block;
+      min-width: 0;
     }
     .ejercicio {
+      min-width: 0;
       display: grid;
       gap: var(--e-4);
     }
@@ -321,7 +323,8 @@ import { Textarea } from 'primeng/textarea';
     }
     .intentos li {
       display: flex;
-      gap: var(--e-3);
+      flex-wrap: wrap;
+      gap: var(--e-2) var(--e-3);
       align-items: center;
       padding: var(--e-3);
       border: 1px solid var(--c-borde);
@@ -333,8 +336,21 @@ import { Textarea } from 'primeng/textarea';
       color: var(--c-texto-tenue);
     }
     .datos {
-      flex: 1;
+      flex: 1 1 9rem;
       min-width: 0;
+    }
+    /* En pantallas estrechas las acciones bajan a su propia línea en vez de aplastar el nombre. */
+    @media (max-width: 520px) {
+      .intentos li > :not(.numero, .datos) {
+        flex: 0 1 auto;
+        max-width: 100%;
+      }
+      .zona {
+        padding: var(--e-4) var(--e-3);
+      }
+      .zona .fila {
+        justify-content: center;
+      }
     }
     .nombre {
       overflow: hidden;

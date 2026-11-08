@@ -5,3 +5,4 @@ android
 e2e
 .git
 *.md
+.env

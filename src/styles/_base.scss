@@ -124,3 +124,49 @@ samp {
     transition-duration: 0.01ms !important;
   }
 }
+
+// Una palabra larga sin espacios (un nombre de archivo, una URL) ensancha su
+// contenedor y empuja la pagina. Solo en texto corrido: en celdas de tabla y en
+// filas flex haria que las columnas se aplastaran en vez de desplazarse.
+h1,
+h2,
+h3,
+h4,
+p,
+dt,
+dd,
+label,
+.micro {
+  overflow-wrap: anywhere;
+}
+
+// Hijo de rejilla o de flex: su minimo por omision es el de su contenido, y una
+// palabra larga o una tabla ancha lo vuelve mas ancho que la pantalla. Con 0 el
+// contenedor manda. `:where` deja especificidad 0: cualquier componente lo anula.
+:where(
+  div,
+  article,
+  section,
+  header,
+  footer,
+  nav,
+  aside,
+  form,
+  details,
+  fieldset,
+  figure,
+  ul,
+  ol,
+  li,
+  dl,
+  dt,
+  dd,
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  .micro
+) {
+  min-width: 0;
+}

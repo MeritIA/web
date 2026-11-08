@@ -63,7 +63,7 @@ import { TableModule } from 'primeng/table';
     VerificacionEntrega,
   ],
   template: `
-    <nav class="migas"><a routerLink="/vacantes">Vacantes</a> <span>/ Detalle</span></nav>
+    <nav class="migas"><a routerLink="/vacantes">Vacantes</a> <span>Detalle</span></nav>
 
     <ui-recurso
       [cargando]="vacante.cargando()"

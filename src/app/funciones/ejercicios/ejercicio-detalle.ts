@@ -20,7 +20,7 @@ import { TableModule } from 'primeng/table';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TableModule, ButtonDirective, RouterLink, DatePipe, Chip, EstadoRecurso, Panel],
   template: `
-    <nav class="migas"><a routerLink="/ejercicios">Ejercicios</a> <span>/ Detalle</span></nav>
+    <nav class="migas"><a routerLink="/ejercicios">Ejercicios</a> <span>Detalle</span></nav>
 
     <ui-recurso
       [cargando]="ejercicio.cargando()"
@@ -88,7 +88,7 @@ import { TableModule } from 'primeng/table';
                 </ul>
               }
               @if (indice() === 0) {
-                <label class="btn btn--sm" for="adjunto"
+                <label class="btn btn--sm btn--adjuntar" for="adjunto"
                   >Adjuntar archivo (dataset, esqueleto)</label
                 >
                 <input
@@ -177,6 +177,11 @@ import { TableModule } from 'primeng/table';
       height: 1px;
       overflow: hidden;
       opacity: 0;
+    }
+    .btn--adjuntar {
+      max-width: 100%;
+      white-space: normal;
+      text-align: center;
     }
     .adjuntos {
       margin: 0 0 var(--e-3);

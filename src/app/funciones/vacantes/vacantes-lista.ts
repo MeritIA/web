@@ -122,6 +122,9 @@ type Filtro = EstadoVacante | 'todas';
     }
     .tarjeta {
       display: grid;
+      /* Sin esto, una palabra larga sin espacios ensancha la tarjeta y la página. */
+      grid-template-columns: minmax(0, 1fr);
+      overflow-wrap: anywhere;
       gap: var(--e-3);
       align-content: start;
       transition: border-color var(--mov) var(--curva);

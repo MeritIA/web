@@ -65,7 +65,7 @@ import { ButtonDirective } from 'primeng/button';
               <dd>{{ vacante.ejercicios?.length ?? 0 }}</dd>
             </div>
             <div>
-              <dt class="micro">Intentos c/u</dt>
+              <dt class="micro" title="Intentos por ejercicio">Intentos</dt>
               <dd>{{ vacante.intentosPermitidos }}</dd>
             </div>
             <div>
@@ -128,8 +128,9 @@ import { ButtonDirective } from 'primeng/button';
       overflow: hidden;
     }
     .cifras {
-      display: flex;
-      gap: var(--e-5);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+      gap: var(--e-4);
       width: 100%;
       margin: 0;
       padding-top: var(--e-3);
