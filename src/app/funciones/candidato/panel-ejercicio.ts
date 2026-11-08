@@ -342,7 +342,8 @@ import { Textarea } from 'primeng/textarea';
     /* En pantallas estrechas las acciones bajan a su propia línea en vez de aplastar el nombre. */
     @media (max-width: 520px) {
       .intentos li > :not(.numero, .datos) {
-        flex: 0 0 auto;
+        flex: 0 1 auto;
+        max-width: 100%;
       }
       .zona {
         padding: var(--e-4) var(--e-3);

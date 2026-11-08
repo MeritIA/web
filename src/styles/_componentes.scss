@@ -379,6 +379,24 @@ textarea.control {
   color: var(--c-texto-tenue);
 }
 
+// Objetivo tactil: un enlace de una linea de texto mide ~18 px de alto. Se
+// ensancha el area pulsable sin cambiar el aspecto: 24 px como minimo siempre
+// (WCAG 2.2 AA) y 44 px donde el puntero es un dedo.
+.migas a,
+.lista-simple a,
+:is(h1, h2, h3, h4, .micro, dd, li, td, strong, div) > a:not(.p-button) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+@media (pointer: coarse) {
+  .migas a,
+  .lista-simple a,
+  :is(h2, h3, h4) > a {
+    min-height: 44px;
+  }
+}
+
 // El separador lo pone la hoja de estilos, no cada pantalla a mano.
 .migas > * + *::before {
   content: '/';

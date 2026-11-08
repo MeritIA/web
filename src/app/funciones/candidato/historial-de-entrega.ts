@@ -47,12 +47,30 @@ import { ButtonDirective } from 'primeng/button';
     }
   `,
   styles: `
+    /* El host vive en una fila flex con wrap: sus hijos participan directo y la lista baja a su propia línea. */
+    :host {
+      display: contents;
+    }
+    .camino,
+    .micro,
+    .campo__error {
+      order: 1;
+    }
     .camino {
+      flex: 1 0 100%;
+      min-width: 0;
       display: grid;
-      gap: var(--e-1, 4px);
-      margin: var(--e-2) 0 0;
+      gap: var(--e-2);
+      margin: 0;
       padding-left: var(--e-4);
       font-size: var(--t-menor);
+    }
+    .camino li {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 var(--e-2);
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
   `,
 })

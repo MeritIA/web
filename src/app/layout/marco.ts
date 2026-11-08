@@ -126,6 +126,7 @@ interface Enlace {
       color: var(--c-texto);
       text-decoration: none;
       white-space: nowrap;
+      min-height: 44px;
     }
     .marca__texto {
       display: grid;
