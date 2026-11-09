@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { MODALIDAD, POSTULACION } from '../../compartido/dominio';
 import { Estado, EstadoRecurso } from '../../compartido/ui/basicos';
 import { Confirmaciones } from '../../compartido/ui/confirmacion';
+import { Recortado } from '../../compartido/ui/recortado';
 import type { Postulacion, VacanteAbierta } from '../../nucleo/api/modelos';
 import { PostulacionesServicio } from '../../nucleo/api/postulaciones.servicio';
 import { accion, recurso } from '../../nucleo/estado/recurso';
@@ -22,7 +23,7 @@ type Vista = 'todas' | 'postuladas';
 @Component({
   selector: 'app-explorar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ButtonDirective, InputText, DatePipe, RouterLink, Estado, EstadoRecurso],
+  imports: [ButtonDirective, InputText, DatePipe, RouterLink, Estado, EstadoRecurso, Recortado],
   template: `
     <header class="pila pila--sm cabecera">
       <span class="micro">vacantes abiertas</span>
@@ -120,9 +121,18 @@ type Vista = 'todas' | 'postuladas';
             }
           </p>
 
-          <p class="descripcion" [class.descripcion--abierta]="abierta() === vacante.id">
+          <p
+            class="descripcion"
+            appRecortado
+            #desc="recortado"
+            [class.descripcion--abierta]="abierta() === vacante.id"
+          >
             {{ vacante.descripcion }}
           </p>
+
+          @if (abierta() === vacante.id && vacante.publicadaEn) {
+            <p class="micro">Publicada el {{ vacante.publicadaEn | date: 'd MMM y' }}</p>
+          }
 
           <ul class="etiquetas" aria-label="Tecnologías">
             @for (tecnologia of vacante.tecnologias; track tecnologia) {
@@ -161,16 +171,28 @@ type Vista = 'todas' | 'postuladas';
           }
 
           <div class="fila fila--entre acciones">
-            <button
-              type="button"
-              pButton
-              [text]="true"
-              severity="secondary"
-              size="small"
-              (click)="alternar(vacante.id)"
-            >
-              {{ abierta() === vacante.id ? 'Ver menos' : 'Ver más' }}
-            </button>
+            <!--
+              El boton solo aparece si hay algo que mostrar: texto recortado o
+              una fecha de publicacion. Antes se pintaba siempre, y con una
+              descripcion corta pulsarlo no cambiaba nada en la pantalla.
+              La condicion de "abierta" mantiene visible el Ver menos mientras
+              esta expandido: ahi ya no sobra texto y recortado() vale false.
+            -->
+            @if (desc.recortado() || vacante.publicadaEn || abierta() === vacante.id) {
+              <button
+                type="button"
+                pButton
+                [text]="true"
+                severity="secondary"
+                size="small"
+                (click)="alternar(vacante.id)"
+              >
+                {{ abierta() === vacante.id ? 'Ver menos' : 'Ver más' }}
+              </button>
+            } @else {
+              <!-- Sostiene el space-between: sin esto la accion se corre a la izquierda. -->
+              <span aria-hidden="true"></span>
+            }
 
             @if (vacante.yaInvitado) {
               <a [routerLink]="['/mis-pruebas', vacante.id]" pButton> Hacer la prueba </a>
