@@ -658,14 +658,25 @@ export interface ContextoDelMentor {
   }[];
 }
 
+/** Material de estudio en que se apoya una respuesta del mentor. */
+export interface FuenteDelMentor {
+  n: number;
+  titulo: string;
+  archivo: string;
+  extracto: string;
+}
+
 export interface TurnoDelMentor {
   rol: 'candidato' | 'mentor';
   texto: string;
+  /** Solo en turnos del mentor; no se reenvía al servidor. */
+  fuentes?: FuenteDelMentor[];
 }
 
 export interface RespuestaDelMentor {
   respuesta: string;
   sugerencias: string[];
+  fuentes?: FuenteDelMentor[];
 }
 
 // --- Pagos (simulados en el navegador) ---------------------------------------

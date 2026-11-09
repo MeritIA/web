@@ -14,6 +14,6 @@ export class MentorServicio {
     this.#api.post<RespuestaDelMentor>('/mentor/preguntar', {
       pregunta,
       // El servicio solo usa los últimos turnos: no se manda lo que se va a tirar.
-      historial: historial.slice(-6),
+      historial: historial.slice(-6).map(({ rol, texto }) => ({ rol, texto })),
     });
 }
