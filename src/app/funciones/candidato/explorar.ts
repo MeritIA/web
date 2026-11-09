@@ -114,10 +114,24 @@ type Vista = 'todas' | 'postuladas';
           </div>
 
           <h2>{{ vacante.titulo }}</h2>
+          <!--
+            Ciudad y modalidad, en ese orden de importancia.
+            Sin ciudad se muestra SOLO la modalidad: "Remoto" ya dice todo lo
+            que hay que decir del sitio, y "Sin ubicacion . Remoto" sonaba a
+            dato perdido. Pero no se inventa: una presencial sin ciudad dice
+            "Presencial", no "Remoto", porque son cosas distintas y quien se
+            postula necesita saber cual es.
+          -->
           <p class="micro">
-            {{ vacante.ubicacion || 'Sin ubicación' }}
-            @if (vacante.modalidad; as modalidad) {
-              · {{ modalidades[modalidad] }}
+            @if (vacante.ubicacion) {
+              {{ vacante.ubicacion }}
+              @if (vacante.modalidad; as modalidad) {
+                · {{ modalidades[modalidad] }}
+              }
+            } @else if (vacante.modalidad; as modalidad) {
+              {{ modalidades[modalidad] }}
+            } @else {
+              Sin ubicación
             }
           </p>
 
