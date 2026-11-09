@@ -80,6 +80,19 @@ const INICIALES = [
               <span class="micro">{{ t.rol === 'mentor' ? 'Mentor' : 'Tú' }}</span>
               {{ t.texto }}
             </p>
+            @if (t.fuentes?.length) {
+              <details class="fuentes">
+                <summary>De dónde sale esto · {{ t.fuentes!.length }} fuentes</summary>
+                <ol>
+                  @for (f of t.fuentes; track f.n) {
+                    <li value="{{ f.n }}">
+                      <strong>{{ f.titulo }}</strong>
+                      <span class="micro">{{ f.extracto }}</span>
+                    </li>
+                  }
+                </ol>
+              </details>
+            }
           }
           @if (preguntar.enviando()) {
             <p class="turno turno--mentor"><span class="micro">Mentor</span> Pensando…</p>
@@ -157,6 +170,18 @@ const INICIALES = [
     .turno--mentor {
       border: 1px solid var(--c-borde);
     }
+    .fuentes {
+      font-size: var(--t-menor);
+      padding-inline: var(--e-3);
+    }
+    .fuentes summary {
+      cursor: pointer;
+    }
+    .fuentes li {
+      display: grid;
+      gap: var(--e-1);
+      margin-block: var(--e-2);
+    }
     .sugerencias {
       flex-wrap: wrap;
     }
@@ -193,7 +218,10 @@ export class Mentor {
     this.sugerencias.set([]);
     try {
       const r = await this.#mentor.preguntar(pregunta, historial);
-      this.turnos.update((t) => [...t, { rol: 'mentor', texto: r.respuesta }]);
+      this.turnos.update((t) => [
+        ...t,
+        { rol: 'mentor', texto: r.respuesta, fuentes: r.fuentes ?? [] },
+      ]);
       this.sugerencias.set(r.sugerencias);
       this.#guardar();
     } catch (e) {
