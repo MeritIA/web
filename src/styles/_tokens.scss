@@ -28,7 +28,9 @@
   --t-menor: 0.845rem;
   --t-micro: 0.72rem; // etiquetas mono en versales
 
-  --peso-display: 200; // el titular fino es la firma visual
+  // El titular fino sigue siendo la firma visual; 200 se leia como un trazo
+  // roto en pantallas sin mucha densidad. 300 conserva el gesto y se sostiene.
+  --peso-display: 300;
   --peso-normal: 400;
   --peso-medio: 500;
   --peso-fuerte: 600;

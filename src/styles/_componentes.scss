@@ -25,6 +25,11 @@ app-panel-ejercicio {
 .micro {
   font-family: var(--fuente-mono);
   font-size: var(--t-micro);
+  // Es lo mas delgado de la pantalla y por tres razones a la vez: cuerpo
+  // pequeno, color tenue y mayusculas con tracking abierto. Subirlo a 500
+  // --que IBM Plex Mono si trae-- lo devuelve a ser legible sin cambiar el
+  // caracter de etiqueta.
+  font-weight: var(--peso-medio);
   letter-spacing: var(--tracking-micro);
   text-transform: uppercase;
   color: var(--c-texto-tenue);

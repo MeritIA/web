@@ -23,7 +23,13 @@ body {
   font-family: var(--fuente-texto);
   font-size: var(--t-cuerpo);
   line-height: var(--interlinea);
-  -webkit-font-smoothing: antialiased;
+  // SIN `-webkit-font-smoothing: antialiased`, Y ES DELIBERADO
+  //
+  // Lo tenia, y sobre fondo oscuro era la causa principal de que la letra se
+  // viera delgada: `antialiased` apaga el suavizado por subpixel y adelgaza
+  // cada trazo, justo al reves de lo que conviene con texto claro sobre fondo
+  // oscuro. Dejarlo en el valor por omision del navegador devuelve el grosor
+  // sin tocar ni la familia ni el peso.
   text-rendering: optimizeLegibility;
 }
 
