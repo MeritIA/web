@@ -389,7 +389,7 @@ textarea.control {
 // (WCAG 2.2 AA) y 44 px donde el puntero es un dedo.
 .migas a,
 .lista-simple a,
-:is(h1, h2, h3, h4, .micro, dd, li, td, strong, div) > a:not(.p-button) {
+:where(:is(h1, h2, h3, h4, .micro, dd, li, td, strong, div) > a:not(.p-button)) {
   display: inline-flex;
   align-items: center;
   min-height: 24px;

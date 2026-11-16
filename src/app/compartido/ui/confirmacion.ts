@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, Injectable, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Injectable,
+  afterNextRender,
+  inject,
+} from '@angular/core';
 import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
@@ -49,4 +55,15 @@ export class Confirmaciones {
   imports: [ConfirmDialogModule],
   template: `<p-confirmdialog [style]="{ width: '440px', maxWidth: 'calc(100vw - 2rem)' }" />`,
 })
-export class Confirmacion {}
+export class Confirmacion {
+  constructor() {
+    // PrimeNG deja el host `p-dialog` con `role="alertdialog"` incluso cerrado.
+    // Sin nombre, cualquier lector anuncia un diálogo vacío y las auditorías lo
+    // marcan como error. El título real lo pone `aria-labelledby` al abrirse.
+    afterNextRender(() => {
+      document
+        .querySelector('ui-confirmacion p-dialog[role="alertdialog"]')
+        ?.setAttribute('aria-label', 'Confirmación');
+    });
+  }
+}

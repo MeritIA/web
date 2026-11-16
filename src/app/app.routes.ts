@@ -1,11 +1,6 @@
 import type { Routes } from '@angular/router';
 import { Marco } from './layout/marco';
-import {
-  guardiaInicio,
-  guardiaInvitado,
-  guardiaRol,
-  guardiaSesion,
-} from './nucleo/sesion/guardias';
+import { guardiaInvitado, guardiaRol, guardiaSesion } from './nucleo/sesion/guardias';
 
 const titulo = (texto: string) => `${texto} · MeritIA`;
 
@@ -18,6 +13,14 @@ const titulo = (texto: string) => `${texto} · MeritIA`;
  * el mapa se lea entero de un vistazo.
  */
 export const rutas: Routes = [
+  // La portada pública va antes que el marco: quien todavía no tiene cuenta
+  // necesita entender el producto sin que un guardia lo mande al login.
+  {
+    path: '',
+    pathMatch: 'full',
+    title: titulo('Evaluación técnica con evidencia'),
+    loadComponent: () => import('./funciones/inicio/inicio').then((m) => m.Inicio),
+  },
   {
     path: 'acceso',
     title: titulo('Entrar'),
@@ -42,8 +45,6 @@ export const rutas: Routes = [
     component: Marco,
     canActivate: [guardiaSesion],
     children: [
-      { path: '', pathMatch: 'full', canActivate: [guardiaInicio], children: [] },
-
       // --- Reclutador y administrador ---------------------------------
       {
         path: 'panel',

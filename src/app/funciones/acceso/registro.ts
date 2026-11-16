@@ -21,10 +21,13 @@ import { InputText } from 'primeng/inputtext';
   imports: [ButtonDirective, InputText, MarcoAcceso, ReactiveFormsModule, RouterLink, Campo],
   template: `
     <app-marco-acceso>
-      <form class="panel pila" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+      <form class="pila" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
         <header class="pila pila--sm">
           <span class="micro">crear cuenta · candidato</span>
-          <h2>Empieza a resolver pruebas</h2>
+          <h1>Empieza a resolver pruebas</h1>
+          <p class="entrada">
+            Mismo reto, misma rúbrica. Tu nota llega con la cita que la justifica.
+          </p>
         </header>
 
         <ui-campo
@@ -109,6 +112,13 @@ import { InputText } from 'primeng/inputtext';
     </app-marco-acceso>
   `,
   styles: `
+    h1 {
+      font-size: var(--t-2);
+    }
+    .entrada {
+      color: var(--c-texto-suave);
+      font-size: var(--t-menor);
+    }
     .consentimiento {
       display: grid;
       grid-template-columns: auto 1fr;

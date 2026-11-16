@@ -26,12 +26,6 @@ export const guardiaRol =
     return sesion.tiene(...roles) || router.createUrlTree([inicioDe(sesion.rol()!)]);
   };
 
-/** La raíz no es una pantalla: lleva a cada rol a donde empieza su trabajo. */
-export const guardiaInicio: CanActivateFn = () => {
-  const sesion = inject(Sesion);
-  return inject(Router).createUrlTree([inicioDe(sesion.rol() ?? 'candidato')]);
-};
-
 /** Quien ya entró no vuelve a ver el formulario de acceso. */
 export const guardiaInvitado: CanActivateFn = () => {
   const sesion = inject(Sesion);

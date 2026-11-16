@@ -49,7 +49,9 @@
   --c-borde-fuerte: rgb(255 255 255 / 24%);
   --c-texto: #eef0f3;
   --c-texto-suave: #9a9da6;
-  --c-texto-tenue: #5c5f68;
+  /* 5.4:1 sobre el fondo y 5.0:1 sobre las superficies: las etiquetas micro
+     tambien tienen que pasar AA, no solo el texto corrido. */
+  --c-texto-tenue: #82858f;
   --c-sombra: 0 24px 60px -30px rgb(0 0 0 / 85%);
 
   // Acentos semanticos. Cada uno con su version "tenue" para fondos.
@@ -114,7 +116,8 @@
   --c-borde-fuerte: rgb(16 16 20 / 28%);
   --c-texto: #15161a;
   --c-texto-suave: #5a5d66;
-  --c-texto-tenue: #8b8e97;
+  /* 4.8:1 sobre el fondo claro; el gris anterior se quedaba en 3.1:1. */
+  --c-texto-tenue: #6a6e77;
   --c-sombra: 0 18px 44px -28px rgb(16 16 20 / 35%);
 
   --c-acento: #14825a;
