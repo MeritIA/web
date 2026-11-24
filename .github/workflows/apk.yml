@@ -34,7 +34,18 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - uses: android-actions/setup-android@v3
+      # Sin `android-actions/setup-android`: intenta instalar el paquete `tools`,
+      # que Google retiro, y aborta. El runner ya trae el SDK; solo hay que
+      # asegurarse de la plataforma y las build-tools que pide el proyecto.
+      - name: Preparar el SDK de Android
+        run: |
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          MGR=$(ls -d "$SDK"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1)
+          echo "SDK en $SDK, gestor $MGR"
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          yes | "$MGR" --licenses > /dev/null 2>&1 || true
+          "$MGR" "platforms;android-36" "build-tools;36.0.0" "platform-tools"
 
       - name: Instalar dependencias
         run: npm ci
