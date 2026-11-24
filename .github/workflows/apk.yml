@@ -1,0 +1,52 @@
+name: APK de Android
+
+# Construye la APK de depuracion y la deja descargable como artefacto.
+#
+# Se hace aqui y no en el portatil de alguien porque compilar Android exige el
+# SDK (~2 GB) y un JDK 21: el runner de GitHub ya los trae. Ademas sale igual
+# para todos, que es lo que se quiere de una entrega.
+
+on:
+  workflow_dispatch:
+    inputs:
+      api:
+        description: URL de la API que usara la APK (absoluta, termina en /api/v1)
+        required: false
+        default: https://meritia-backend.purpleglacier-76ab2c43.chilecentral.azurecontainerapps.io/api/v1
+  push:
+    tags:
+      - 'apk-*'
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # Gradle 8.14 no soporta JDK 25; 21 es el ultimo que acepta.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Construir web, sincronizar y compilar la APK
+        env:
+          API_MOVIL: ${{ github.event.inputs.api || 'https://meritia-backend.purpleglacier-76ab2c43.chilecentral.azurecontainerapps.io/api/v1' }}
+        run: npm run movil:apk
+
+      - name: Publicar la APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: meritia-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
